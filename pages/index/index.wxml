@@ -1,0 +1,107 @@
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header {{inputCollapsed ? 'collapsed' : ''}}">
+    <text class="title">古字通</text>
+    <text class="subtitle" wx:if="{{!inputCollapsed}}">初中生文言学习助手</text>
+  </view>
+
+  <!-- 输入区域 -->
+  <view class="input-section {{inputCollapsed ? 'collapsed' : ''}}">
+    <textarea
+      class="text-input {{inputCollapsed ? 'collapsed' : ''}}"
+      placeholder="请输入要查询的字词，如：之、乎、者、也"
+      placeholder-class="placeholder"
+      bindinput="onInputChange"
+      value="{{inputText}}"
+      maxlength="100"
+    />
+    <view class="input-actions" wx:if="{{!inputCollapsed}}">
+      <text class="char-count">{{inputText.length}}/100</text>
+      <view class="clear-btn" bindtap="clearInput" wx:if="{{inputText.length > 0}}">
+        <text class="clear-text">清空</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 查词按钮 -->
+  <view class="search-btn {{inputCollapsed ? 'small' : ''}}" bindtap="searchWord">
+    <text class="search-btn-text">{{inputCollapsed ? '查 词' : '查 词'}}</text>
+  </view>
+
+  <!-- 快捷字词提示 -->
+  <view class="quick-words" wx:if="{{showQuickWords && !inputCollapsed}}">
+    <text class="section-title">中考高频虚词</text>
+    <view class="word-tags">
+      <view
+        class="word-tag"
+        wx:for="{{quickWords}}"
+        wx:key="index"
+        bindtap="onQuickWordTap"
+        data-word="{{item}}"
+      >
+        <text class="word-tag-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 中考实词 -->
+  <view class="real-words-section" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
+    <view class="real-words-header">
+      <text class="section-title">中考高频实词</text>
+      <view class="header-right">
+        <view class="detail-btn" bindtap="goToRealWordsPage">
+          <text class="detail-btn-text">查看全部</text>
+        </view>
+      </view>
+    </view>
+    <view class="word-tags" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
+      <view
+        class="word-tag"
+        wx:for="{{highFreqRealWords}}"
+        wx:key="index"
+        bindtap="onQuickWordTap"
+        data-word="{{item}}"
+      >
+        <text class="word-tag-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 查词结果区域 -->
+  <view class="result-section" wx:if="{{showResult || streamingText}}">
+    <view class="result-card" animation="{{resultAnimation}}">
+      <!-- 查询的字词 -->
+      <view class="result-header">
+        <text class="result-word">{{inputText}}</text>
+      </view>
+
+      <!-- 使用 rich-text 渲染 Markdown -->
+      <rich-text nodes="{{resultHtml}}"></rich-text>
+
+      <!-- 收藏按钮 -->
+      <view class="result-actions" wx:if="{{showResult}}">
+        <view class="action-btn" bindtap="copyContent">
+          <text class="action-icon">📋</text>
+          <text class="action-text">复制</text>
+        </view>
+        <view class="collect-btn" bindtap="toggleCollect">
+          <text class="collect-icon">{{isCollected ? '❤️' : '🤍'}}</text>
+          <text class="collect-text">{{isCollected ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-section" wx:if="{{isLoading && !streamingText}}">
+    <view class="loading-card">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在查询...</text>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-section" wx:if="{{showError}}">
+    <text class="error-text">{{errorMessage}}</text>
+  </view>
+</view>

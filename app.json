@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/translate/translate",
+    "pages/profile/profile",
+    "pages/realwords/realwords"
+  ],
+  "usingComponents": {},
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom",
+    "navigationBarTitleText": "古字通",
+    "navigationBarBackgroundColor": "#FDFBF7"
+  },
+  "tabBar": {
+    "color": "#2C3E50",
+    "selectedColor": "#B91C1C",
+    "backgroundColor": "#FDFBF7",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "查词",
+        "iconPath": "assets/icons/dictionary.png",
+        "selectedIconPath": "assets/icons/dictionary.png"
+      },
+      {
+        "pagePath": "pages/translate/translate",
+        "text": "翻译",
+        "iconPath": "assets/icons/translate.png",
+        "selectedIconPath": "assets/icons/translate.png"
+      },
+      {
+        "pagePath": "pages/realwords/realwords",
+        "text": "实词",
+        "iconPath": "assets/icons/real_word.png",
+        "selectedIconPath": "assets/icons/real_word.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header {{inputCollapsed ? 'collapsed' : ''}}">
+    <text class="title">古今对译</text>
+    <text class="subtitle" wx:if="{{!inputCollapsed}}">整句整段的文言文翻译</text>
+  </view>
+
+  <!-- 输入区域 -->
+  <view class="input-section {{inputCollapsed ? 'collapsed' : ''}}">
+    <textarea
+      class="text-input {{inputCollapsed ? 'collapsed' : ''}}"
+      placeholder="请输入要翻译的文言文，如：子曰：学而时习之，不亦说乎"
+      placeholder-class="placeholder"
+      bindinput="onInputChange"
+      value="{{inputText}}"
+      maxlength="1000"
+    />
+    <view class="input-actions" wx:if="{{!inputCollapsed}}">
+      <text class="char-count">{{inputText.length}}/1000</text>
+      <view class="clear-btn" bindtap="clearInput" wx:if="{{inputText.length > 0}}">
+        <text class="clear-text">清空</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 翻译按钮 -->
+  <view class="translate-btn {{inputCollapsed ? 'small' : ''}}" bindtap="translateText">
+    <text class="translate-btn-text">翻 译</text>
+  </view>
+
+  <!-- 翻译结果区域 -->
+  <view class="result-section" wx:if="{{showResult || streamingText}}">
+    <view class="result-card" animation="{{resultAnimation}}">
+      <!-- 原文 -->
+      <view class="result-original">
+        <view class="result-label">
+          <text class="label-text">原文</text>
+        </view>
+        <text class="original-text">{{inputText}}</text>
+      </view>
+
+      <!-- 译文（Markdown 格式） -->
+      <view class="result-translation">
+        <view class="result-label">
+          <text class="label-text">译文</text>
+        </view>
+        <rich-text nodes="{{resultHtml}}"></rich-text>
+      </view>
+
+      <!-- 收藏按钮 -->
+      <view class="result-actions" wx:if="{{showResult}}">
+        <view class="action-btn" bindtap="copyTranslation">
+          <text class="action-icon">📋</text>
+          <text class="action-text">复制</text>
+        </view>
+        <view class="collect-btn" bindtap="collectTranslation">
+          <text class="collect-icon">🤍</text>
+          <text class="collect-text">收藏</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-section" wx:if="{{isLoading}}">
+    <view class="loading-card">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在翻译...</text>
+      <text class="streaming-preview">{{streamingText}}</text>
+    </view>
+  </view>
+</view>

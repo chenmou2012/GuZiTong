@@ -1,0 +1,285 @@
+/* 页面整体样式 */
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+  padding: 20rpx 30rpx 120rpx;
+  box-sizing: border-box;
+}
+
+/* 标题区域 */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0 30rpx;
+  transition: padding 0.3s ease;
+}
+
+.header.collapsed {
+  padding: 20rpx 0 10rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  color: #2C3E50;
+  font-weight: bold;
+  letter-spacing: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #666;
+  letter-spacing: 4rpx;
+}
+
+/* 输入区域 */
+.input-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.input-section.collapsed {
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.text-input {
+  width: 100%;
+  height: 240rpx;
+  font-size: 30rpx;
+  color: #2C3E50;
+  line-height: 1.8;
+  text-align: left;
+  transition: height 0.3s ease;
+}
+
+.text-input.collapsed {
+  height: 80rpx;
+  font-size: 28rpx;
+}
+
+.placeholder {
+  color: #aaa;
+  font-size: 28rpx;
+}
+
+.input-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.char-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.clear-btn {
+  padding: 8rpx 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+}
+
+.clear-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 翻译按钮 */
+.translate-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #B91C1C;
+  color: #fff;
+  padding: 24rpx 0;
+  border-radius: 12rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(185, 28, 28, 0.3);
+  transition: all 0.3s ease;
+}
+
+.translate-btn.small {
+  padding: 16rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.translate-btn:active {
+  background-color: #991b1b;
+  transform: scale(0.98);
+}
+
+.translate-btn-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  letter-spacing: 8rpx;
+}
+
+/* 结果区域 */
+.result-section {
+  margin-top: 20rpx;
+}
+
+.result-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  border-left: 8rpx solid #B91C1C;
+}
+
+.result-label {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.label-icon {
+  font-size: 28rpx;
+}
+
+.label-text {
+  font-size: 26rpx;
+  color: #B91C1C;
+  font-weight: bold;
+}
+
+/* 原文 */
+.result-original {
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx dashed #e0e0e0;
+}
+
+.original-text {
+  font-size: 32rpx;
+  color: #2C3E50;
+  line-height: 1.8;
+  font-style: italic;
+}
+
+/* 译文 */
+.result-translation {
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx dashed #e0e0e0;
+}
+
+.translation-text {
+  font-size: 30rpx;
+  color: #2C3E50;
+  line-height: 1.8;
+}
+
+/* 保存按钮 */
+.result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 30rpx;
+}
+
+.action-btn,
+.collect-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 40rpx;
+  background-color: #f5f5f5;
+  border-radius: 40rpx;
+}
+
+.action-btn:active,
+.collect-btn:active {
+  background-color: #e8e8e8;
+}
+
+.action-text,
+.collect-text {
+  font-size: 26rpx;
+  color: #2C3E50;
+}
+
+.action-icon {
+  font-size: 26rpx;
+}
+
+.collect-icon {
+  font-size: 28rpx;
+}
+
+/* 加载状态 */
+.loading-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60rpx 0;
+}
+
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top-color: #B91C1C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 来源与典故 */
+.result-source {
+  margin-top: 30rpx;
+  padding: 24rpx;
+  background-color: #faf8f5;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #B91C1C;
+}
+
+.source-content {
+  margin-top: 16rpx;
+}
+
+.source-item {
+  margin-bottom: 12rpx;
+}
+
+.source-item:last-child {
+  margin-bottom: 0;
+}
+
+.source-label {
+  font-size: 26rpx;
+  color: #B91C1C;
+  font-weight: 500;
+}
+
+.source-value {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.5;
+}

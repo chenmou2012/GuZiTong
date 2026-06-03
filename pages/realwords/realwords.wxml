@@ -1,0 +1,87 @@
+<view class="container">
+  <!-- 标题 -->
+  <view class="header">
+    <text class="title">中考文言实词</text>
+    <text class="subtitle">点击字词查看详细解释</text>
+  </view>
+
+  <!-- 实词列表 -->
+  <view class="words-grid">
+    <view
+      class="word-item"
+      wx:for="{{realWords}}"
+      wx:key="index"
+      bindtap="onWordTap"
+      data-word="{{item}}"
+    >
+      <text class="word-text">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 查询结果弹窗 -->
+  <view class="result-modal" wx:if="{{result.word}}">
+    <view class="modal-mask" bindtap="closeResult"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-word">{{result.word}}</text>
+        <view class="modal-close" bindtap="closeResult">×</view>
+      </view>
+
+      <scroll-view class="modal-body" scroll-y>
+        <!-- 拼音 -->
+        <view class="result-pinyin" wx:if="{{result.pronunciations && result.pronunciations.length > 0}}">
+          <text class="pinyin-text">{{result.pronunciations[0]}}</text>
+        </view>
+
+        <!-- 释义列表 -->
+        <view class="definitions-list" wx:if="{{result.definitions}}">
+          <view class="definition-item" wx:for="{{result.definitions}}" wx:key="index">
+            <view class="definition-label-row">
+              <text class="definition-label">释义</text>
+              <text class="definition-meaning">{{item.meaning}}</text>
+            </view>
+
+            <view class="source-text" wx:if="{{item.original_source}}">
+              <text class="source-label">出处：</text>
+              <text class="source-value">{{item.original_source}}</text>
+            </view>
+
+            <view class="usage-category" wx:if="{{item.usage_category}}">
+              <text class="category-text">{{item.usage_category}}</text>
+            </view>
+
+            <view class="examples-section" wx:if="{{item.examples && item.examples.length > 0}}">
+              <text class="examples-label">例句</text>
+              <view class="example-item" wx:for="{{item.examples}}" wx:for-item="ex" wx:key="idx">
+                <text class="example-sentence">{{ex.sentence}}</text>
+                <text class="example-translation">{{ex.translation}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 字源 -->
+        <view class="etymology-section" wx:if="{{result.etymology}}">
+          <text class="etymology-label">字源</text>
+          <text class="etymology-text">{{result.etymology}}</text>
+        </view>
+      </scroll-view>
+
+      <!-- 收藏按钮 -->
+      <view class="modal-footer">
+        <view class="collect-btn" bindtap="toggleCollect">
+          <text class="collect-icon">❤️</text>
+          <text class="collect-text">收藏</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-mask" wx:if="{{isLoading}}">
+    <view class="loading-box">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在查询...</text>
+    </view>
+  </view>
+</view>
