@@ -1,29 +1,9 @@
 // pages/translate/translate.js
-const API_BASE_URL = 'https://share.sng-oj.cn';
+const constants = require('../../utils/services/constants');
+const storage = require('../../utils/services/storage');
+const markdown = require('../../utils/services/markdown');
 
-/**
- * 简易 Markdown 转 HTML
- */
-function markdownToHtml(markdown) {
-  if (!markdown) return '';
-
-  // 转义 HTML 特殊字符
-  var escaped = markdown
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  // Markdown 转换
-  var html = escaped
-    // 标题 ## xxx
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    // 加粗 **xxx**
-    .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
-    // 换行转为 br
-    .replace(/\n/g, '<br>');
-
-  return html;
-}
+const { API_BASE_URL } = constants;
 
 Page({
   data: {
@@ -141,7 +121,7 @@ Page({
         if (data.type === 'content') {
           // 实时更新流式文本并渲染 Markdown
           const newText = that.data.streamingText + data.content;
-          const html = markdownToHtml(newText);
+          const html = markdown.markdownToHtml(newText);
           that.setData({
             streamingText: newText,
             resultHtml: html
@@ -181,7 +161,7 @@ Page({
     });
     animation.opacity(1).step();
 
-    const html = markdownToHtml(content);
+    const html = markdown.markdownToHtml(content);
 
     this.setData({
       isLoading: false,
@@ -228,17 +208,7 @@ Page({
       return;
     }
 
-    let translations = wx.getStorageSync('translations') || [];
-    translations.unshift({
-      original: this.data.inputText,
-      translated: content,
-      time: Date.now()
-    });
-    if (translations.length > 50) {
-      translations = translations.slice(0, 50);
-    }
-    wx.setStorageSync('translations', translations);
-
+    storage.addTranslation(this.data.inputText, content);
     wx.showToast({
       title: '已收藏',
       icon: 'success'

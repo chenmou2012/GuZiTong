@@ -1,4 +1,6 @@
 // pages/profile/profile.js
+const storage = require('../../utils/services/storage');
+
 Page({
   data: {
     stats: {
@@ -17,21 +19,12 @@ Page({
   },
 
   loadStats: function() {
-    const history = wx.getStorageSync('searchHistory') || [];
-    const collections = wx.getStorageSync('collections') || [];
-    const translations = wx.getStorageSync('translations') || [];
-
-    this.setData({
-      stats: {
-        words: history.length,
-        collections: collections.length,
-        translations: translations.length
-      }
-    });
+    const stats = storage.getStats();
+    this.setData({ stats });
   },
 
   viewHistory: function() {
-    const history = wx.getStorageSync('searchHistory') || [];
+    const history = storage.getHistory();
     if (history.length === 0) {
       wx.showToast({
         title: '暂无学习记录',
@@ -47,7 +40,7 @@ Page({
   },
 
   viewCollections: function() {
-    const collections = wx.getStorageSync('collections') || [];
+    const collections = storage.getCollections();
     if (collections.length === 0) {
       wx.showToast({
         title: '暂无收藏',
@@ -63,7 +56,7 @@ Page({
   },
 
   viewTranslations: function() {
-    const translations = wx.getStorageSync('translations') || [];
+    const translations = storage.getTranslations();
     if (translations.length === 0) {
       wx.showToast({
         title: '暂无翻译记录',
