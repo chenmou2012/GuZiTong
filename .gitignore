@@ -1,4 +1,10 @@
+# Claude Code 相关
 .claude/
 .agents/
+skills-lock.json
+
+# 项目配置
 project.config.json
+
+# 后端
 backend/
