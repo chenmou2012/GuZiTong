@@ -89,6 +89,11 @@
           <text class="collect-text">{{isCollected ? '已收藏' : '收藏'}}</text>
         </view>
       </view>
+
+      <!-- 停止/清空按钮 -->
+      <view class="stop-btn" bindtap="stopOrClear">
+        <text class="stop-btn-text">{{isLoading ? '停止输出' : '清空'}}</text>
+      </view>
     </view>
   </view>
 

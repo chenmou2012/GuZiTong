@@ -216,6 +216,26 @@
   font-size: 28rpx;
 }
 
+/* 停止/清空按钮 */
+.stop-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16rpx 40rpx;
+  background-color: #f5f5f5;
+  border-radius: 40rpx;
+  margin-top: 20rpx;
+}
+
+.stop-btn:active {
+  background-color: #e8e8e8;
+}
+
+.stop-btn-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
 /* 加载状态 */
 .loading-section {
   display: flex;

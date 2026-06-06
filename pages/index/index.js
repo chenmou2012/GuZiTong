@@ -276,6 +276,41 @@ Page({
     this.setData({ hasHistory: history.length > 0 });
   },
 
+  // 停止或清空
+  stopOrClear: function() {
+    if (this.data.isLoading) {
+      // 停止输出
+      if (this.socketTask) {
+        this.socketTask.close();
+        this.socketTask = null;
+      }
+      wx.hideLoading();
+      this.setData({
+        isLoading: false,
+        showResult: false,
+        streamingText: '',
+        inputCollapsed: false,
+        showQuickWords: true
+      });
+      wx.showToast({ title: '已停止', icon: 'none' });
+    } else {
+      // 清空
+      this.setData({
+        inputText: '',
+        showResult: false,
+        result: {},
+        resultHtml: '',
+        streamingText: '',
+        showQuickWords: true,
+        inputCollapsed: false,
+        showRealWordsSection: true,
+        showRealWordsPicker: false,
+        pickerIndex: -1,
+        isCollected: false
+      });
+    }
+  },
+
   onPullDownRefresh: function() {
     if (this.socketTask) {
       this.socketTask.close();
