@@ -6,5 +6,10 @@ skills-lock.json
 # 项目配置
 project.config.json
 
-# 后端
-backend/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 后端配置
+backend/config.json
