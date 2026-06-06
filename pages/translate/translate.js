@@ -241,7 +241,12 @@ Page({
       });
       wx.showToast({ title: '已停止', icon: 'none' });
     } else {
-      // 清空
+      // 清空 - 先关闭 WebSocket
+      if (this.socketTask) {
+        this.socketTask.close();
+        this.socketTask = null;
+      }
+      wx.hideLoading();
       this.setData({
         inputText: '',
         showResult: false,
