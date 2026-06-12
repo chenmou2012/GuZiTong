@@ -1,4 +1,5 @@
 // Storage 服务
+const cloudStorage = require('./cloudStorage.js');
 
 const STORAGE_KEYS = {
   SEARCH_HISTORY: 'searchHistory',
@@ -25,6 +26,11 @@ function saveHistory(word, content) {
     history = history.slice(0, MAX_ITEMS);
   }
   wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, history);
+
+  // 同步到云端
+  if (wx.cloud) {
+    cloudStorage.saveCloudSearchHistory('auto', history).catch(() => {});
+  }
   return history;
 }
 
@@ -132,8 +138,25 @@ function markWordLearned(word) {
       reviewCount: 0
     });
     wx.setStorageSync(STORAGE_KEYS.LEARNED_WORDS, learned);
+
+    // 同步到云端
+    syncToCloud(learned);
   }
   return learned;
+}
+
+// 同步到云端
+function syncToCloud(data) {
+  if (wx.cloud) {
+    cloudStorage.saveCloudLearnedWords('auto', data).catch(() => {});
+  }
+}
+
+// 启用云端存储
+function enableCloudSync() {
+  if (wx.cloud) {
+    cloudStorage.syncLearnedWords();
+  }
 }
 
 // 获取复习记录
@@ -254,5 +277,7 @@ module.exports = {
   // 错误次数
   getErrorCount,
   incrementErrorCount,
-  resetErrorCount
+  resetErrorCount,
+  // 云端同步
+  enableCloudSync
 };

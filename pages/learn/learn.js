@@ -41,6 +41,7 @@ Page({
     // 统计
     learnedCount: 0,
     totalCount: 0,
+    currentLearningWord: '',  // 正在学习的字（字符串）
 
     // 复习
     reviewWords: []
@@ -59,6 +60,11 @@ Page({
   loadData: function() {
     const words = REAL_WORDS_DATA || [];
     const learned = storage.getLearnedWords() || [];
+
+    // 尝试从云端同步数据
+    if (wx.cloud) {
+      storage.enableCloudSync();
+    }
 
     // 过滤掉已掌握的词
     const toLearn = words.filter(w => !learned.some(l => l.word === w.word));
@@ -79,7 +85,9 @@ Page({
       reviewWords: reviewWords,
       // 进度百分比
       learnProgress: Math.round((learned.length / words.length) * 100) || 0,
-      reviewCount: reviewWords.length
+      reviewCount: reviewWords.length,
+      // 当前正在学习的词（下一个待学习的词）
+      currentLearningWord: toLearn.length > 0 ? toLearn[0].word : ''
     });
   },
 

@@ -2,7 +2,7 @@
 
 .container {
   min-height: 100vh;
-  background: #FDFBF7;
+  background: #fcf9f8;
   padding: 20rpx;
 }
 
@@ -12,12 +12,145 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  min-height: 60vh;
+}
+
+/* 学习进度卡片 */
+.progress-card {
+  background: #f0ebe3;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin: 20rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid #c1c9bf;
+}
+
+.progress-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.progress-card-info {
+  flex: 1;
+}
+
+.progress-card-status {
+  font-size: 24rpx;
+  color: #717971;
+  display: block;
+  margin-bottom: 8rpx;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.progress-card-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #1b1c1c;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.progress-card-current {
+  font-size: 28rpx;
+  color: #414942;
+  display: block;
+}
+
+.progress-card-ring {
+  width: 160rpx;
+  height: 160rpx;
+  flex-shrink: 0;
+}
+
+.progress-ring-outer {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 80rpx;
+  background: #e4e2e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-bg {
+  position: absolute;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 64rpx;
+  background: #f0ebe3;
+}
+
+.progress-ring-progress {
+  position: absolute;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 64rpx;
+  border: 8rpx solid transparent;
+  border-top-color: #ab3334;
+  border-right-color: #ab3334;
+  transform: rotate(0deg);
+  box-sizing: border-box;
+}
+
+.progress-ring-progress.half {
+  border-bottom-color: #ab3334;
+  border-left-color: #ab3334;
+}
+
+.progress-ring-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-percent {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #ab3334;
+}
+
+.progress-card-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 24rpx;
+  margin-top: 24rpx;
+  border-top: 1rpx solid rgba(193, 201, 191, 0.5);
+}
+
+.progress-card-chapter {
+  font-size: 24rpx;
+  color: #717971;
+}
+
+.progress-card-remaining {
+  font-size: 24rpx;
+  color: #717971;
 }
 
 .start-card {
   text-align: center;
-  padding: 60rpx;
+  padding: 48rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(185, 28, 28, 0.1);
+}
+
+.start-card-btns {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+
+.start-card-btns .start-btn {
+  margin-top: 0;
+  width: auto;
+  flex: 1;
 }
 
 .start-title {
@@ -36,14 +169,21 @@
 }
 
 .start-btn {
-  margin-top: 40rpx;
-  padding: 24rpx 80rpx;
-  background: #B91C1C;
+  margin-top: 32rpx;
+  padding: 20rpx 60rpx;
+  background: linear-gradient(135deg, #ab3334 0%, #8a1a1f 100%);
   color: #fff;
-  border-radius: 50rpx;
-  font-size: 32rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
   border: none;
-  width: 60%;
+  width: 50%;
+  box-shadow: 0 4rpx 16rpx rgba(171, 51, 52, 0.25);
+  transition: all 0.3s ease;
+}
+
+.start-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2rpx 10rpx rgba(185, 28, 28, 0.2);
 }
 
 /* 进度条 */
@@ -55,17 +195,19 @@
 
 .progress-bar {
   height: 16rpx;
-  background: #e0e0e0;
+  background: #f0e0e0;
   border-radius: 8rpx;
   overflow: hidden;
   margin-bottom: 10rpx;
+  box-shadow: inset 0 2rpx 4rpx rgba(0,0,0,0.1);
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #B91C1C, #e53935);
   border-radius: 8rpx;
-  transition: width 0.3s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.3);
 }
 
 .progress-text {
@@ -103,19 +245,21 @@
 }
 
 .intro-word-item {
-  padding: 24rpx;
-  margin-bottom: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
 }
 
 .intro-word {
-  font-size: 80rpx;
+  font-size: 96rpx;
   font-weight: bold;
   color: #B91C1C;
   display: block;
-  margin-bottom: 30rpx;
+  margin-bottom: 40rpx;
   text-align: center;
+  letter-spacing: 8rpx;
 }
 
 .intro-meanings {
@@ -131,11 +275,11 @@
 .intro-meaning-item {
   display: flex;
   align-items: flex-start;
-  padding: 16rpx 24rpx;
-  margin-bottom: 12rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  border-left: 6rpx solid #B91C1C;
+  padding: 20rpx 28rpx;
+  margin-bottom: 16rpx;
+  background: #fafafa;
+  border-radius: 16rpx;
+  border-left: 8rpx solid #B91C1C;
 }
 
 .meaning-number {
@@ -147,9 +291,9 @@
 }
 
 .meaning-text {
-  font-size: 32rpx;
+  font-size: 34rpx;
   color: #333;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .intro-meaning {
@@ -189,125 +333,138 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 32rpx;
 }
 
-.practice-progress-bar {
-  width: 90%;
+.header-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.header-progress-bg {
   height: 8rpx;
-  background: #e0e0e0;
-  border-radius: 4rpx;
-  margin: 10rpx auto;
-  overflow: hidden;
+  background: #e4e2e1;
+  width: 100%;
 }
 
-.practice-header {
+.header-progress-fill {
+  height: 8rpx;
+  background: #ab3334;
+  transition: width 0.3s ease;
+}
+
+.header-info {
   display: flex;
   justify-content: space-between;
-  width: 90%;
-  padding: 20rpx;
-}
-
-.practice-progress {
-  font-size: 28rpx;
-  color: #666;
-}
-
-.practice-group {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.quiz-container {
+  align-items: flex-start;
   width: 100%;
-  padding: 20rpx;
+  padding: 120rpx 0 32rpx;
 }
 
-/* 语境选意思 */
-.quiz-context {
-  text-align: center;
-  margin-bottom: 40rpx;
+.progress-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.quiz-sentence {
-  font-size: 32rpx;
-  color: #333;
-  line-height: 1.8;
-  padding: 30rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  margin-bottom: 20rpx;
-}
-
-.quiz-word-highlight {
+.page-title {
+  font-family: 'EB Garamond', serif;
   font-size: 28rpx;
-  color: #666;
+  font-weight: 500;
+  color: #414942;
 }
 
-.highlight {
-  color: #B91C1C;
-  font-weight: bold;
+.progress-label {
+  font-size: 24rpx;
+  text-transform: uppercase;
+  letter-spacing: 4rpx;
+  color: #717971;
+  font-weight: 500;
+}
+
+.progress-text {
+  font-family: 'EB Garamond', serif;
   font-size: 36rpx;
+  font-weight: 500;
+  color: #1b1c1c;
+}
+
+.group-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.group-label {
+  font-size: 20rpx;
+  color: #717971;
+}
+
+.quiz-area {
+  width: 100%;
+}
+
+.main-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 48rpx 32rpx;
+  text-align: center;
+  border: 1rpx solid rgba(193, 201, 191, 0.4);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.quote-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 40rpx;
+  color: #1b1c1c;
+  line-height: 1.8;
+}
+
+.question-text {
+  text-align: center;
+  font-family: 'EB Garamond', serif;
+  font-size: 36rpx;
+  color: #1b1c1c;
+  padding: 24rpx 0 32rpx;
 }
 
 .bold-word {
   font-weight: bold;
-  color: #B91C1C;
+  color: #ab3334;
 }
 
-/* 根据意思选句子 */
-.quiz-sentence-type {
-  text-align: center;
-  margin-bottom: 40rpx;
+.options-area {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
 }
 
-.quiz-meaning {
+.option-btn {
+  padding: 32rpx;
+  background: #fff;
+  border-radius: 24rpx;
   font-size: 32rpx;
-  color: #333;
-  padding: 30rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  margin-bottom: 20rpx;
-  font-weight: 500;
-}
-
-.quiz-tip {
-  font-size: 28rpx;
-  color: #666;
-}
-
-/* 选项 */
-.options {
-  margin-top: 30rpx;
-}
-
-.option {
-  padding: 28rpx;
-  margin-bottom: 14rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  font-size: 28rpx;
   text-align: center;
-  border: 2rpx solid #ddd;
-  transition: all 0.2s;
+  border: 1rpx solid rgba(193, 201, 191, 0.4);
+  transition: all 0.2s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
-.option:active {
-  transform: scale(0.98);
-  background: #f5f5f5;
+.option-btn:active {
+  background: #f0eded;
 }
 
-.option.correct {
-  background: #d4edda;
-  border-color: #28a745;
-  color: #28a745;
-  animation: correctPulse 0.3s ease;
+.option-btn.correct {
+  background: #E8F5E9;
+  border-color: #4CAF50;
+  color: #4CAF50;
 }
 
-.option.wrong {
-  background: #f8d7da;
-  border-color: #dc3545;
-  color: #dc3545;
-  animation: wrongShake 0.3s ease;
+.option-btn.wrong {
+  background: #FFEBEE;
+  border-color: #F44336;
+  color: #F44336;
 }
 
 @keyframes correctPulse {
@@ -323,28 +480,54 @@
 }
 
 /* 结果 */
-.quiz-result {
+.result-area {
   text-align: center;
-  margin: 30rpx 0;
-  font-size: 30rpx;
-  font-weight: bold;
+  padding: 32rpx 0;
+  font-size: 32rpx;
+  font-weight: 500;
 }
 
 .result-correct {
-  color: #28a745;
+  color: #316342;
   display: block;
 }
 
 .result-wrong {
-  color: #dc3545;
+  color: #ab3334;
   display: block;
 }
 
-/* 操作按钮 */
-.action-btns {
+/* 看答案按钮 */
+.answer-btn-area {
   display: flex;
   justify-content: center;
-  margin-top: 20rpx;
+  padding: 32rpx 0;
+}
+
+.answer-btn {
+  font-family: 'EB Garamond', serif;
+  font-size: 36rpx;
+  color: #ab3334;
+  background: #fff;
+  border: 2rpx solid #ab3334;
+  border-radius: 24rpx;
+  padding: 24rpx 48rpx;
+}
+
+/* 下一题按钮 */
+.next-btn-area {
+  display: flex;
+  justify-content: center;
+  padding: 24rpx 0;
+}
+
+.next-btn {
+  padding: 24rpx 64rpx;
+  background: #ab3334;
+  color: #fff;
+  border-radius: 24rpx;
+  font-size: 32rpx;
+  border: none;
 }
 
 .action-btns .btn.next {
@@ -356,22 +539,25 @@
   border: none;
 }
 
-/* 底部按钮 */
-.bottom-btns {
+/* 底部标熟 */
+.mark-known-area {
+  position: fixed;
+  bottom: 48rpx;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
-  gap: 30rpx;
-  margin-top: 40rpx;
-  padding: 20rpx;
+  padding: 24rpx;
 }
 
-.btn-mark-known {
-  padding: 20rpx 40rpx;
-  background: #4CAF50;
-  color: #fff;
-  border-radius: 40rpx;
-  font-size: 28rpx;
+.mark-known-btn {
+  font-size: 24rpx;
+  text-transform: uppercase;
+  letter-spacing: 4rpx;
+  color: rgba(27, 28, 28, 0.5);
+  background: transparent;
   border: none;
+  padding: 16rpx 32rpx;
 }
 
 .btn-give-up {
@@ -388,10 +574,11 @@
   display: flex;
   justify-content: space-around;
   margin-top: 40rpx;
-  padding: 24rpx;
+  padding: 32rpx;
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   width: 90%;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
 .stat-item {
@@ -400,9 +587,10 @@
 
 .stat-num {
   display: block;
-  font-size: 36rpx;
+  font-size: 44rpx;
   font-weight: bold;
   color: #B91C1C;
+  text-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.2);
 }
 
 .stat-label {
@@ -446,16 +634,18 @@
 
 .review-list {
   max-height: 60vh;
+  padding: 10rpx;
 }
 
 .review-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24rpx;
-  margin-bottom: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
   background: #fff;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
 .review-word {
