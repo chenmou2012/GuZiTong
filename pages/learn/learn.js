@@ -3,9 +3,9 @@ const { REAL_WORDS_DATA } = require('../../utils/services/realWords.js');
 const storage = require('../../utils/services/storage.js');
 
 const GROUP_SIZE = 5;
-const TOTAL_PRACTICE = 5;
-const PRACTICE_CONTEXT = 2;  // 前2次：语境选意思
-const PRACTICE_SENTENCE = 3; // 后3次：根据意思选句子
+const TOTAL_PRACTICE = 4;
+const PRACTICE_CONTEXT = 2;  // 偶数次：语境选意思 (0, 2)
+const PRACTICE_SENTENCE = 3; // 奇数次：根据意思选句子 (1, 3)
 
 Page({
   data: {
@@ -22,6 +22,7 @@ Page({
     // 当前练习的词
     currentWordIndex: 0,     // 当前练习的词在组内的索引
     currentWord: null,         // 当前词数据
+    lastWord: '',            // 上一道题的词
     practiceCount: 0,          // 当前词已练习次数
 
     // 测验
@@ -160,9 +161,10 @@ Page({
   startLearn: function() {
     const { allWords, groupIndex } = this.data;
 
-    // 获取当前组的5个词
+    // 获取当前组的5个词并随机打乱
     const startIdx = groupIndex * GROUP_SIZE;
     const groupWords = allWords.slice(startIdx, startIdx + GROUP_SIZE);
+    this.shuffleArray(groupWords);
 
     if (!groupWords.length || groupWords.length < GROUP_SIZE) {
       // 词不够5个，重新开始
@@ -233,10 +235,9 @@ Page({
     const { currentWord, practiceCount, groupWords } = this.data;
     if (!currentWord) return;
 
-    // 确定测验类型
-    // 第1、2次：语境选意思（第0、1次）
-    // 第3、4、5次：根据意思选句子（第2、3、4次）
-    const quizType = practiceCount < PRACTICE_CONTEXT ? 'context' : 'sentence';
+    // 确定测验类型 - 交替分配
+    // 偶数次(0,2)：语境选意思，奇数次(1,3)：根据意思选句子
+    const quizType = practiceCount % 2 === 0 ? 'context' : 'sentence';
 
     let quiz, options;
 
@@ -295,19 +296,17 @@ Page({
 
       quiz = {
         word: currentWord.word,
+        meaning: meaningStr,
         correctAnswer: correctSentence,
         sentence: correctSentence,
         sentenceParts: this.boldWordInSentence(correctSentence, currentWord.word)
       };
     }
 
-    options.sort(() => Math.random() - 0.5);
-    // 确保正确答案位置不是第一个（增加难度）
-    if (options.indexOf(quiz.correctAnswer) === 0 && options.length > 1) {
-      // 交换第一个和最后一个
-      const temp = options[0];
-      options[0] = options[options.length - 1];
-      options[options.length - 1] = temp;
+    // Fisher-Yates 洗牌算法
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
     }
     const correctIdx = options.indexOf(quiz.correctAnswer);
     quiz.correctIndex = correctIdx;
@@ -334,7 +333,8 @@ Page({
       selectedIndex: -1,
       showResult: false,
       showMarkKnown: false,
-      showGiveUp: false
+      showGiveUp: false,
+      lastWord: currentWord.word
     });
   },
 
@@ -376,18 +376,23 @@ Page({
 
   // 下一题
   nextQuestion: function() {
-    const { currentWordIndex, practiceCount, groupWords, groupIndex, totalGroups } = this.data;
+    const { currentWordIndex, practiceCount, groupWords, groupIndex, totalGroups, lastWord } = this.data;
 
     let newPracticeCount = practiceCount + 1;
     let newWordIndex = currentWordIndex;
 
-    // 当前词5次用完了，进入下一个词
+    // 当前词4次用完了，进入下一个词
     if (newPracticeCount >= TOTAL_PRACTICE) {
       newPracticeCount = 0;
       newWordIndex = currentWordIndex + 1;
+
+      // 避免连续出现同一道题
+      while (newWordIndex < groupWords.length && groupWords[newWordIndex].word === lastWord) {
+        newWordIndex++;
+      }
     }
 
-    // 当前组5个词都用完了
+    // 当前组5个词都用完了或找不到不重复的词
     if (newWordIndex >= groupWords.length) {
       // 进入下一组
       const nextGroupIndex = groupIndex + 1;

@@ -39,9 +39,12 @@
       <!-- 当前展示的词 -->
       <view class="intro-word-item" wx:if="{{groupWords[introIndex]}}">
         <text class="intro-word">{{groupWords[introIndex].word}}</text>
-        <view class="intro-meanings">
+        <view class="intro-meanings-list">
           <block wx:for="{{groupWords[introIndex].meanings}}" wx:for-item="m" wx:key="index">
-            <text class="intro-meaning">{{m.meaning}}</text>
+            <view class="intro-meaning-item">
+              <text class="meaning-number">{{index + 1}}.</text>
+              <text class="meaning-text">{{m.meaning}}</text>
+            </view>
           </block>
         </view>
       </view>
@@ -78,7 +81,7 @@
 
         <!-- 根据意思选句子 -->
         <view wx:if="{{quizType === 'sentence'}}" class="quiz-sentence-type">
-          <view class="quiz-meaning">"{{quiz.word}}" 的正确意思是？</view>
+          <view class="quiz-meaning">"{{quiz.word}}" - "{{quiz.meaning}}"</view>
           <view class="quiz-tip">选择正确的句子</view>
         </view>
 
@@ -134,8 +137,8 @@
       <view wx:if="{{reviewWords.length === 0}}" class="no-review">🎉 今日复习完成！</view>
     </view>
 
-    <!-- 统计 -->
-    <view class="stats">
+    <!-- 统计 - 仅在学习/展示/复习环节显示 -->
+    <view class="stats" wx:if="{{phase === 'intro' || phase === 'review'}}">
       <view class="stat-item">
         <text class="stat-num">{{learnedCount}}</text>
         <text class="stat-label">已掌握</text>
