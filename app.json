@@ -3,7 +3,8 @@
     "pages/index/index",
     "pages/translate/translate",
     "pages/profile/profile",
-    "pages/realwords/realwords"
+    "pages/realwords/realwords",
+    "pages/learn/learn"
   ],
   "usingComponents": {},
   "window": {
@@ -23,6 +24,12 @@
         "text": "查词",
         "iconPath": "assets/icons/dictionary.png",
         "selectedIconPath": "assets/icons/dictionary.png"
+      },
+      {
+        "pagePath": "pages/learn/learn",
+        "text": "学习",
+        "iconPath": "assets/icons/learn.png",
+        "selectedIconPath": "assets/icons/learn.png"
       },
       {
         "pagePath": "pages/translate/translate",

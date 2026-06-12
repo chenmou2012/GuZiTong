@@ -4,7 +4,9 @@ const STORAGE_KEYS = {
   SEARCH_HISTORY: 'searchHistory',
   COLLECTIONS: 'collections',
   TRANSLATIONS: 'translations',
-  PENDING_QUERY: 'pendingQuery'
+  PENDING_QUERY: 'pendingQuery',
+  LEARNED_WORDS: 'learnedWords',
+  REVIEW_RECORDS: 'reviewRecords'
 };
 
 const MAX_ITEMS = 50;
@@ -112,6 +114,117 @@ function getStats() {
   };
 }
 
+// ==================== 学习相关 ====================
+
+// 获取已学会的词
+function getLearnedWords() {
+  return wx.getStorageSync(STORAGE_KEYS.LEARNED_WORDS) || [];
+}
+
+// 标记词已学会
+function markWordLearned(word) {
+  let learned = getLearnedWords();
+  const index = learned.findIndex(item => item.word === word);
+  if (index === -1) {
+    learned.push({
+      word: word,
+      learnedTime: Date.now(),
+      reviewCount: 0
+    });
+    wx.setStorageSync(STORAGE_KEYS.LEARNED_WORDS, learned);
+  }
+  return learned;
+}
+
+// 获取复习记录
+function getReviewRecords() {
+  return wx.getStorageSync(STORAGE_KEYS.REVIEW_RECORDS) || [];
+}
+
+// 更新复习时间
+function updateReviewTime(wordId, isKnown) {
+  let records = getReviewRecords();
+  const index = records.findIndex(item => item.wordId === wordId);
+
+  if (index === -1) {
+    records.push({
+      wordId: wordId,
+      lastReview: Date.now(),
+      reviewCount: 1
+    });
+  } else {
+    const record = records[index];
+    if (isKnown) {
+      record.reviewCount += 1;
+    } else {
+      record.reviewCount = 0; // 忘记则重置
+    }
+    record.lastReview = Date.now();
+    records[index] = record;
+  }
+
+  wx.setStorageSync(STORAGE_KEYS.REVIEW_RECORDS, records);
+  return records;
+}
+
+// 获取上次复习时间
+function getLastReviewTime(word) {
+  const records = getReviewRecords();
+  const record = records.find(item => item.word === word);
+  return record ? record.lastReview : 0;
+}
+
+// 学习进度
+function getLearnProgress() {
+  return wx.getStorageSync('learnProgress') || 0;
+}
+
+function setLearnProgress(index) {
+  wx.setStorageSync('learnProgress', index);
+}
+
+// 复习历史记录
+function getReviewHistory() {
+  return wx.getStorageSync('reviewHistory') || [];
+}
+
+function addReviewHistory(count) {
+  const history = getReviewHistory();
+  const today = new Date().toLocaleDateString('zh-CN');
+  const todayRecord = history.find(h => h.date === today);
+
+  if (todayRecord) {
+    todayRecord.count += count;
+  } else {
+    history.unshift({ date: today, count: count });
+  }
+
+  // 只保留30天记录
+  if (history.length > 30) history.pop();
+  wx.setStorageSync('reviewHistory', history);
+  return history;
+}
+
+// 错误次数记录
+function getErrorCount(word) {
+  const records = wx.getStorageSync('errorCountRecords') || {};
+  return records[word] || 0;
+}
+
+function incrementErrorCount(word) {
+  const records = wx.getStorageSync('errorCountRecords') || {};
+  records[word] = (records[word] || 0) + 1;
+  wx.setStorageSync('errorCountRecords', records);
+  return records[word];
+}
+
+function resetErrorCount(word) {
+  const records = wx.getStorageSync('errorCountRecords') || {};
+  records[word] = 0;
+  wx.setStorageSync('errorCountRecords', records);
+  return records;
+}
+
 module.exports = {
   STORAGE_KEYS,
   getHistory,
@@ -127,5 +240,19 @@ module.exports = {
   getPendingQuery,
   setPendingQuery,
   clearPendingQuery,
-  getStats
+  getStats,
+  // 学习相关
+  getLearnedWords,
+  markWordLearned,
+  getReviewRecords,
+  updateReviewTime,
+  getLastReviewTime,
+  getLearnProgress,
+  setLearnProgress,
+  getReviewHistory,
+  addReviewHistory,
+  // 错误次数
+  getErrorCount,
+  incrementErrorCount,
+  resetErrorCount
 };

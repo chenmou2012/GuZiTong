@@ -1,0 +1,457 @@
+/* pages/learn/learn.wxss */
+
+.container {
+  min-height: 100vh;
+  background: #FDFBF7;
+  padding: 20rpx;
+}
+
+/* 开始学习屏幕 */
+.start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.start-card {
+  text-align: center;
+  padding: 60rpx;
+}
+
+.start-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #B91C1C;
+  margin-bottom: 30rpx;
+}
+
+.start-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.start-btn {
+  margin-top: 40rpx;
+  padding: 24rpx 80rpx;
+  background: #B91C1C;
+  color: #fff;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  border: none;
+  width: 60%;
+}
+
+/* 进度条 */
+.progress-bar-container {
+  width: 80%;
+  margin: 30rpx auto;
+  text-align: center;
+}
+
+.progress-bar {
+  height: 16rpx;
+  background: #e0e0e0;
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-bottom: 10rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #B91C1C, #e53935);
+  border-radius: 8rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: #B91C1C;
+  font-weight: bold;
+}
+
+/* 展示环节 */
+.intro-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.phase-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.group-progress {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+.word-list {
+  width: 100%;
+  max-height: 55vh;
+}
+
+.intro-word-item {
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  background: #fff;
+  border-radius: 16rpx;
+}
+
+.intro-word {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #B91C1C;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.intro-meanings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.intro-meaning {
+  font-size: 26rpx;
+  color: #666;
+  background: #f5f5f5;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+/* 展示导航按钮 */
+.intro-btns {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-top: 30rpx;
+}
+
+.btn-prev, .btn-next {
+  padding: 20rpx 40rpx;
+  background: #fff;
+  color: #333;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: 2rpx solid #ddd;
+}
+
+.btn-next {
+  background: #B91C1C;
+  color: #fff;
+  border: none;
+}
+
+/* 练习环节 */
+.practice-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.practice-progress-bar {
+  width: 90%;
+  height: 8rpx;
+  background: #e0e0e0;
+  border-radius: 4rpx;
+  margin: 10rpx auto;
+  overflow: hidden;
+}
+
+.practice-header {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  padding: 20rpx;
+}
+
+.practice-progress {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.practice-group {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.quiz-container {
+  width: 100%;
+  padding: 20rpx;
+}
+
+/* 语境选意思 */
+.quiz-context {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.quiz-sentence {
+  font-size: 32rpx;
+  color: #333;
+  line-height: 1.8;
+  padding: 30rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.quiz-word-highlight {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.highlight {
+  color: #B91C1C;
+  font-weight: bold;
+  font-size: 36rpx;
+}
+
+.bold-word {
+  font-weight: bold;
+  color: #B91C1C;
+}
+
+/* 根据意思选句子 */
+.quiz-sentence-type {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.quiz-meaning {
+  font-size: 32rpx;
+  color: #333;
+  padding: 30rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+
+.quiz-tip {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 选项 */
+.options {
+  margin-top: 30rpx;
+}
+
+.option {
+  padding: 28rpx;
+  margin-bottom: 14rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  text-align: center;
+  border: 2rpx solid #ddd;
+  transition: all 0.2s;
+}
+
+.option:active {
+  transform: scale(0.98);
+  background: #f5f5f5;
+}
+
+.option.correct {
+  background: #d4edda;
+  border-color: #28a745;
+  color: #28a745;
+  animation: correctPulse 0.3s ease;
+}
+
+.option.wrong {
+  background: #f8d7da;
+  border-color: #dc3545;
+  color: #dc3545;
+  animation: wrongShake 0.3s ease;
+}
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5rpx); }
+  75% { transform: translateX(5rpx); }
+}
+
+/* 结果 */
+.quiz-result {
+  text-align: center;
+  margin: 30rpx 0;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.result-correct {
+  color: #28a745;
+  display: block;
+}
+
+.result-wrong {
+  color: #dc3545;
+  display: block;
+}
+
+/* 操作按钮 */
+.action-btns {
+  display: flex;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+
+.action-btns .btn.next {
+  padding: 20rpx 60rpx;
+  background: #B91C1C;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+/* 底部按钮 */
+.bottom-btns {
+  display: flex;
+  justify-content: center;
+  gap: 30rpx;
+  margin-top: 40rpx;
+  padding: 20rpx;
+}
+
+.btn-mark-known {
+  padding: 20rpx 40rpx;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-give-up {
+  padding: 20rpx 40rpx;
+  background: #FF9800;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+/* 统计 */
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 40rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  width: 90%;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-num {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #B91C1C;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 复习阶段 */
+.review-phase {
+  padding: 20rpx;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.review-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.btn-back {
+  padding: 16rpx 32rpx;
+  background: #f5f5f5;
+  color: #666;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  border: none;
+}
+
+.review-tip {
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+}
+
+.review-list {
+  max-height: 60vh;
+}
+
+.review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  background: #fff;
+  border-radius: 12rpx;
+}
+
+.review-word {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.review-btns {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn-know {
+  background: #4CAF50 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.btn-forget {
+  background: #dc3545 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.no-review {
+  text-align: center;
+  padding: 60rpx;
+  color: #4CAF50;
+  font-size: 32rpx;
+}

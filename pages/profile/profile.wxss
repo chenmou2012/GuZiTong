@@ -59,6 +59,40 @@
   width: fit-content;
 }
 
+.avatar-img {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+}
+
+.logout-btn {
+  margin-top: 10rpx;
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  font-size: 24rpx;
+}
+
+/* 同步区域 */
+.sync-section {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.sync-btn {
+  padding: 16rpx 40rpx;
+  background: #B91C1C;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.download-btn {
+  background: #4CAF50;
+}
+
 /* 统计数据 */
 .stats-section {
   display: flex;

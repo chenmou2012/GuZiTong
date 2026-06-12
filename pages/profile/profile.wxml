@@ -1,14 +1,28 @@
 <view class="container">
   <!-- 用户信息头部 -->
   <view class="profile-header">
-    <view class="avatar-section">
+    <!-- 未登录 -->
+    <view wx:if="{{!loggedIn}}" class="avatar-section" bindtap="handleLogin">
       <view class="avatar">
-        <text class="avatar-text">文</text>
+        <text class="avatar-text">👤</text>
       </view>
       <view class="user-info">
-        <text class="username">文言学者</text>
+        <text class="username">点击登录</text>
       </view>
     </view>
+
+    <!-- 已登录 -->
+    <view wx:else class="avatar-section">
+      <view class="avatar">
+        <image wx:if="{{userInfo.avatar}}" class="avatar-img" src="{{userInfo.avatar}}" mode="aspectFill"/>
+        <text wx:else class="avatar-text">👤</text>
+      </view>
+      <view class="user-info">
+        <text class="username">{{userInfo.nickname || '文言学者'}}</text>
+      </view>
+      <button class="logout-btn" size="mini" bindtap="handleLogin">退出</button>
+    </view>
+
     <view class="stats-section">
       <view class="stat-item">
         <text class="stat-number">{{stats.words}}</text>
@@ -23,6 +37,12 @@
         <text class="stat-label">翻译数</text>
       </view>
     </view>
+  </view>
+
+  <!-- 云端同步（登录后显示） -->
+  <view wx:if="{{loggedIn}}" class="sync-section">
+    <button class="sync-btn" bindtap="syncData">上传到云端</button>
+    <button class="sync-btn download-btn" bindtap="downloadData">下载云端</button>
   </view>
 
   <!-- 功能列表 -->

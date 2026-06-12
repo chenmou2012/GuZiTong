@@ -282,6 +282,105 @@ async def ws_translate(ws: WebSocket):
         manager.disconnect(ws)
 
 
+# --- 登录接口 ---
+from auth import code2session, create_token, verify_token
+from database import (
+    create_user, get_user_by_openid, update_user_token, update_user_info,
+    save_user_data, get_user_data
+)
+
+
+class LoginRequest(BaseModel):
+    code: str
+
+
+class SyncRequest(BaseModel):
+    data_type: str
+    data_key: str
+    data_value: str
+
+
+@app.post("/api/login")
+async def login(req: LoginRequest):
+    """微信登录"""
+    # 用 code 换 openid
+    result = await code2session(req.code)
+    if not result["success"]:
+        return {"error": result["errmsg"]}
+
+    openid = result["openid"]
+
+    # 检查用户是否存在
+    user = get_user_by_openid(openid)
+    if user:
+        # 已有用户，更新 token
+        token_info = create_token(openid)
+        update_user_token(openid, token_info["token"], token_info["expire_time"])
+    else:
+        # 新用户，创建
+        token_info = create_token(openid)
+        create_user(openid, token_info["token"], token_info["expire_time"])
+
+    return {
+        "openid": openid,
+        "token": token_info["token"],
+        "expire_days": token_info["expire_days"]
+    }
+
+
+@app.get("/api/user")
+async def get_user_info(token: str):
+    """获取用户信息"""
+    openid, valid = verify_token(token)
+    if not valid:
+        return {"error": "无效的 token"}
+
+    user = get_user_by_openid(openid)
+    if not user:
+        return {"error": "用户不存在"}
+
+    return {
+        "openid": user["openid"],
+        "nickname": user["nickname"],
+        "avatar": user["avatar"],
+        "created_at": user["created_at"]
+    }
+
+
+@app.put("/api/user")
+async def update_user(token: str, nickname: str = None, avatar: str = None):
+    """更新用户信息"""
+    openid, valid = verify_token(token)
+    if not valid:
+        return {"error": "无效的 token"}
+
+    update_user_info(openid, nickname, avatar)
+    return {"success": True}
+
+
+@app.get("/api/user/data")
+async def get_user_data_api(token: str, data_type: str = None):
+    """获取用户数据"""
+    openid, valid = verify_token(token)
+    if not valid:
+        return {"error": "无效的 token"}
+
+    data = get_user_data(openid, data_type)
+    return {"data": data}
+
+
+@app.put("/api/user/data")
+async def save_user_data_api(token: str, req: SyncRequest):
+    """保存用户数据"""
+    openid, valid = verify_token(token)
+    if not valid:
+        return {"error": "无效的 token"}
+
+    import json
+    save_user_data(openid, req.data_type, req.data_key, json.dumps(req.data_value))
+    return {"success": True}
+
+
 # --- 启动 ---
 if __name__ == "__main__":
     uvicorn.run(app, host=HOST, port=PORT)

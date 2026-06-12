@@ -13,3 +13,4 @@ __pycache__/
 
 # 后端配置
 backend/config.json
+backend/*.db
