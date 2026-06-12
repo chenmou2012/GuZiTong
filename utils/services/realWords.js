@@ -147,8 +147,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "计算，计量", "example": "通计一舟，为人五", "source": "核舟记"}
   ]},
   {"id": 33, "word": "济", "meanings": [
-    {"meaning": "渡", "example": "欲济无舟楫", "source": "望洞庭湖赠张丞相"},
-    {"meaning": "渡", "example": "直挂云帆济沧海", "source": "行路难（其一）"}
+    {"meaning": "渡", "example": "欲济无舟楫", "source": "望洞庭湖赠张丞相"}
   ]},
   {"id": 34, "word": "假", "meanings": [
     {"meaning": "不真实的，与真相对", "example": "乃吾前狼假寐", "source": "狼"},
@@ -161,8 +160,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "夹杂，参与", "example": "中间力拉崩倒之声", "source": "口技"}
   ]},
   {"id": 36, "word": "简", "meanings": [
-    {"meaning": "挑选，选拔", "example": "盖简桃核修狭者为之", "source": "核舟记"},
-    {"meaning": "挑选，选拔", "example": "是以先帝简拔以遗陛下", "source": "出师表"}
+    {"meaning": "挑选，选拔", "example": "盖简桃核修狭者为之", "source": "核舟记"}
   ]},
   {"id": 37, "word": "见", "meanings": [
     {"meaning": "看见，看到", "example": "见其发矢十中八九", "source": "卖油翁"},
@@ -187,8 +185,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "处在，处于（某种地位或某个地方）", "example": "居庙堂之高，则忧其民", "source": "岳阳楼记"}
   ]},
   {"id": 42, "word": "举", "meanings": [
-    {"meaning": "选拔，推举", "example": "胶鬲举于鱼盐之中", "source": "生于忧患，死于安乐"},
-    {"meaning": "选拔，推举", "example": "是以众议举宠为督", "source": "出师表"}
+    {"meaning": "选拔，推举", "example": "胶鬲举于鱼盐之中", "source": "生于忧患，死于安乐"}
   ]},
   {"id": 43, "word": "具", "meanings": [
     {"meaning": "具备，具有", "example": "罔不因势象形，各具情态", "source": "核舟记"},
@@ -264,7 +261,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 60, "word": "强", "meanings": [
     {"meaning": "强悍，强大", "example": "凶强侠气，为乡里所患", "source": "周处"},
-    {"meaning": "强悍，强大", "example": "知困，然后能自强也", "source": "虽有嘉肴"},
     {"meaning": "qiǎng 竭力，尽力（勉强，硬要）", "example": "余强饮三大白", "source": "湖心亭看雪"}
   ]},
   {"id": 61, "word": "窃", "meanings": [
@@ -292,7 +288,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 66, "word": "去", "meanings": [
     {"meaning": "离开", "example": "睨之，久而不去", "source": "卖油翁"},
-    {"meaning": "离开", "example": "委而去之", "source": "得道者多助失道者寡助"},
     {"meaning": "距离", "example": "西蜀之去南海", "source": "为学（六上）"}
   ]},
   {"id": 67, "word": "全", "meanings": [
@@ -306,13 +301,10 @@ const REAL_WORDS_DATA = [
     {"meaning": "听凭，任凭", "example": "从流飘荡，任意东西", "source": "与朱元思书"}
   ]},
   {"id": 69, "word": "入", "meanings": [
-    {"meaning": "进入，与出相对", "example": "入楚则盗", "source": "橘逾淮为枳"},
-    {"meaning": "进入，与出相对", "example": "于是入朝见威王", "source": "邹忌讽齐王纳谏"},
-    {"meaning": "进入，与出相对", "example": "草色入帘青", "source": "陋室铭"}
+    {"meaning": "进入，与出相对", "example": "入楚则盗", "source": "橘逾淮为枳"}
   ]},
   {"id": 70, "word": "若", "meanings": [
     {"meaning": "如，似，好像", "example": "门庭若市", "source": "邹忌讽齐王纳谏"},
-    {"meaning": "如，似，好像", "example": "急湍甚箭，猛浪若奔", "source": "与朱元思书"},
     {"meaning": "假如，如果", "example": "若有作奸犯科及为忠善者", "source": "出师表"},
     {"meaning": "比，比得上", "example": "徐公不若君之美也", "source": "邹忌讽齐王纳谏"}
   ]},
@@ -398,8 +390,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "朴素，不加装饰", "example": "可以调素琴，阅金经", "source": "陋室铭"}
   ]},
   {"id": 89, "word": "汤", "meanings": [
-    {"meaning": "热水，开水", "example": "日初出沧沧凉凉，及日中如探汤", "source": "两小儿辩日"},
-    {"meaning": "热水，开水", "example": "滕人持汤沃灌", "source": "送东阳马生序"}
+    {"meaning": "热水，开水", "example": "日初出沧沧凉凉，及日中如探汤", "source": "两小儿辩日"}
   ]},
   {"id": 90, "word": "徒", "meanings": [
     {"meaning": "只，仅仅", "example": "叶徒相似，其实味不同", "source": "橘逾淮为枳"},
@@ -421,8 +412,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "抛弃，舍弃", "example": "委而去之，是地利不如人和", "source": "得道者多助失道者寡助"}
   ]},
   {"id": 94, "word": "务", "meanings": [
-    {"meaning": "事务，事情", "example": "蒙辞以军中多务", "source": "孙权劝学"},
-    {"meaning": "事务，事情", "example": "经纶世务���，窥谷忘返", "source": "与朱元思书"}
+    {"meaning": "事务，事情", "example": "蒙辞以军中多务", "source": "孙权劝学"}
   ]},
   {"id": 95, "word": "鲜", "meanings": [
     {"meaning": "鲜艳，鲜明", "example": "芳草鲜美，落英缤纷", "source": "桃花源记"},
@@ -446,7 +436,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 100, "word": "行", "meanings": [
     {"meaning": "行走", "example": "臣请缚一人，过王而行", "source": "橘逾淮为枳"},
-    {"meaning": "行走", "example": "月色入户，欣然起行", "source": "记承天寺夜游"},
     {"meaning": "做，实行，实施", "example": "大道之行也", "source": "大道之行也"},
     {"meaning": "品德，品行", "example": "将军向宠，性行淑均", "source": "出师表"}
   ]},
@@ -465,8 +454,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "培养", "example": "选贤与能，讲信修睦", "source": "大道之行也"}
   ]},
   {"id": 104, "word": "徐", "meanings": [
-    {"meaning": "缓缓地，缓慢，慢慢地", "example": "徐以杓酌油沥之", "source": "卖油翁"},
-    {"meaning": "缓缓地，缓慢，慢慢地", "example": "清风徐来，水波不兴", "source": "核舟记"}
+    {"meaning": "缓缓地，缓慢，慢慢地", "example": "徐以杓酌油沥之", "source": "卖油翁"}
   ]},
   {"id": 105, "word": "许", "meanings": [
     {"meaning": "表约数，上下，光景", "example": "自富阳至桐庐一百许里", "source": "与朱元思书"},
@@ -474,7 +462,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 106, "word": "寻", "meanings": [
     {"meaning": "找寻，寻求，探求", "example": "乃入吴寻二陆", "source": "周处"},
-    {"meaning": "找寻，寻求，探求", "example": "遂至承天寺，寻张怀民", "source": "记承天寺夜游"},
     {"meaning": "不久，随即", "example": "未果，寻病终", "source": "桃花源记"}
   ]},
   {"id": 107, "word": "业", "meanings": [
@@ -484,7 +471,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 108, "word": "遗", "meanings": [
     {"meaning": "遗留，留下", "example": "邻人京城氏之孀妻有遗男", "source": "愚公移山"},
-    {"meaning": "遗留，留下", "example": "以光先帝遗德", "source": "出师表"},
     {"meaning": "wèi 留给，送给，馈赠", "example": "是以先帝简拔以遗陛下", "source": "出师表"}
   ]},
   {"id": 109, "word": "贻", "meanings": [
@@ -541,12 +527,10 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 122, "word": "远", "meanings": [
     {"meaning": "遥远（指空间距离大）", "example": "可远观而不可亵玩也", "source": "爱莲说"},
-    {"meaning": "遥远（指空间距离大）", "example": "香远益清", "source": "爱莲说"},
     {"meaning": "疏远，不亲近，不接近", "example": "亲贤臣，远小人", "source": "出师表"}
   ]},
   {"id": 123, "word": "云", "meanings": [
     {"meaning": "说", "example": "孔子云：何陋之有", "source": "陋室铭"},
-    {"meaning": "说", "example": "自云先世避秦时乱", "source": "桃花源记"},
     {"meaning": "天空里的云，云彩", "example": "高峰入云，清流见底", "source": "答谢中书书"}
   ]},
   {"id": 124, "word": "章", "meanings": [
@@ -592,7 +576,6 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 134, "word": "作", "meanings": [
     {"meaning": "振作，奋发", "example": "困于心，衡于虑，而后作", "source": "生于忧患，死于安乐"},
-    {"meaning": "振作，奋发", "example": "一鼓作气，再而衰，三而竭", "source": "曹刿论战"},
     {"meaning": "发出，出现", "example": "火爆声，呼呼风声，百千齐作", "source": "口技"},
     {"meaning": "写作，创作", "example": "自是指物作诗，立就", "source": "伤仲永"}
   ]},
@@ -605,8 +588,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "社会地位低微，见识短浅", "example": "先帝不以臣卑鄙", "source": "出师表"}
   ]},
   {"id": 137, "word": "布衣", "meanings": [
-    {"meaning": "平民百姓", "example": "臣本布衣，躬耕于南阳", "source": "出师表"},
-    {"meaning": "平民百姓", "example": "大王尝闻布衣之怒乎", "source": "唐雎不辱使命"}
+    {"meaning": "平民百姓", "example": "臣本布衣，躬耕于南阳", "source": "出师表"}
   ]},
   {"id": 138, "word": "菲薄", "meanings": [
     {"meaning": "轻视，小看", "example": "不宜妄自菲薄，引喻失义", "source": "出师表"}
