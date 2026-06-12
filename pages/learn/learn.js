@@ -293,7 +293,7 @@ Page({
 
       quiz = {
         word: currentWord.word,
-        correctAnswer: meaningStr,
+        correctAnswer: correctSentence,
         sentence: correctSentence,
         sentenceParts: this.boldWordInSentence(correctSentence, currentWord.word)
       };
