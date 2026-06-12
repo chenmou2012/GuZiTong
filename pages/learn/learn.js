@@ -270,12 +270,14 @@ Page({
       const meaning = meanings[Math.floor(Math.random() * meanings.length)];
       const meaningStr = meaning.meaning;
 
-      // 从当前组选错误选项 - 收集所有例句
+      // 从当前组选错误选项 - 只选包含当前字的例句
       const allSentences = [];
       groupWords.forEach(w => {
         if (w.meanings) {
           w.meanings.forEach(m => {
-            if (m.example) allSentences.push(m.example);
+            if (m.example && m.example.includes(currentWord.word)) {
+              allSentences.push(m.example);
+            }
           });
         }
       });
