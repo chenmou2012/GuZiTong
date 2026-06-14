@@ -1,0 +1,902 @@
+[
+  {
+    "id": 1,
+    "word": "比",
+    "pinyin": "bǐ",
+    "alt": ""
+  },
+  {
+    "id": 2,
+    "word": "鄙",
+    "pinyin": "bǐ",
+    "alt": ""
+  },
+  {
+    "id": 3,
+    "word": "兵",
+    "pinyin": "bīng",
+    "alt": ""
+  },
+  {
+    "id": 4,
+    "word": "病",
+    "pinyin": "bìng",
+    "alt": ""
+  },
+  {
+    "id": 5,
+    "word": "乘",
+    "pinyin": "chéng",
+    "alt": "shèng（量词「辆」，如「车六七百乘」）"
+  },
+  {
+    "id": 6,
+    "word": "持",
+    "pinyin": "chí",
+    "alt": ""
+  },
+  {
+    "id": 7,
+    "word": "从",
+    "pinyin": "cóng",
+    "alt": ""
+  },
+  {
+    "id": 8,
+    "word": "达",
+    "pinyin": "dá",
+    "alt": ""
+  },
+  {
+    "id": 9,
+    "word": "当",
+    "pinyin": "dāng",
+    "alt": "dàng（恰当、当作）"
+  },
+  {
+    "id": 10,
+    "word": "道",
+    "pinyin": "dào",
+    "alt": ""
+  },
+  {
+    "id": 11,
+    "word": "得",
+    "pinyin": "dé",
+    "alt": ""
+  },
+  {
+    "id": 12,
+    "word": "尔",
+    "pinyin": "ěr",
+    "alt": ""
+  },
+  {
+    "id": 13,
+    "word": "伐",
+    "pinyin": "fá",
+    "alt": ""
+  },
+  {
+    "id": 14,
+    "word": "犯",
+    "pinyin": "fàn",
+    "alt": ""
+  },
+  {
+    "id": 15,
+    "word": "方",
+    "pinyin": "fāng",
+    "alt": ""
+  },
+  {
+    "id": 16,
+    "word": "负",
+    "pinyin": "fù",
+    "alt": ""
+  },
+  {
+    "id": 17,
+    "word": "赋",
+    "pinyin": "fù",
+    "alt": ""
+  },
+  {
+    "id": 18,
+    "word": "更",
+    "pinyin": "gēng",
+    "alt": "gèng（又、再、更加）"
+  },
+  {
+    "id": 19,
+    "word": "苟",
+    "pinyin": "gǒu",
+    "alt": ""
+  },
+  {
+    "id": 20,
+    "word": "故",
+    "pinyin": "gù",
+    "alt": ""
+  },
+  {
+    "id": 21,
+    "word": "顾",
+    "pinyin": "gù",
+    "alt": ""
+  },
+  {
+    "id": 22,
+    "word": "观",
+    "pinyin": "guān",
+    "alt": "guàn（道观）"
+  },
+  {
+    "id": 23,
+    "word": "归",
+    "pinyin": "guī",
+    "alt": ""
+  },
+  {
+    "id": 24,
+    "word": "过",
+    "pinyin": "guò",
+    "alt": ""
+  },
+  {
+    "id": 25,
+    "word": "好",
+    "pinyin": "hǎo",
+    "alt": "hào（喜好、爱好）"
+  },
+  {
+    "id": 26,
+    "word": "号",
+    "pinyin": "háo",
+    "alt": "hào（称号、名号）"
+  },
+  {
+    "id": 27,
+    "word": "还",
+    "pinyin": "huán",
+    "alt": "hái（仍然）"
+  },
+  {
+    "id": 28,
+    "word": "会",
+    "pinyin": "huì",
+    "alt": "kuài（会计）"
+  },
+  {
+    "id": 29,
+    "word": "惠",
+    "pinyin": "huì",
+    "alt": ""
+  },
+  {
+    "id": 30,
+    "word": "及",
+    "pinyin": "jí",
+    "alt": ""
+  },
+  {
+    "id": 31,
+    "word": "极",
+    "pinyin": "jí",
+    "alt": ""
+  },
+  {
+    "id": 32,
+    "word": "计",
+    "pinyin": "jì",
+    "alt": ""
+  },
+  {
+    "id": 33,
+    "word": "济",
+    "pinyin": "jì",
+    "alt": "jǐ（济水）"
+  },
+  {
+    "id": 34,
+    "word": "假",
+    "pinyin": "jiǎ",
+    "alt": "jià（假期）"
+  },
+  {
+    "id": 35,
+    "word": "间",
+    "pinyin": "jiān",
+    "alt": "jiàn（间隔、间或、参与、夹杂）"
+  },
+  {
+    "id": 36,
+    "word": "简",
+    "pinyin": "jiǎn",
+    "alt": ""
+  },
+  {
+    "id": 37,
+    "word": "见",
+    "pinyin": "jiàn",
+    "alt": "xiàn（通「现」，表露）"
+  },
+  {
+    "id": 38,
+    "word": "竭",
+    "pinyin": "jié",
+    "alt": ""
+  },
+  {
+    "id": 39,
+    "word": "尽",
+    "pinyin": "jìn",
+    "alt": ""
+  },
+  {
+    "id": 40,
+    "word": "进",
+    "pinyin": "jìn",
+    "alt": ""
+  },
+  {
+    "id": 41,
+    "word": "居",
+    "pinyin": "jū",
+    "alt": ""
+  },
+  {
+    "id": 42,
+    "word": "举",
+    "pinyin": "jǔ",
+    "alt": ""
+  },
+  {
+    "id": 43,
+    "word": "具",
+    "pinyin": "jù",
+    "alt": ""
+  },
+  {
+    "id": 44,
+    "word": "俱",
+    "pinyin": "jù",
+    "alt": ""
+  },
+  {
+    "id": 45,
+    "word": "聚",
+    "pinyin": "jù",
+    "alt": ""
+  },
+  {
+    "id": 46,
+    "word": "遽",
+    "pinyin": "jù",
+    "alt": ""
+  },
+  {
+    "id": 47,
+    "word": "决",
+    "pinyin": "jué",
+    "alt": ""
+  },
+  {
+    "id": 48,
+    "word": "绝",
+    "pinyin": "jué",
+    "alt": ""
+  },
+  {
+    "id": 49,
+    "word": "类",
+    "pinyin": "lèi",
+    "alt": ""
+  },
+  {
+    "id": 50,
+    "word": "临",
+    "pinyin": "lín",
+    "alt": ""
+  },
+  {
+    "id": 51,
+    "word": "虑",
+    "pinyin": "lǜ",
+    "alt": ""
+  },
+  {
+    "id": 52,
+    "word": "论",
+    "pinyin": "lùn",
+    "alt": "lún（《论语》）"
+  },
+  {
+    "id": 53,
+    "word": "漫",
+    "pinyin": "màn",
+    "alt": ""
+  },
+  {
+    "id": 54,
+    "word": "明",
+    "pinyin": "míng",
+    "alt": ""
+  },
+  {
+    "id": 55,
+    "word": "名",
+    "pinyin": "míng",
+    "alt": ""
+  },
+  {
+    "id": 56,
+    "word": "命",
+    "pinyin": "mìng",
+    "alt": ""
+  },
+  {
+    "id": 57,
+    "word": "难",
+    "pinyin": "nán",
+    "alt": "nàn（灾难）"
+  },
+  {
+    "id": 58,
+    "word": "平",
+    "pinyin": "píng",
+    "alt": ""
+  },
+  {
+    "id": 59,
+    "word": "戚",
+    "pinyin": "qī",
+    "alt": ""
+  },
+  {
+    "id": 60,
+    "word": "强",
+    "pinyin": "qiáng",
+    "alt": "qiǎng（竭力、勉强）"
+  },
+  {
+    "id": 61,
+    "word": "窃",
+    "pinyin": "qiè",
+    "alt": ""
+  },
+  {
+    "id": 62,
+    "word": "请",
+    "pinyin": "qǐng",
+    "alt": ""
+  },
+  {
+    "id": 63,
+    "word": "穷",
+    "pinyin": "qióng",
+    "alt": ""
+  },
+  {
+    "id": 64,
+    "word": "求",
+    "pinyin": "qiú",
+    "alt": ""
+  },
+  {
+    "id": 65,
+    "word": "取",
+    "pinyin": "qǔ",
+    "alt": ""
+  },
+  {
+    "id": 66,
+    "word": "去",
+    "pinyin": "qù",
+    "alt": ""
+  },
+  {
+    "id": 67,
+    "word": "全",
+    "pinyin": "quán",
+    "alt": ""
+  },
+  {
+    "id": 68,
+    "word": "任",
+    "pinyin": "rèn",
+    "alt": ""
+  },
+  {
+    "id": 69,
+    "word": "入",
+    "pinyin": "rù",
+    "alt": ""
+  },
+  {
+    "id": 70,
+    "word": "若",
+    "pinyin": "ruò",
+    "alt": ""
+  },
+  {
+    "id": 71,
+    "word": "善",
+    "pinyin": "shàn",
+    "alt": ""
+  },
+  {
+    "id": 72,
+    "word": "少",
+    "pinyin": "shǎo",
+    "alt": "shào（年少、年轻）"
+  },
+  {
+    "id": 73,
+    "word": "舍",
+    "pinyin": "shè",
+    "alt": "shě（舍弃、丢弃）"
+  },
+  {
+    "id": 74,
+    "word": "涉",
+    "pinyin": "shè",
+    "alt": ""
+  },
+  {
+    "id": 75,
+    "word": "生",
+    "pinyin": "shēng",
+    "alt": ""
+  },
+  {
+    "id": 76,
+    "word": "胜",
+    "pinyin": "shèng",
+    "alt": "shēng（尽，如「不可胜数」）"
+  },
+  {
+    "id": 77,
+    "word": "师",
+    "pinyin": "shī",
+    "alt": ""
+  },
+  {
+    "id": 78,
+    "word": "施",
+    "pinyin": "shī",
+    "alt": ""
+  },
+  {
+    "id": 79,
+    "word": "实",
+    "pinyin": "shí",
+    "alt": ""
+  },
+  {
+    "id": 80,
+    "word": "食",
+    "pinyin": "shí",
+    "alt": "sì（通「饲」，供养，如「食马者」）"
+  },
+  {
+    "id": 81,
+    "word": "使",
+    "pinyin": "shǐ",
+    "alt": ""
+  },
+  {
+    "id": 82,
+    "word": "释",
+    "pinyin": "shì",
+    "alt": ""
+  },
+  {
+    "id": 83,
+    "word": "市",
+    "pinyin": "shì",
+    "alt": ""
+  },
+  {
+    "id": 84,
+    "word": "恃",
+    "pinyin": "shì",
+    "alt": ""
+  },
+  {
+    "id": 85,
+    "word": "数",
+    "pinyin": "shù",
+    "alt": "shǔ（计算、点数）；shuò（屡次）"
+  },
+  {
+    "id": 86,
+    "word": "属",
+    "pinyin": "zhǔ",
+    "alt": "shǔ（隶属、部属、类）"
+  },
+  {
+    "id": 87,
+    "word": "说",
+    "pinyin": "shuō",
+    "alt": "shuì（劝说、游说）；yuè（通「悦」，高兴）"
+  },
+  {
+    "id": 88,
+    "word": "素",
+    "pinyin": "sù",
+    "alt": ""
+  },
+  {
+    "id": 89,
+    "word": "汤",
+    "pinyin": "tāng",
+    "alt": "shāng（汤汤，水流貌）"
+  },
+  {
+    "id": 90,
+    "word": "徒",
+    "pinyin": "tú",
+    "alt": ""
+  },
+  {
+    "id": 91,
+    "word": "亡",
+    "pinyin": "wáng",
+    "alt": "wú（通「无」，没有）"
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "pinyin": "wéi",
+    "alt": "wèi（为了、为何，介词）"
+  },
+  {
+    "id": 93,
+    "word": "委",
+    "pinyin": "wěi",
+    "alt": ""
+  },
+  {
+    "id": 94,
+    "word": "务",
+    "pinyin": "wù",
+    "alt": ""
+  },
+  {
+    "id": 95,
+    "word": "鲜",
+    "pinyin": "xiān",
+    "alt": "xiǎn（少，如「陶后鲜有闻」）"
+  },
+  {
+    "id": 96,
+    "word": "向",
+    "pinyin": "xiàng",
+    "alt": ""
+  },
+  {
+    "id": 97,
+    "word": "效",
+    "pinyin": "xiào",
+    "alt": ""
+  },
+  {
+    "id": 98,
+    "word": "谢",
+    "pinyin": "xiè",
+    "alt": ""
+  },
+  {
+    "id": 99,
+    "word": "信",
+    "pinyin": "xìn",
+    "alt": ""
+  },
+  {
+    "id": 100,
+    "word": "行",
+    "pinyin": "xíng",
+    "alt": "háng（行列、行业）"
+  },
+  {
+    "id": 101,
+    "word": "形",
+    "pinyin": "xíng",
+    "alt": ""
+  },
+  {
+    "id": 102,
+    "word": "兴",
+    "pinyin": "xīng",
+    "alt": "xìng（兴致、兴趣）"
+  },
+  {
+    "id": 103,
+    "word": "修",
+    "pinyin": "xiū",
+    "alt": ""
+  },
+  {
+    "id": 104,
+    "word": "徐",
+    "pinyin": "xú",
+    "alt": ""
+  },
+  {
+    "id": 105,
+    "word": "许",
+    "pinyin": "xǔ",
+    "alt": ""
+  },
+  {
+    "id": 106,
+    "word": "寻",
+    "pinyin": "xún",
+    "alt": ""
+  },
+  {
+    "id": 107,
+    "word": "业",
+    "pinyin": "yè",
+    "alt": ""
+  },
+  {
+    "id": 108,
+    "word": "遗",
+    "pinyin": "yí",
+    "alt": "wèi（给予、馈赠，如「以遗陛下」）"
+  },
+  {
+    "id": 109,
+    "word": "贻",
+    "pinyin": "yí",
+    "alt": ""
+  },
+  {
+    "id": 110,
+    "word": "夷",
+    "pinyin": "yí",
+    "alt": ""
+  },
+  {
+    "id": 111,
+    "word": "异",
+    "pinyin": "yì",
+    "alt": ""
+  },
+  {
+    "id": 112,
+    "word": "易",
+    "pinyin": "yì",
+    "alt": ""
+  },
+  {
+    "id": 113,
+    "word": "诣",
+    "pinyin": "yì",
+    "alt": ""
+  },
+  {
+    "id": 114,
+    "word": "益",
+    "pinyin": "yì",
+    "alt": ""
+  },
+  {
+    "id": 115,
+    "word": "阴",
+    "pinyin": "yīn",
+    "alt": ""
+  },
+  {
+    "id": 116,
+    "word": "引",
+    "pinyin": "yǐn",
+    "alt": ""
+  },
+  {
+    "id": 117,
+    "word": "盈",
+    "pinyin": "yíng",
+    "alt": ""
+  },
+  {
+    "id": 118,
+    "word": "余",
+    "pinyin": "yú",
+    "alt": ""
+  },
+  {
+    "id": 119,
+    "word": "狱",
+    "pinyin": "yù",
+    "alt": ""
+  },
+  {
+    "id": 120,
+    "word": "御",
+    "pinyin": "yù",
+    "alt": ""
+  },
+  {
+    "id": 121,
+    "word": "缘",
+    "pinyin": "yuán",
+    "alt": ""
+  },
+  {
+    "id": 122,
+    "word": "远",
+    "pinyin": "yuǎn",
+    "alt": "yuàn（疏远，动词）"
+  },
+  {
+    "id": 123,
+    "word": "云",
+    "pinyin": "yún",
+    "alt": ""
+  },
+  {
+    "id": 124,
+    "word": "章",
+    "pinyin": "zhāng",
+    "alt": ""
+  },
+  {
+    "id": 125,
+    "word": "知",
+    "pinyin": "zhī",
+    "alt": "zhì（通「智」，智慧）"
+  },
+  {
+    "id": 126,
+    "word": "止",
+    "pinyin": "zhǐ",
+    "alt": ""
+  },
+  {
+    "id": 127,
+    "word": "志",
+    "pinyin": "zhì",
+    "alt": ""
+  },
+  {
+    "id": 128,
+    "word": "致",
+    "pinyin": "zhì",
+    "alt": ""
+  },
+  {
+    "id": 129,
+    "word": "质",
+    "pinyin": "zhì",
+    "alt": ""
+  },
+  {
+    "id": 130,
+    "word": "专",
+    "pinyin": "zhuān",
+    "alt": ""
+  },
+  {
+    "id": 131,
+    "word": "走",
+    "pinyin": "zǒu",
+    "alt": ""
+  },
+  {
+    "id": 132,
+    "word": "足",
+    "pinyin": "zú",
+    "alt": ""
+  },
+  {
+    "id": 133,
+    "word": "卒",
+    "pinyin": "zú",
+    "alt": "cù（通「猝」，仓促）"
+  },
+  {
+    "id": 134,
+    "word": "作",
+    "pinyin": "zuò",
+    "alt": ""
+  },
+  {
+    "id": 135,
+    "word": "坐",
+    "pinyin": "zuò",
+    "alt": ""
+  },
+  {
+    "id": 136,
+    "word": "卑鄙",
+    "pinyin": "bēi bǐ",
+    "alt": ""
+  },
+  {
+    "id": 137,
+    "word": "布衣",
+    "pinyin": "bù yī",
+    "alt": ""
+  },
+  {
+    "id": 138,
+    "word": "菲薄",
+    "pinyin": "fěi bó",
+    "alt": ""
+  },
+  {
+    "id": 139,
+    "word": "其实",
+    "pinyin": "qí shí",
+    "alt": ""
+  },
+  {
+    "id": 140,
+    "word": "亲戚",
+    "pinyin": "qīn qī",
+    "alt": ""
+  },
+  {
+    "id": 141,
+    "word": "驱驰",
+    "pinyin": "qū chí",
+    "alt": ""
+  },
+  {
+    "id": 142,
+    "word": "无论",
+    "pinyin": "wú lùn",
+    "alt": ""
+  },
+  {
+    "id": 143,
+    "word": "牺牲",
+    "pinyin": "xī shēng",
+    "alt": ""
+  },
+  {
+    "id": 144,
+    "word": "鸿儒",
+    "pinyin": "hóng rú",
+    "alt": ""
+  },
+  {
+    "id": 145,
+    "word": "白丁",
+    "pinyin": "bái dīng",
+    "alt": ""
+  },
+  {
+    "id": 146,
+    "word": "阡陌",
+    "pinyin": "qiān mò",
+    "alt": ""
+  },
+  {
+    "id": 147,
+    "word": "交通",
+    "pinyin": "jiāo tōng",
+    "alt": ""
+  },
+  {
+    "id": 148,
+    "word": "问津",
+    "pinyin": "wèn jīn",
+    "alt": ""
+  },
+  {
+    "id": 149,
+    "word": "绝境",
+    "pinyin": "jué jìng",
+    "alt": ""
+  },
+  {
+    "id": 150,
+    "word": "妻子",
+    "pinyin": "qī zǐ",
+    "alt": ""
+  }
+]

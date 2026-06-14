@@ -14,10 +14,12 @@ Page({
     inputCollapsed: false,
     resultAnimation: {},
     streamingText: '',
-    resultHtml: ''
+    resultHtml: '',
+    statusBarHeight: 20
   },
 
   onLoad: function() {
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
   },
 
   onShow: function() {

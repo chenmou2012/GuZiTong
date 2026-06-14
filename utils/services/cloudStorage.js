@@ -188,6 +188,68 @@ function mergeWordData(local, cloud) {
   return Array.from(map.values());
 }
 
+// 保存学习列表到云端
+function saveCloudLearnList(openId, list) {
+  return new Promise((resolve, reject) => {
+    if (!cloudDb) {
+      resolve();
+      return;
+    }
+
+    cloudDb.collection('learnList')
+      .where({ _openid: openId })
+      .get()
+      .then(res => {
+        if (res.data.length > 0) {
+          // 更新
+          cloudDb.collection('learnList')
+            .doc(res.data[0]._id)
+            .update({
+              data: {
+                list: list,
+                updateTime: Date.now()
+              }
+            })
+            .then(() => resolve())
+            .catch(reject);
+        } else {
+          // 新增
+          cloudDb.collection('learnList')
+            .add({
+              data: {
+                list: list,
+                createTime: Date.now(),
+                updateTime: Date.now()
+              }
+            })
+            .then(() => resolve())
+            .catch(reject);
+        }
+      })
+      .catch(reject);
+  });
+}
+
+// 获取云端学习列表
+function getCloudLearnList(openId) {
+  return new Promise((resolve) => {
+    if (!cloudDb) {
+      resolve(null);
+      return;
+    }
+
+    cloudDb.collection('learnList')
+      .where({ _openid: openId })
+      .get()
+      .then(res => {
+        resolve(res.data.length > 0 ? res.data[0].list : null);
+      })
+      .catch(() => {
+        resolve(null);
+      });
+  });
+}
+
 // 获取用户openid
 function getOpenId() {
   return new Promise((resolve) => {
@@ -317,6 +379,9 @@ module.exports = {
   getCloudLearnedWords,
   saveCloudLearnedWords,
   syncLearnedWords,
+  // 学习列表
+  getCloudLearnList,
+  saveCloudLearnList,
   // 复习记录
   getCloudReviewRecords,
   saveCloudReviewRecords,

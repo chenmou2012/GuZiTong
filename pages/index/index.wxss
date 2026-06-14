@@ -490,6 +490,22 @@
   color: #B91C1C;
 }
 
+.retry-btn {
+  margin-top: 20rpx;
+  padding: 16rpx 40rpx;
+  background: #B91C1C;
+  border-radius: 30rpx;
+}
+
+.retry-btn:active {
+  opacity: 0.8;
+}
+
+.retry-btn-text {
+  color: #fff;
+  font-size: 26rpx;
+}
+
 /* 实词选择区域 */
 .real-words-section {
   margin-bottom: 40rpx;

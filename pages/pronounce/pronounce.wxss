@@ -1,0 +1,263 @@
+/* pages/pronounce/pronounce.wxss */
+page {
+  background: linear-gradient(135deg, #fcf9f8 0%, #f7f3f0 100%);
+}
+
+.container {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-left: 32rpx;
+  padding-right: 32rpx;
+  padding-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部返回 */
+.topbar {
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+}
+.back-btn {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  color: #6b7280;
+}
+.back-icon {
+  font-size: 48rpx;
+  line-height: 1;
+  margin-right: 4rpx;
+}
+
+/* 标题 */
+.page-head {
+  padding: 8rpx 0 24rpx;
+}
+.page-title {
+  display: block;
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #bc262e;
+  letter-spacing: 4rpx;
+}
+.page-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+/* 声音切换 */
+.voice-switch {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+.voice-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14rpx 0;
+  background: #fff;
+  border: 1rpx solid #e6e1de;
+  border-radius: 18rpx;
+  transition: all 0.2s;
+}
+.voice-opt.on {
+  background: #bc262e;
+  border-color: #bc262e;
+}
+.voice-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+.voice-sub {
+  font-size: 20rpx;
+  color: #9a938e;
+  margin-top: 2rpx;
+}
+.voice-opt.on .voice-label,
+.voice-opt.on .voice-sub {
+  color: #fff;
+}
+
+/* 搜索 */
+.search-box {
+  position: relative;
+  margin-bottom: 24rpx;
+}
+.search-input {
+  height: 76rpx;
+  background: #fff;
+  border: 1rpx solid #e6e1de;
+  border-radius: 38rpx;
+  padding: 0 64rpx 0 32rpx;
+  font-size: 28rpx;
+  color: #1b1c1c;
+}
+.search-clear {
+  position: absolute;
+  right: 28rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 28rpx;
+  color: #b9b3af;
+}
+
+/* 列表 */
+.list {
+  flex: 1;
+  height: 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(193, 201, 191, 0.4);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  padding: 24rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 字头 */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx dashed #ece7e3;
+  margin-bottom: 8rpx;
+}
+.word-block {
+  display: flex;
+  align-items: baseline;
+  gap: 20rpx;
+  padding: 6rpx 8rpx;
+  border-radius: 12rpx;
+  transition: background 0.2s;
+}
+.word-block.playing {
+  background: rgba(188, 38, 46, 0.08);
+}
+.word {
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #1b1c1c;
+}
+.word-py {
+  font-size: 30rpx;
+  color: #bc262e;
+  font-weight: 600;
+}
+.poly-tag {
+  font-size: 20rpx;
+  color: #bc262e;
+  border: 1rpx solid rgba(188, 38, 46, 0.4);
+  border-radius: 20rpx;
+  padding: 2rpx 14rpx;
+}
+
+/* 例句条目 */
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 8rpx;
+  border-radius: 12rpx;
+  transition: background 0.2s;
+}
+.item:active {
+  background: #f6f2f0;
+}
+.item.playing {
+  background: rgba(188, 38, 46, 0.06);
+}
+.item-main {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+.item-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.item-py {
+  font-size: 26rpx;
+  color: #bc262e;
+  font-weight: 600;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+.item-sentence {
+  font-size: 30rpx;
+  color: #2d2d2d;
+  line-height: 1.5;
+}
+.item-sentence .b {
+  font-weight: bold;
+  color: #bc262e;
+}
+.item-meta {
+  margin-top: 6rpx;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.item-meaning {
+  font-size: 23rpx;
+  color: #6b7280;
+  margin-right: 12rpx;
+}
+.item-source {
+  font-size: 22rpx;
+  color: #b1aaa5;
+}
+.item-note {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #c08a3e;
+}
+
+/* 播放按钮 */
+.play-btn {
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #fbeceb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.play-btn.on {
+  background: #bc262e;
+}
+.play-icon {
+  font-size: 26rpx;
+  color: #bc262e;
+}
+.play-btn.on .play-icon {
+  color: #fff;
+}
+
+.list-foot {
+  text-align: center;
+  color: #c2bbb6;
+  font-size: 22rpx;
+  padding: 16rpx 0 8rpx;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9a938e;
+  font-size: 28rpx;
+}

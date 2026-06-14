@@ -2,6 +2,30 @@
 const { REAL_WORDS_DATA } = require('../../utils/services/realWords.js');
 const storage = require('../../utils/services/storage.js');
 
+// 加载 EB Garamond 字体（小程序无法用相对路径加载包内字体，必须用网络地址或 base64 data URI）
+const EB_GARAMOND_FONT = require('../../utils/fonts/ebGaramond.js');
+let fontLoaded = false;
+
+function loadFont() {
+  if (fontLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    wx.loadFontFace({
+      global: true,
+      family: 'EB Garamond',
+      source: 'url("' + EB_GARAMOND_FONT + '")',
+      success: () => {
+        fontLoaded = true;
+        console.log('字体加载成功');
+        resolve();
+      },
+      fail: (err) => {
+        console.log('字体加载失败', err);
+        resolve(); // 不阻塞
+      }
+    });
+  });
+}
+
 const GROUP_SIZE = 5;
 const TOTAL_PRACTICE = 4;
 const PRACTICE_CONTEXT = 2;  // 偶数次：语境选意思 (0, 2)
@@ -44,10 +68,15 @@ Page({
     currentLearningWord: '',  // 正在学习的字（字符串）
 
     // 复习
-    reviewWords: []
+    reviewWords: [],
+
+    // 自定义导航栏顶部留白
+    statusBarHeight: 20
   },
 
   onLoad: function() {
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+    loadFont();
     this.loadData();
   },
 
@@ -57,7 +86,7 @@ Page({
     }
   },
 
-  loadData: function() {
+  loadData: async function() {
     const words = REAL_WORDS_DATA || [];
     const learned = storage.getLearnedWords() || [];
 
@@ -66,13 +95,16 @@ Page({
       storage.enableCloudSync();
     }
 
+    // 同步学习列表（优先云端，本地兜底）
+    let learnList = await storage.syncLearnList(words);
+
     // 过滤掉已掌握的词
-    const toLearn = words.filter(w => !learned.some(l => l.word === w.word));
+    const toLearn = learnList.filter(w => !learned.some(l => l.word === w.word));
 
-    // 随机打乱
-    this.shuffleArray(toLearn);
+    // 当前学习进度 = 已掌握数
+    const currentIndex = learned.length;
 
-    const totalGroups = Math.ceil(toLearn.length / GROUP_SIZE);
+    const totalGroups = Math.ceil(learnList.length / GROUP_SIZE);
 
     // 计算需要复习的词
     const reviewWords = this.calculateReview(learned);
@@ -80,6 +112,7 @@ Page({
     this.setData({
       totalCount: words.length,
       learnedCount: learned.length,
+      currentIndex: currentIndex,
       totalGroups: totalGroups,
       allWords: toLearn,
       reviewWords: reviewWords,
@@ -96,8 +129,14 @@ Page({
     const now = Date.now();
     const result = [];
     const intervals = [1, 3, 7, 15, 30];  // 天数
+    const learnList = storage.getLearnList() || [];
 
-    learned.forEach(w => {
+    // 只复习 learnList 中学过的词
+    const learnedWords = new Set(learned.map(l => l.word));
+
+    learnList.forEach(w => {
+      if (!learnedWords.has(w.word)) return;
+
       const lastReview = storage.getLastReviewTime(w.word) || w.learnedTime || 0;
       const errorCount = storage.getErrorCount(w.word) || 0;
       const reviewCount = w.reviewCount || 0;
@@ -207,6 +246,26 @@ Page({
     this.setData({
       learning: false,
       phase: 'intro'
+    });
+  },
+
+  // 进入字音跟读页
+  goPronounce: function() {
+    wx.navigateTo({ url: '/pages/pronounce/pronounce' });
+  },
+
+  exitLearn: function() {
+    wx.showModal({
+      title: '退出学习',
+      content: '确定要退出当前学习吗？',
+      success: (res) => {
+        if (res.confirm) {
+          this.setData({
+            learning: false,
+            phase: 'intro'
+          });
+        }
+      }
     });
   },
 
@@ -441,6 +500,10 @@ Page({
 
     // 标记为已掌握
     storage.markWordLearned(currentWord.word);
+
+    // 实时更新已学数量
+    const learned = storage.getLearnedWords() || [];
+    this.setData({ learnedCount: learned.length });
 
     // 跳到下一个词
     let newWordIndex = currentWordIndex + 1;

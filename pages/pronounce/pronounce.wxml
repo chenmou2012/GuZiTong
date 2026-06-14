@@ -1,0 +1,72 @@
+<!-- pages/pronounce/pronounce.wxml -->
+<view class="container" style="padding-top: calc(24rpx + {{statusBarHeight}}px)">
+  <!-- 返回 -->
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+      <text>返回</text>
+    </view>
+  </view>
+
+  <!-- 标题 -->
+  <view class="page-head">
+    <text class="page-title">字音跟读</text>
+    <text class="page-sub">共 {{total}} 条例句 · 点字或例句播放正音</text>
+  </view>
+
+  <!-- 声音切换 -->
+  <view class="voice-switch">
+    <view class="voice-opt {{voice === 'female' ? 'on' : ''}}" bindtap="setVoice" data-voice="female">
+      <text class="voice-label">女声</text>
+      <text class="voice-sub">小学老师</text>
+    </view>
+    <view class="voice-opt {{voice === 'male' ? 'on' : ''}}" bindtap="setVoice" data-voice="male">
+      <text class="voice-label">男声</text>
+      <text class="voice-sub">高中老师</text>
+    </view>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="search-box">
+    <input class="search-input" placeholder="搜索字 / 拼音" value="{{keyword}}" bindinput="onSearch" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="search-clear" bindtap="clearSearch">✕</text>
+  </view>
+
+  <!-- 列表 -->
+  <scroll-view scroll-y class="list" wx:if="{{groups.length > 0}}">
+    <view class="card" wx:for="{{groups}}" wx:key="id" wx:for-item="g">
+      <!-- 字头 -->
+      <view class="card-head">
+        <view class="word-block {{playingKey === (g.items[0].key) ? 'playing' : ''}}" bindtap="playItem" data-key="{{g.items[0].key}}" data-id="{{g.id}}" data-word="{{g.word}}" data-mi="{{g.items[0].mi}}">
+          <text class="word">{{g.word}}</text>
+          <text class="word-py">{{g.readingText}}</text>
+        </view>
+        <text wx:if="{{g.polyphonic}}" class="poly-tag">多音</text>
+      </view>
+
+      <!-- 例句逐条 -->
+      <view class="item {{playingKey === item.key ? 'playing' : ''}}"
+            wx:for="{{g.items}}" wx:key="key" wx:for-item="item"
+            bindtap="playItem" data-key="{{item.key}}" data-id="{{item.id}}" data-word="{{item.word}}" data-mi="{{item.mi}}">
+        <view class="item-main">
+          <view class="item-line">
+            <text class="item-py">{{item.pinyin}}</text>
+            <text class="item-sentence"><text wx:for="{{item.parts}}" wx:key="index" wx:for-item="p" class="{{p.bold ? 'b' : ''}}">{{p.text}}</text></text>
+          </view>
+          <view class="item-meta">
+            <text class="item-meaning">{{item.meaning}}</text>
+            <text class="item-source">《{{item.source}}》</text>
+          </view>
+          <text wx:if="{{item.note}}" class="item-note">{{item.note}}</text>
+        </view>
+        <view class="play-btn {{playingKey === item.key ? 'on' : ''}}">
+          <text class="play-icon">{{playingKey === item.key ? '⏸' : '▶'}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="list-foot">— 已显示全部 {{groups.length}} 字 —</view>
+  </scroll-view>
+
+  <!-- 空 -->
+  <view wx:else class="empty">没有匹配的字</view>
+</view>

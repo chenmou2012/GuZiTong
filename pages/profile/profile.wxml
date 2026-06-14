@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
   <!-- 用户信息头部 -->
   <view class="profile-header">
     <!-- 未登录 -->

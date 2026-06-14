@@ -26,10 +26,12 @@ Page({
     showRealWordsSection: true,
     showRealWordsPicker: false,
     pickerIndex: -1,
-    streamingText: ''
+    streamingText: '',
+    statusBarHeight: 20
   },
 
   onLoad: function(options) {
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
     this.checkHistory();
   },
 
@@ -47,6 +49,8 @@ Page({
       showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
+      showRealWordsPicker: false,
+      pickerIndex: -1,
       isCollected: false
     });
 
@@ -72,12 +76,6 @@ Page({
       showRealWordsSection: true,
       showRealWordsPicker: false,
       pickerIndex: -1
-    });
-  },
-
-  closeRealWords: function() {
-    this.setData({
-      showRealWordsSection: false
     });
   },
 
@@ -107,9 +105,9 @@ Page({
     });
   },
 
-  goToRealWordsPage: function() {
-    wx.switchTab({
-      url: '/pages/realwords/realwords'
+  closeRealWords: function() {
+    this.setData({
+      showRealWordsSection: false
     });
   },
 
@@ -308,9 +306,6 @@ Page({
         streamingText: '',
         showQuickWords: true,
         inputCollapsed: false,
-        showRealWordsSection: true,
-        showRealWordsPicker: false,
-        pickerIndex: -1,
         isCollected: false
       });
     }

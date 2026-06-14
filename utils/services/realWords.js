@@ -36,7 +36,7 @@ const REAL_WORDS_DATA = [
   {"id": 8, "word": "达", "meanings": [
     {"meaning": "到达", "example": "指通豫南，达于汉阴", "source": "愚公移山"},
     {"meaning": "得志，显贵", "example": "不求闻达于诸侯", "source": "出师表"},
-    {"meaning": "有道德，有学问（的人���", "example": "从乡之先达执经叩问", "source": "送东阳马生序"}
+    {"meaning": "有道德，有学问（的人）", "example": "从乡之先达执经叩问", "source": "送东阳马生序"}
   ]},
   {"id": 9, "word": "当", "meanings": [
     {"meaning": "在（某时、某处）", "example": "陈康肃公尧咨善射，当世无双", "source": "卖油翁"},
@@ -135,7 +135,7 @@ const REAL_WORDS_DATA = [
   ]},
   {"id": 30, "word": "及", "meanings": [
     {"meaning": "到，至", "example": "及郡下，谐太守，说如此", "source": "桃花源记"},
-    {"meaning": "比得上", "example": "君美甚，徐公何能及君也", "source": "邹忌讽齐王纳���"},
+    {"meaning": "比得上", "example": "君美甚，徐公何能及君也", "source": "邹忌讽齐王纳谏"},
     {"meaning": "以及，和，与", "example": "若有作奸犯科及为忠善者", "source": "出师表"}
   ]},
   {"id": 31, "word": "极", "meanings": [
@@ -314,7 +314,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "表同意", "example": "王曰：善", "source": "邹忌讽齐王纳谏"}
   ]},
   {"id": 72, "word": "少", "meanings": [
-    {"meaning": "不多，数量小", "example": "义不杀少而���众", "source": "公输"},
+    {"meaning": "不多，数量小", "example": "义不杀少而杀众", "source": "公输"},
     {"meaning": "缺少", "example": "但少闲人如吾两人者耳", "source": "记承天寺夜游"},
     {"meaning": "年轻，少年，年纪小", "example": "年少时", "source": "周处"},
     {"meaning": "稍微，略微", "example": "宾客意少舒，稍稍正坐", "source": "口技"}
@@ -400,7 +400,7 @@ const REAL_WORDS_DATA = [
     {"meaning": "灭亡，死亡", "example": "出则无敌国外患者，国恒亡", "source": "生于忧患，死于安乐"},
     {"meaning": "wú 通无，没有", "example": "河曲智叟亡以应", "source": "愚公移山"}
   ]},
-  {"id": 92, "word": "���", "meanings": [
+  {"id": 92, "word": "为", "meanings": [
     {"meaning": "做，干", "example": "若有作奸犯科及为忠善者", "source": "出师表"},
     {"meaning": "雕刻，制作，制造", "example": "能以径寸之木，为宫室、器皿、人物", "source": "核舟记"},
     {"meaning": "作为，当作", "example": "全石以为底", "source": "小石潭记"},
@@ -539,7 +539,7 @@ const REAL_WORDS_DATA = [
   {"id": 125, "word": "知", "meanings": [
     {"meaning": "知道", "example": "西蜀之去南海，不知几千里也", "source": "为学（六上）"},
     {"meaning": "懂得", "example": "汝亦知射乎", "source": "卖油翁"},
-    {"meaning": "通智。聪明，智���", "example": "孰为女多知乎！", "source": "两小儿辩日"}
+    {"meaning": "通智。聪明，智慧", "example": "孰为女多知乎！", "source": "两小儿辩日"}
   ]},
   {"id": 126, "word": "止", "meanings": [
     {"meaning": "停止", "example": "又一大儿醒，絮絮不止", "source": "口技"},

@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
   <!-- 标题区域 -->
   <view class="header {{inputCollapsed ? 'collapsed' : ''}}">
     <text class="title">古今对译</text>

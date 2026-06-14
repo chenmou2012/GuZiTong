@@ -10,10 +10,12 @@ Page({
       words: 0,
       collections: 0,
       translations: 0
-    }
+    },
+    statusBarHeight: 20
   },
 
   onLoad: function() {
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
     this.checkLogin();
   },
 

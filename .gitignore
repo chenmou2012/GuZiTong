@@ -5,12 +5,39 @@ skills-lock.json
 
 # 项目配置
 project.config.json
+project.private.config.json
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyw
 
 # 后端配置
 backend/config.json
 backend/*.db
+backend/*.log
+
+# 日志
+*.log
+npm-debug.log*
+yarn-error.log
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# 微信开发工具
+miniprogram_nick_name

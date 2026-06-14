@@ -1,0 +1,3302 @@
+[
+  {
+    "id": 1,
+    "word": "比",
+    "mi": 1,
+    "pinyin": "bǐ",
+    "meaning": "并列，靠近",
+    "example": "其两膝相比者，各隐卷底衣褶中",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 1,
+    "word": "比",
+    "mi": 2,
+    "pinyin": "bǐ",
+    "meaning": "及，等到（……的时候）",
+    "example": "比其反也，则冻馁其妻子",
+    "source": "王顾左右而言他",
+    "note": ""
+  },
+  {
+    "id": 1,
+    "word": "比",
+    "mi": 3,
+    "pinyin": "bǐ",
+    "meaning": "比较",
+    "example": "心却比，男儿烈",
+    "source": "满江红",
+    "note": ""
+  },
+  {
+    "id": 2,
+    "word": "鄙",
+    "mi": 1,
+    "pinyin": "bǐ",
+    "meaning": "边疆，边远的地方",
+    "example": "蜀之鄙有二僧",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 2,
+    "word": "鄙",
+    "mi": 2,
+    "pinyin": "bǐ",
+    "meaning": "浅陋，目光短浅",
+    "example": "刿曰：肉食者鄙，未能远谋。",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 2,
+    "word": "鄙",
+    "mi": 3,
+    "pinyin": "bǐ",
+    "meaning": "社会地位低微，见识短浅",
+    "example": "先帝不以臣卑鄙",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "word": "兵",
+    "mi": 1,
+    "pinyin": "bīng",
+    "meaning": "兵器，武器",
+    "example": "兵革非不坚利也",
+    "source": "得道者多助失道者寡助",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "word": "兵",
+    "mi": 2,
+    "pinyin": "bīng",
+    "meaning": "战士、士兵、军队",
+    "example": "沙场秋点兵",
+    "source": "破阵子·为陈同甫赋壮词以寄之",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "word": "兵",
+    "mi": 3,
+    "pinyin": "bīng",
+    "meaning": "战争",
+    "example": "况乃未休兵",
+    "source": "月夜忆舍弟",
+    "note": ""
+  },
+  {
+    "id": 4,
+    "word": "病",
+    "mi": 1,
+    "pinyin": "bìng",
+    "meaning": "生病",
+    "example": "未果，寻病终",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 4,
+    "word": "病",
+    "mi": 2,
+    "pinyin": "bìng",
+    "meaning": "辱，耻辱",
+    "example": "圣人非所与熙也，寡人反取病焉",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 5,
+    "word": "乘",
+    "mi": 1,
+    "pinyin": "chéng",
+    "meaning": "坐、驾（车）",
+    "example": "虽乘奔御风，不以疾也",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 5,
+    "word": "乘",
+    "mi": 2,
+    "pinyin": "chéng",
+    "meaning": "乘坐",
+    "example": "公与之乘",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 6,
+    "word": "持",
+    "mi": 1,
+    "pinyin": "chí",
+    "meaning": "拉",
+    "example": "锐兵刃，彀弓弩，持满",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 6,
+    "word": "持",
+    "mi": 2,
+    "pinyin": "chí",
+    "meaning": "拿着",
+    "example": "屠乃奔倚其下，弛担持刀",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 7,
+    "word": "从",
+    "mi": 1,
+    "pinyin": "cóng",
+    "meaning": "跟从，跟随",
+    "example": "从先人还家，于舅家见之",
+    "source": "伤仲永",
+    "note": ""
+  },
+  {
+    "id": 7,
+    "word": "从",
+    "mi": 2,
+    "pinyin": "cóng",
+    "meaning": "听从，顺从",
+    "example": "小惠未遍，民弗从也",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 7,
+    "word": "从",
+    "mi": 3,
+    "pinyin": "cóng",
+    "meaning": "自，由",
+    "example": "从小丘西行百二十步",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 7,
+    "word": "从",
+    "mi": 4,
+    "pinyin": "cóng",
+    "meaning": "与容连用：舒缓安闲，不慌不忙",
+    "example": "鱼出游从容",
+    "source": "庄子与惠子游于濠梁之上",
+    "note": ""
+  },
+  {
+    "id": 8,
+    "word": "达",
+    "mi": 1,
+    "pinyin": "dá",
+    "meaning": "到达",
+    "example": "指通豫南，达于汉阴",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 8,
+    "word": "达",
+    "mi": 2,
+    "pinyin": "dá",
+    "meaning": "得志，显贵",
+    "example": "不求闻达于诸侯",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 8,
+    "word": "达",
+    "mi": 3,
+    "pinyin": "dá",
+    "meaning": "有道德，有学问（的人）",
+    "example": "从乡之先达执经叩问",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 9,
+    "word": "当",
+    "mi": 1,
+    "pinyin": "dāng",
+    "meaning": "在（某时、某处）",
+    "example": "陈康肃公尧咨善射，当世无双",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 9,
+    "word": "当",
+    "mi": 2,
+    "pinyin": "dāng",
+    "meaning": "应当，应该",
+    "example": "当奖率三军",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 9,
+    "word": "当",
+    "mi": 3,
+    "pinyin": "dāng",
+    "meaning": "将要，就要",
+    "example": "今当远离",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 9,
+    "word": "当",
+    "mi": 4,
+    "pinyin": "dāng",
+    "meaning": "掌管，主持",
+    "example": "卿今当涂掌事",
+    "source": "孙权劝学",
+    "note": ""
+  },
+  {
+    "id": 10,
+    "word": "道",
+    "mi": 1,
+    "pinyin": "dào",
+    "meaning": "路；途",
+    "example": "伐竹取道，下见小潭，水尤清冽",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 10,
+    "word": "道",
+    "mi": 2,
+    "pinyin": "dào",
+    "meaning": "道理，规律，方法",
+    "example": "虽有至道，弗学，不知其善也",
+    "source": "虽有嘉肴",
+    "note": ""
+  },
+  {
+    "id": 10,
+    "word": "道",
+    "mi": 3,
+    "pinyin": "dào",
+    "meaning": "道义",
+    "example": "得道者多助，失道者寡助",
+    "source": "得道者多助失道者寡助",
+    "note": ""
+  },
+  {
+    "id": 10,
+    "word": "道",
+    "mi": 4,
+    "pinyin": "dào",
+    "meaning": "说，讲",
+    "example": "此中人语云：不足为外人道也。",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 11,
+    "word": "得",
+    "mi": 1,
+    "pinyin": "dé",
+    "meaning": "得到，获得",
+    "example": "一狼得骨止",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 11,
+    "word": "得",
+    "mi": 2,
+    "pinyin": "dé",
+    "meaning": "能够，可以",
+    "example": "天子先驱至，不得入",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 11,
+    "word": "得",
+    "mi": 3,
+    "pinyin": "dé",
+    "meaning": "同德，感恩",
+    "example": "所识穷乏者得我与",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 12,
+    "word": "尔",
+    "mi": 1,
+    "pinyin": "ěr",
+    "meaning": "助词，相当于而已、罢了",
+    "example": "无他，但手熟尔",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 12,
+    "word": "尔",
+    "mi": 2,
+    "pinyin": "ěr",
+    "meaning": "代词，你（你们）",
+    "example": "尔安敢轻吾射",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 12,
+    "word": "尔",
+    "mi": 3,
+    "pinyin": "ěr",
+    "meaning": "指示代词，这，那",
+    "example": "尔来二十有一年矣",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 13,
+    "word": "伐",
+    "mi": 1,
+    "pinyin": "fá",
+    "meaning": "砍伐",
+    "example": "伐竹取道，下见小潭",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 13,
+    "word": "伐",
+    "mi": 2,
+    "pinyin": "fá",
+    "meaning": "攻打，讨伐",
+    "example": "十年春，齐师伐我",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 14,
+    "word": "犯",
+    "mi": 1,
+    "pinyin": "fàn",
+    "meaning": "侵害，危害",
+    "example": "并皆暴犯百姓",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 14,
+    "word": "犯",
+    "mi": 2,
+    "pinyin": "fàn",
+    "meaning": "触犯，违犯",
+    "example": "若有作奸犯科及为忠善者",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 15,
+    "word": "方",
+    "mi": 1,
+    "pinyin": "fāng",
+    "meaning": "方圆，周围",
+    "example": "今齐地方千里，百二十城",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 15,
+    "word": "方",
+    "mi": 2,
+    "pinyin": "fāng",
+    "meaning": "区域，地方",
+    "example": "北方有侮臣者，愿借子杀之",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 15,
+    "word": "方",
+    "mi": 3,
+    "pinyin": "fāng",
+    "meaning": "将，将要",
+    "example": "今方来，吾欲辱之，何以也",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 16,
+    "word": "负",
+    "mi": 1,
+    "pinyin": "fù",
+    "meaning": "背，以背载物",
+    "example": "帝感其诚，命夸娥氏二子负二山",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 16,
+    "word": "负",
+    "mi": 2,
+    "pinyin": "fù",
+    "meaning": "凭借，依仗，倚靠",
+    "example": "皆生寒树，负势竞上",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 17,
+    "word": "赋",
+    "mi": 1,
+    "pinyin": "fù",
+    "meaning": "一种文体",
+    "example": "刻唐贤今人诗赋于其上",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 18,
+    "word": "更",
+    "mi": 1,
+    "pinyin": "gēng",
+    "meaning": "交替，轮换，更换",
+    "example": "乡里皆谓已死，更相庆",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 18,
+    "word": "更",
+    "mi": 2,
+    "pinyin": "gèng",
+    "meaning": "又，另，还",
+    "example": "湖中焉得更有此人",
+    "source": "湖心亭看雪",
+    "note": ""
+  },
+  {
+    "id": 19,
+    "word": "苟",
+    "mi": 1,
+    "pinyin": "gǒu",
+    "meaning": "随便，马虎",
+    "example": "苟全性命于乱世",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 19,
+    "word": "苟",
+    "mi": 2,
+    "pinyin": "gǒu",
+    "meaning": "勉强，不正当",
+    "example": "故不为苟得也",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 20,
+    "word": "故",
+    "mi": 1,
+    "pinyin": "gù",
+    "meaning": "原因，缘故",
+    "example": "既克，公问其故",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 20,
+    "word": "故",
+    "mi": 2,
+    "pinyin": "gù",
+    "meaning": "所以，因此",
+    "example": "故天将降大任于是人也",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 20,
+    "word": "故",
+    "mi": 3,
+    "pinyin": "gù",
+    "meaning": "特意",
+    "example": "余故道为学之难以告之",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 21,
+    "word": "顾",
+    "mi": 1,
+    "pinyin": "gù",
+    "meaning": "回头看，看，看见",
+    "example": "顾野有麦场",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 21,
+    "word": "顾",
+    "mi": 2,
+    "pinyin": "gù",
+    "meaning": "拜访",
+    "example": "三顾臣于草庐之中",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 21,
+    "word": "顾",
+    "mi": 3,
+    "pinyin": "gù",
+    "meaning": "还，反而",
+    "example": "人之立志，顾不如蜀鄙之僧哉",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 22,
+    "word": "观",
+    "mi": 1,
+    "pinyin": "guān",
+    "meaning": "看，仔细看",
+    "example": "启窗而观",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 22,
+    "word": "观",
+    "mi": 2,
+    "pinyin": "guān",
+    "meaning": "观赏",
+    "example": "可远观而不可亵玩焉",
+    "source": "爱莲说",
+    "note": ""
+  },
+  {
+    "id": 22,
+    "word": "观",
+    "mi": 3,
+    "pinyin": "guān",
+    "meaning": "景象",
+    "example": "此则岳阳楼之大观也",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 23,
+    "word": "归",
+    "mi": 1,
+    "pinyin": "guī",
+    "meaning": "归来，返回",
+    "example": "朝而往，暮而归",
+    "source": "醉翁亭记",
+    "note": ""
+  },
+  {
+    "id": 23,
+    "word": "归",
+    "mi": 2,
+    "pinyin": "guī",
+    "meaning": "归属，归依",
+    "example": "微斯人，吾谁与归",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 23,
+    "word": "归",
+    "mi": 3,
+    "pinyin": "guī",
+    "meaning": "女子出嫁",
+    "example": "男有分，女有归",
+    "source": "大道之行也",
+    "note": ""
+  },
+  {
+    "id": 24,
+    "word": "过",
+    "mi": 1,
+    "pinyin": "guò",
+    "meaning": "过失，过错",
+    "example": "群臣吏民能面刺寡人之过者，受上赏",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 24,
+    "word": "过",
+    "mi": 2,
+    "pinyin": "guò",
+    "meaning": "犯错",
+    "example": "人恒过，然后能改",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 24,
+    "word": "过",
+    "mi": 3,
+    "pinyin": "guò",
+    "meaning": "过分，过于",
+    "example": "以其境过清，不可久居",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 25,
+    "word": "好",
+    "mi": 1,
+    "pinyin": "hǎo",
+    "meaning": "美丽的",
+    "example": "好鸟相鸣，嘤嘤成韵",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 25,
+    "word": "好",
+    "mi": 2,
+    "pinyin": "hǎo",
+    "meaning": "使人满意，与坏相对",
+    "example": "窈窕淑女，君子好逑",
+    "source": "关雎",
+    "note": ""
+  },
+  {
+    "id": 26,
+    "word": "号",
+    "mi": 1,
+    "pinyin": "háo",
+    "meaning": "大叫，呼啸",
+    "example": "阴风怒号，浊浪排空",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 26,
+    "word": "号",
+    "mi": 2,
+    "pinyin": "hào",
+    "meaning": "称号，别号",
+    "example": "故自号曰醉翁也",
+    "source": "醉翁亭记",
+    "note": ""
+  },
+  {
+    "id": 27,
+    "word": "还",
+    "mi": 1,
+    "pinyin": "huán",
+    "meaning": "返回",
+    "example": "贫者自南海还，以告富者",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 27,
+    "word": "还",
+    "mi": 2,
+    "pinyin": "huán",
+    "meaning": "交还，归还",
+    "example": "计日以还",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 28,
+    "word": "会",
+    "mi": 1,
+    "pinyin": "huì",
+    "meaning": "会和，聚会，集会",
+    "example": "迁客骚人，多会于此",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 28,
+    "word": "会",
+    "mi": 2,
+    "pinyin": "huì",
+    "meaning": "正好，恰好",
+    "example": "会宾客大宴",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 29,
+    "word": "惠",
+    "mi": 1,
+    "pinyin": "huì",
+    "meaning": "恩惠，给人以好处",
+    "example": "小惠未遍，民弗从也",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 29,
+    "word": "惠",
+    "mi": 2,
+    "pinyin": "huì",
+    "meaning": "同慧，聪明",
+    "example": "甚矣，汝之不惠",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 30,
+    "word": "及",
+    "mi": 1,
+    "pinyin": "jí",
+    "meaning": "到，至",
+    "example": "及郡下，谐太守，说如此",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 30,
+    "word": "及",
+    "mi": 2,
+    "pinyin": "jí",
+    "meaning": "比得上",
+    "example": "君美甚，徐公何能及君也",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 30,
+    "word": "及",
+    "mi": 3,
+    "pinyin": "jí",
+    "meaning": "以及，和，与",
+    "example": "若有作奸犯科及为忠善者",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 31,
+    "word": "极",
+    "mi": 1,
+    "pinyin": "jí",
+    "meaning": "尽头，极点，穷尽",
+    "example": "渔歌互答，此乐何极",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 31,
+    "word": "极",
+    "mi": 2,
+    "pinyin": "jí",
+    "meaning": "到极点（直达）",
+    "example": "然则北通巫峡，南极潇湘",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 31,
+    "word": "极",
+    "mi": 3,
+    "pinyin": "jí",
+    "meaning": "很，非常",
+    "example": "初极狭，才通人",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 32,
+    "word": "计",
+    "mi": 1,
+    "pinyin": "jì",
+    "meaning": "计算，计量",
+    "example": "通计一舟，为人五",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 33,
+    "word": "济",
+    "mi": 1,
+    "pinyin": "jì",
+    "meaning": "渡",
+    "example": "欲济无舟楫",
+    "source": "望洞庭湖赠张丞相",
+    "note": ""
+  },
+  {
+    "id": 34,
+    "word": "假",
+    "mi": 1,
+    "pinyin": "jiǎ",
+    "meaning": "不真实的，与真相对",
+    "example": "乃吾前狼假寐",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 34,
+    "word": "假",
+    "mi": 2,
+    "pinyin": "jiǎ",
+    "meaning": "借",
+    "example": "是以人多以书假余",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 35,
+    "word": "间",
+    "mi": 1,
+    "pinyin": "jiān",
+    "meaning": "中间",
+    "example": "傅说举于版筑之间",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 35,
+    "word": "间",
+    "mi": 2,
+    "pinyin": "jiān",
+    "meaning": "期间",
+    "example": "奉命于危难之间",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 35,
+    "word": "间",
+    "mi": 3,
+    "pinyin": "jiàn",
+    "meaning": "间或，偶尔",
+    "example": "数月之后，时时而间进",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 35,
+    "word": "间",
+    "mi": 4,
+    "pinyin": "jiàn",
+    "meaning": "夹杂，参与",
+    "example": "中间力拉崩倒之声",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 36,
+    "word": "简",
+    "mi": 1,
+    "pinyin": "jiǎn",
+    "meaning": "挑选，选拔",
+    "example": "盖简桃核修狭者为之",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 37,
+    "word": "见",
+    "mi": 1,
+    "pinyin": "jiàn",
+    "meaning": "看见，看到",
+    "example": "见其发矢十中八九",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 37,
+    "word": "见",
+    "mi": 2,
+    "pinyin": "jiàn",
+    "meaning": "拜见，谒见",
+    "example": "于是入朝见威王",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 37,
+    "word": "见",
+    "mi": 3,
+    "pinyin": "xiàn",
+    "meaning": "同现，表露",
+    "example": "食不饱，力不足，才美不外见",
+    "source": "马说",
+    "note": ""
+  },
+  {
+    "id": 38,
+    "word": "竭",
+    "mi": 1,
+    "pinyin": "jié",
+    "meaning": "尽，完（耗尽，消失）",
+    "example": "一鼓作气，再而衰，三而竭",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 38,
+    "word": "竭",
+    "mi": 2,
+    "pinyin": "jié",
+    "meaning": "全部用上",
+    "example": "庶竭驽钝，攘除奸凶",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 39,
+    "word": "尽",
+    "mi": 1,
+    "pinyin": "jìn",
+    "meaning": "完，没有了",
+    "example": "林尽水源，使得一山",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 39,
+    "word": "尽",
+    "mi": 2,
+    "pinyin": "jìn",
+    "meaning": "全部，都（毫无保留）",
+    "example": "至于斟酌损益，进尽忠言",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 40,
+    "word": "进",
+    "mi": 1,
+    "pinyin": "jìn",
+    "meaning": "到朝廷，出来做官",
+    "example": "是进亦忧，退亦忧",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 40,
+    "word": "进",
+    "mi": 2,
+    "pinyin": "jìn",
+    "meaning": "进献，奉献",
+    "example": "进尽忠言",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 41,
+    "word": "居",
+    "mi": 1,
+    "pinyin": "jū",
+    "meaning": "停留",
+    "example": "以其境过清，不可久居",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 41,
+    "word": "居",
+    "mi": 2,
+    "pinyin": "jū",
+    "meaning": "居住，安居",
+    "example": "面山而居",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 41,
+    "word": "居",
+    "mi": 3,
+    "pinyin": "jū",
+    "meaning": "处在，处于（某种地位或某个地方）",
+    "example": "居庙堂之高，则忧其民",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 42,
+    "word": "举",
+    "mi": 1,
+    "pinyin": "jǔ",
+    "meaning": "选拔，推举",
+    "example": "胶鬲举于鱼盐之中",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 43,
+    "word": "具",
+    "mi": 1,
+    "pinyin": "jù",
+    "meaning": "具备，具有",
+    "example": "罔不因势象形，各具情态",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 43,
+    "word": "具",
+    "mi": 2,
+    "pinyin": "jù",
+    "meaning": "通俱，全部，详细地",
+    "example": "此人一一为具言所闻，皆叹惋",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 44,
+    "word": "俱",
+    "mi": 1,
+    "pinyin": "jù",
+    "meaning": "一起，在一起",
+    "example": "蛟或浮或没，行数十里，处之于俱",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 44,
+    "word": "俱",
+    "mi": 2,
+    "pinyin": "jù",
+    "meaning": "全，都",
+    "example": "风烟俱净，天山共色",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 45,
+    "word": "聚",
+    "mi": 1,
+    "pinyin": "jù",
+    "meaning": "集合",
+    "example": "聚室而谋曰",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 45,
+    "word": "聚",
+    "mi": 2,
+    "pinyin": "jù",
+    "meaning": "聚拢",
+    "example": "峰峦如聚",
+    "source": "山坡羊·潼关怀古",
+    "note": ""
+  },
+  {
+    "id": 46,
+    "word": "遽",
+    "mi": 1,
+    "pinyin": "jù",
+    "meaning": "就",
+    "example": "其父虽善游，其子岂遽善游哉",
+    "source": "《吕氏春秋》两则",
+    "note": ""
+  },
+  {
+    "id": 47,
+    "word": "决",
+    "mi": 1,
+    "pinyin": "jué",
+    "meaning": "决断，判定",
+    "example": "孔子不能决也",
+    "source": "两小儿辩日",
+    "note": ""
+  },
+  {
+    "id": 48,
+    "word": "绝",
+    "mi": 1,
+    "pinyin": "jué",
+    "meaning": "断",
+    "example": "至于夏水襄陵，沿溯阻绝",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 48,
+    "word": "绝",
+    "mi": 2,
+    "pinyin": "jué",
+    "meaning": "与世隔绝的",
+    "example": "率妻子邑人来此绝境",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 48,
+    "word": "绝",
+    "mi": 3,
+    "pinyin": "jué",
+    "meaning": "独一无二的，独特的",
+    "example": "奇山异水，天下独绝",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 48,
+    "word": "绝",
+    "mi": 4,
+    "pinyin": "jué",
+    "meaning": "极，非常",
+    "example": "绝巚多生怪柏",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 49,
+    "word": "类",
+    "mi": 1,
+    "pinyin": "lèi",
+    "meaning": "类推，类比",
+    "example": "义不杀少而杀众，不可谓知类",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 49,
+    "word": "类",
+    "mi": 2,
+    "pinyin": "lèi",
+    "meaning": "类似，像",
+    "example": "佛印绝类弥勒",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 50,
+    "word": "临",
+    "mi": 1,
+    "pinyin": "lín",
+    "meaning": "靠近",
+    "example": "有亭翼然临于泉上者，醉翁亭也",
+    "source": "醉翁亭记",
+    "note": ""
+  },
+  {
+    "id": 50,
+    "word": "临",
+    "mi": 2,
+    "pinyin": "lín",
+    "meaning": "面对，对着",
+    "example": "把酒临风，其喜洋洋者矣",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 50,
+    "word": "临",
+    "mi": 3,
+    "pinyin": "lín",
+    "meaning": "正当，将要，就要",
+    "example": "今当远离，临表涕零",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 51,
+    "word": "虑",
+    "mi": 1,
+    "pinyin": "lǜ",
+    "meaning": "思虑，思绪，心思",
+    "example": "困于心，衡于虑，而后作",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 52,
+    "word": "论",
+    "mi": 1,
+    "pinyin": "lùn",
+    "meaning": "议论，谈论",
+    "example": "曹刿论战",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 52,
+    "word": "论",
+    "mi": 2,
+    "pinyin": "lùn",
+    "meaning": "评定，判定",
+    "example": "宣付有司论其刑赏",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 53,
+    "word": "漫",
+    "mi": 1,
+    "pinyin": "màn",
+    "meaning": "随意，随便",
+    "example": "心智既不专一，却只漫浪诵读",
+    "source": "熟读精思",
+    "note": ""
+  },
+  {
+    "id": 54,
+    "word": "明",
+    "mi": 1,
+    "pinyin": "míng",
+    "meaning": "明亮，光明",
+    "example": "斗折蛇行，明灭可见",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 54,
+    "word": "明",
+    "mi": 2,
+    "pinyin": "míng",
+    "meaning": "明亮，光明（透明）",
+    "example": "庭下如积水空明",
+    "source": "记承天寺夜游",
+    "note": ""
+  },
+  {
+    "id": 54,
+    "word": "明",
+    "mi": 3,
+    "pinyin": "míng",
+    "meaning": "英明",
+    "example": "以昭陛下平明之理",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 54,
+    "word": "明",
+    "mi": 4,
+    "pinyin": "míng",
+    "meaning": "次，下一个",
+    "example": "明日，徐公来，熟视之",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 55,
+    "word": "名",
+    "mi": 1,
+    "pinyin": "míng",
+    "meaning": "名字，名称",
+    "example": "北冥有鱼，其名为鲲",
+    "source": "北冥有鱼",
+    "note": ""
+  },
+  {
+    "id": 55,
+    "word": "名",
+    "mi": 2,
+    "pinyin": "míng",
+    "meaning": "命名，给…取名",
+    "example": "名之者谁",
+    "source": "醉翁亭记",
+    "note": ""
+  },
+  {
+    "id": 55,
+    "word": "名",
+    "mi": 3,
+    "pinyin": "míng",
+    "meaning": "有名，出名",
+    "example": "山不在高，有仙则名",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 55,
+    "word": "名",
+    "mi": 4,
+    "pinyin": "míng",
+    "meaning": "说出，指出",
+    "example": "人有百口，口有百舌，不能名其一处也",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 56,
+    "word": "命",
+    "mi": 1,
+    "pinyin": "mìng",
+    "meaning": "命令，号令",
+    "example": "命夸娥氏二子负二山",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 56,
+    "word": "命",
+    "mi": 2,
+    "pinyin": "mìng",
+    "meaning": "任命，委派",
+    "example": "受命以来，夙夜忧叹",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 56,
+    "word": "命",
+    "mi": 3,
+    "pinyin": "mìng",
+    "meaning": "生命，性命",
+    "example": "苟全性命于乱世",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 57,
+    "word": "难",
+    "mi": 1,
+    "pinyin": "nán",
+    "meaning": "不容易，困难",
+    "example": "夫大国，难测也，惧有伏焉",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 57,
+    "word": "难",
+    "mi": 2,
+    "pinyin": "nàn",
+    "meaning": "灾难",
+    "example": "奉命于危难之间",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 58,
+    "word": "平",
+    "mi": 1,
+    "pinyin": "píng",
+    "meaning": "平坦",
+    "example": "土地平旷，屋舍俨",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 58,
+    "word": "平",
+    "mi": 2,
+    "pinyin": "píng",
+    "meaning": "填平，铲平",
+    "example": "吾与汝毕力平险",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 58,
+    "word": "平",
+    "mi": 3,
+    "pinyin": "píng",
+    "meaning": "公平，公正",
+    "example": "以昭陛下平明之理",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 59,
+    "word": "戚",
+    "mi": 1,
+    "pinyin": "qī",
+    "meaning": "亲属（指外族）",
+    "example": "寡助之至，亲戚畔之",
+    "source": "得道者多助失道者寡助",
+    "note": ""
+  },
+  {
+    "id": 60,
+    "word": "强",
+    "mi": 1,
+    "pinyin": "qiáng",
+    "meaning": "强悍，强大",
+    "example": "凶强侠气，为乡里所患",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 60,
+    "word": "强",
+    "mi": 2,
+    "pinyin": "qiǎng",
+    "meaning": "qiǎng 竭力，尽力（勉强，硬要）",
+    "example": "余强饮三大白",
+    "source": "湖心亭看雪",
+    "note": ""
+  },
+  {
+    "id": 61,
+    "word": "窃",
+    "mi": 1,
+    "pinyin": "qiè",
+    "meaning": "偷取",
+    "example": "盗窃乱贼而不作",
+    "source": "大道之行也",
+    "note": ""
+  },
+  {
+    "id": 62,
+    "word": "请",
+    "mi": 1,
+    "pinyin": "qǐng",
+    "meaning": "请求",
+    "example": "曹刿请见",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 62,
+    "word": "请",
+    "mi": 2,
+    "pinyin": "qǐng",
+    "meaning": "请允许我（做某事）",
+    "example": "请献千金",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 62,
+    "word": "请",
+    "mi": 3,
+    "pinyin": "qǐng",
+    "meaning": "请你（做某事）",
+    "example": "请循其本",
+    "source": "庄子与惠子游于濠梁之上",
+    "note": ""
+  },
+  {
+    "id": 63,
+    "word": "穷",
+    "mi": 1,
+    "pinyin": "qióng",
+    "meaning": "生活困难",
+    "example": "所识穷乏者得我与",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 63,
+    "word": "穷",
+    "mi": 2,
+    "pinyin": "qióng",
+    "meaning": "穷尽，完结",
+    "example": "子子孙孙无穷匮也",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 63,
+    "word": "穷",
+    "mi": 3,
+    "pinyin": "qióng",
+    "meaning": "穷尽，完结（走到尽头，走完）",
+    "example": "复前行，欲穷其林",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 64,
+    "word": "求",
+    "mi": 1,
+    "pinyin": "qiú",
+    "meaning": "探求，探索，追求，谋求，奢求",
+    "example": "予尝求古仁人之心",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 64,
+    "word": "求",
+    "mi": 2,
+    "pinyin": "qiú",
+    "meaning": "索取，要求，需求",
+    "example": "忽啼求之",
+    "source": "伤仲永",
+    "note": ""
+  },
+  {
+    "id": 64,
+    "word": "求",
+    "mi": 3,
+    "pinyin": "qiú",
+    "meaning": "乞求，请求",
+    "example": "又夹百千求救声",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 65,
+    "word": "取",
+    "mi": 1,
+    "pinyin": "qǔ",
+    "meaning": "拿",
+    "example": "乃取一葫芦置于地",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 65,
+    "word": "取",
+    "mi": 2,
+    "pinyin": "qǔ",
+    "meaning": "获得，讨取（招致）",
+    "example": "圣人非所与熙也，寡人反取病焉",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 65,
+    "word": "取",
+    "mi": 3,
+    "pinyin": "qǔ",
+    "meaning": "选取，采用",
+    "example": "舍鱼而取熊掌者也",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 66,
+    "word": "去",
+    "mi": 1,
+    "pinyin": "qù",
+    "meaning": "离开",
+    "example": "睨之，久而不去",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 66,
+    "word": "去",
+    "mi": 2,
+    "pinyin": "qù",
+    "meaning": "距离",
+    "example": "西蜀之去南海",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 67,
+    "word": "全",
+    "mi": 1,
+    "pinyin": "quán",
+    "meaning": "完整，整个",
+    "example": "全石以为底",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 67,
+    "word": "全",
+    "mi": 2,
+    "pinyin": "quán",
+    "meaning": "完全，完备",
+    "example": "子之不知鱼之乐，全矣",
+    "source": "庄子与惠子游于濠梁之上",
+    "note": ""
+  },
+  {
+    "id": 67,
+    "word": "全",
+    "mi": 3,
+    "pinyin": "quán",
+    "meaning": "保全",
+    "example": "苟全性命于乱世",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 68,
+    "word": "任",
+    "mi": 1,
+    "pinyin": "rèn",
+    "meaning": "责任，职责",
+    "example": "故天将降大任于是人也",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 68,
+    "word": "任",
+    "mi": 2,
+    "pinyin": "rèn",
+    "meaning": "委任，任用",
+    "example": "受任于败军之际",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 68,
+    "word": "任",
+    "mi": 3,
+    "pinyin": "rèn",
+    "meaning": "听凭，任凭",
+    "example": "从流飘荡，任意东西",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 69,
+    "word": "入",
+    "mi": 1,
+    "pinyin": "rù",
+    "meaning": "进入，与出相对",
+    "example": "入楚则盗",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 70,
+    "word": "若",
+    "mi": 1,
+    "pinyin": "ruò",
+    "meaning": "如，似，好像",
+    "example": "门庭若市",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 70,
+    "word": "若",
+    "mi": 2,
+    "pinyin": "ruò",
+    "meaning": "假如，如果",
+    "example": "若有作奸犯科及为忠善者",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 70,
+    "word": "若",
+    "mi": 3,
+    "pinyin": "ruò",
+    "meaning": "比，比得上",
+    "example": "徐公不若君之美也",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 71,
+    "word": "善",
+    "mi": 1,
+    "pinyin": "shàn",
+    "meaning": "好，好的，善良的",
+    "example": "弗学，不知其善也",
+    "source": "虽有嘉肴",
+    "note": ""
+  },
+  {
+    "id": 71,
+    "word": "善",
+    "mi": 2,
+    "pinyin": "shàn",
+    "meaning": "善于，擅长",
+    "example": "陈康肃公尧咨善射，当世无双",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 71,
+    "word": "善",
+    "mi": 3,
+    "pinyin": "shàn",
+    "meaning": "表同意",
+    "example": "王曰：善",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 72,
+    "word": "少",
+    "mi": 1,
+    "pinyin": "shǎo",
+    "meaning": "不多，数量小",
+    "example": "义不杀少而杀众",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 72,
+    "word": "少",
+    "mi": 2,
+    "pinyin": "shǎo",
+    "meaning": "缺少",
+    "example": "但少闲人如吾两人者耳",
+    "source": "记承天寺夜游",
+    "note": ""
+  },
+  {
+    "id": 72,
+    "word": "少",
+    "mi": 3,
+    "pinyin": "shào",
+    "meaning": "年轻，少年，年纪小",
+    "example": "年少时",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 72,
+    "word": "少",
+    "mi": 4,
+    "pinyin": "shǎo",
+    "meaning": "稍微，略微",
+    "example": "宾客意少舒，稍稍正坐",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 73,
+    "word": "舍",
+    "mi": 1,
+    "pinyin": "shè",
+    "meaning": "房屋，房舍",
+    "example": "土地平旷，屋舍俨",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 73,
+    "word": "舍",
+    "mi": 2,
+    "pinyin": "shě",
+    "meaning": "舍弃，丢弃",
+    "example": "便舍船，从口入",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 74,
+    "word": "涉",
+    "mi": 1,
+    "pinyin": "shè",
+    "meaning": "浏览，阅览",
+    "example": "但当涉猎，见往事耳",
+    "source": "孙权劝学",
+    "note": ""
+  },
+  {
+    "id": 75,
+    "word": "生",
+    "mi": 1,
+    "pinyin": "shēng",
+    "meaning": "（草木）生长，出生，诞生",
+    "example": "橘生淮南则为橘，生于淮北则为枳",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 75,
+    "word": "生",
+    "mi": 2,
+    "pinyin": "shēng",
+    "meaning": "生存，活着",
+    "example": "然后知生于忧患而死于安乐也",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 75,
+    "word": "生",
+    "mi": 3,
+    "pinyin": "shēng",
+    "meaning": "生命",
+    "example": "生，亦我所欲也",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 75,
+    "word": "生",
+    "mi": 4,
+    "pinyin": "shēng",
+    "meaning": "后生，晚辈",
+    "example": "隶而从者，崔氏二小生",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 76,
+    "word": "胜",
+    "mi": 1,
+    "pinyin": "shèng",
+    "meaning": "胜利",
+    "example": "此所谓战胜于朝廷",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 76,
+    "word": "胜",
+    "mi": 2,
+    "pinyin": "shèng",
+    "meaning": "尽，完",
+    "example": "臣不胜受恩感激",
+    "source": "出师表",
+    "note": "旧读 shēng（不胜）"
+  },
+  {
+    "id": 76,
+    "word": "胜",
+    "mi": 3,
+    "pinyin": "shèng",
+    "meaning": "优美的",
+    "example": "予观夫巴陵胜状，在洞庭一湖",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 77,
+    "word": "师",
+    "mi": 1,
+    "pinyin": "shī",
+    "meaning": "军队",
+    "example": "十年春，齐师伐我",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 77,
+    "word": "师",
+    "mi": 2,
+    "pinyin": "shī",
+    "meaning": "老师",
+    "example": "温故而知新，可以为师矣",
+    "source": "论语",
+    "note": ""
+  },
+  {
+    "id": 78,
+    "word": "施",
+    "mi": 1,
+    "pinyin": "shī",
+    "meaning": "实施，实行",
+    "example": "悉以咨之，然后施行",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 78,
+    "word": "施",
+    "mi": 2,
+    "pinyin": "shī",
+    "meaning": "设置，安放",
+    "example": "施八尺屏障",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 79,
+    "word": "实",
+    "mi": 1,
+    "pinyin": "shí",
+    "meaning": "果实，种子",
+    "example": "叶徒相似，其实味不同",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 79,
+    "word": "实",
+    "mi": 2,
+    "pinyin": "shí",
+    "meaning": "实际，事实",
+    "example": "实冀三横唯余其一",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 79,
+    "word": "实",
+    "mi": 3,
+    "pinyin": "shí",
+    "meaning": "诚实，真实",
+    "example": "此皆良实",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 80,
+    "word": "食",
+    "mi": 1,
+    "pinyin": "shí",
+    "meaning": "吃，吃饭",
+    "example": "弗食，不知其旨也",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 80,
+    "word": "食",
+    "mi": 2,
+    "pinyin": "shí",
+    "meaning": "粮食，食物",
+    "example": "便要还家，设酒杀鸡作食",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 80,
+    "word": "食",
+    "mi": 3,
+    "pinyin": "sì",
+    "meaning": "供养，给…吃",
+    "example": "食之不能尽其材",
+    "source": "马说",
+    "note": ""
+  },
+  {
+    "id": 81,
+    "word": "使",
+    "mi": 1,
+    "pinyin": "shǐ",
+    "meaning": "派遣",
+    "example": "于是上乃使使持节诏将军",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 81,
+    "word": "使",
+    "mi": 2,
+    "pinyin": "shǐ",
+    "meaning": "让，叫，令；使得，致使",
+    "example": "得无楚之水土使民善盗耶",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 81,
+    "word": "使",
+    "mi": 3,
+    "pinyin": "shǐ",
+    "meaning": "出使",
+    "example": "晏子将使楚",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 82,
+    "word": "释",
+    "mi": 1,
+    "pinyin": "shì",
+    "meaning": "放下",
+    "example": "有卖油翁释担而立",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 83,
+    "word": "市",
+    "mi": 1,
+    "pinyin": "shì",
+    "meaning": "众人聚集处",
+    "example": "能谤讥于市朝，闻寡人之耳者，受下赏",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 83,
+    "word": "市",
+    "mi": 2,
+    "pinyin": "shì",
+    "meaning": "市场，集市",
+    "example": "百里奚举于市",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 84,
+    "word": "恃",
+    "mi": 1,
+    "pinyin": "shì",
+    "meaning": "依赖，倚仗",
+    "example": "富者曰：子何恃而往？",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 85,
+    "word": "数",
+    "mi": 1,
+    "pinyin": "shù",
+    "meaning": "几，几个",
+    "example": "吾数年来欲买舟而下",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 85,
+    "word": "数",
+    "mi": 2,
+    "pinyin": "shǔ",
+    "meaning": "计算，点数",
+    "example": "珠可历历数也",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 86,
+    "word": "属",
+    "mi": 1,
+    "pinyin": "zhǔ",
+    "meaning": "zhǔ 同嘱，嘱托",
+    "example": "属予作文以记之",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 86,
+    "word": "属",
+    "mi": 2,
+    "pinyin": "shǔ",
+    "meaning": "部属，隶属，归属",
+    "example": "壁门士吏谓从属车骑曰",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 86,
+    "word": "属",
+    "mi": 3,
+    "pinyin": "shǔ",
+    "meaning": "类，一类",
+    "example": "有良田、美池、桑竹之属",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 87,
+    "word": "说",
+    "mi": 1,
+    "pinyin": "shuō",
+    "meaning": "陈述，解说，讲",
+    "example": "请说之",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 87,
+    "word": "说",
+    "mi": 2,
+    "pinyin": "shuō",
+    "meaning": "古代的一种文体",
+    "example": "马说",
+    "source": "马说",
+    "note": ""
+  },
+  {
+    "id": 87,
+    "word": "说",
+    "mi": 3,
+    "pinyin": "shuì",
+    "meaning": "shuì 劝说，说服",
+    "example": "或说处杀虎斩蛟",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 87,
+    "word": "说",
+    "mi": 4,
+    "pinyin": "yuè",
+    "meaning": "yuè 同悦，喜欢，高兴",
+    "example": "公输盘不说",
+    "source": "公输",
+    "note": ""
+  },
+  {
+    "id": 88,
+    "word": "素",
+    "mi": 1,
+    "pinyin": "sù",
+    "meaning": "白的，白色的",
+    "example": "春冬之时，则素湍绿潭",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 88,
+    "word": "素",
+    "mi": 2,
+    "pinyin": "sù",
+    "meaning": "朴素，不加装饰",
+    "example": "可以调素琴，阅金经",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 89,
+    "word": "汤",
+    "mi": 1,
+    "pinyin": "tāng",
+    "meaning": "热水，开水",
+    "example": "日初出沧沧凉凉，及日中如探汤",
+    "source": "两小儿辩日",
+    "note": ""
+  },
+  {
+    "id": 90,
+    "word": "徒",
+    "mi": 1,
+    "pinyin": "tú",
+    "meaning": "只，仅仅",
+    "example": "叶徒相似，其实味不同",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 90,
+    "word": "徒",
+    "mi": 2,
+    "pinyin": "tú",
+    "meaning": "空，光",
+    "example": "亦免冠徒跣，以头抢地尔",
+    "source": "唐雎不辱使命",
+    "note": ""
+  },
+  {
+    "id": 91,
+    "word": "亡",
+    "mi": 1,
+    "pinyin": "wáng",
+    "meaning": "灭亡，死亡",
+    "example": "出则无敌国外患者，国恒亡",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 91,
+    "word": "亡",
+    "mi": 2,
+    "pinyin": "wú",
+    "meaning": "wú 通无，没有",
+    "example": "河曲智叟亡以应",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 1,
+    "pinyin": "wéi",
+    "meaning": "做，干",
+    "example": "若有作奸犯科及为忠善者",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 2,
+    "pinyin": "wéi",
+    "meaning": "雕刻，制作，制造",
+    "example": "能以径寸之木，为宫室、器皿、人物",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 3,
+    "pinyin": "wéi",
+    "meaning": "作为，当作",
+    "example": "全石以为底",
+    "source": "小石潭记",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 4,
+    "pinyin": "wéi",
+    "meaning": "是",
+    "example": "橘生淮南则为橘",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 5,
+    "pinyin": "wéi",
+    "meaning": "变成，成为",
+    "example": "终为忠臣",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 92,
+    "word": "为",
+    "mi": 6,
+    "pinyin": "wèi",
+    "meaning": "为了",
+    "example": "力恶其不出于身也，不必为己",
+    "source": "鱼我所欲也",
+    "note": ""
+  },
+  {
+    "id": 93,
+    "word": "委",
+    "mi": 1,
+    "pinyin": "wěi",
+    "meaning": "抛弃，舍弃",
+    "example": "委而去之，是地利不如人和",
+    "source": "得道者多助失道者寡助",
+    "note": ""
+  },
+  {
+    "id": 94,
+    "word": "务",
+    "mi": 1,
+    "pinyin": "wù",
+    "meaning": "事务，事情",
+    "example": "蒙辞以军中多务",
+    "source": "孙权劝学",
+    "note": ""
+  },
+  {
+    "id": 95,
+    "word": "鲜",
+    "mi": 1,
+    "pinyin": "xiān",
+    "meaning": "鲜艳，鲜明",
+    "example": "芳草鲜美，落英缤纷",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 95,
+    "word": "鲜",
+    "mi": 2,
+    "pinyin": "xiǎn",
+    "meaning": "少",
+    "example": "菊之爱，陶后鲜有闻",
+    "source": "爱莲说",
+    "note": ""
+  },
+  {
+    "id": 96,
+    "word": "向",
+    "mi": 1,
+    "pinyin": "xiàng",
+    "meaning": "对着，朝着",
+    "example": "狼不敢前，眈眈相向",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 96,
+    "word": "向",
+    "mi": 2,
+    "pinyin": "xiàng",
+    "meaning": "过去，从前，原来",
+    "example": "便扶向路，处处志之",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 97,
+    "word": "效",
+    "mi": 1,
+    "pinyin": "xiào",
+    "meaning": "任务，重任",
+    "example": "愿陛下托臣以讨贼兴复之效",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 97,
+    "word": "效",
+    "mi": 2,
+    "pinyin": "xiào",
+    "meaning": "效果，见效，奏效",
+    "example": "恐托付不效，以伤先帝之明",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 98,
+    "word": "谢",
+    "mi": 1,
+    "pinyin": "xiè",
+    "meaning": "道谢",
+    "example": "使人称谢",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 98,
+    "word": "谢",
+    "mi": 2,
+    "pinyin": "xiè",
+    "meaning": "道歉",
+    "example": "秦王色挠，长跪而谢曰",
+    "source": "唐雎不辱使命",
+    "note": ""
+  },
+  {
+    "id": 99,
+    "word": "信",
+    "mi": 1,
+    "pinyin": "xìn",
+    "meaning": "信实，信用",
+    "example": "牺牲玉帛，弗敢加也，必以信",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 99,
+    "word": "信",
+    "mi": 2,
+    "pinyin": "xìn",
+    "meaning": "相信，信任",
+    "example": "忌不自信",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 100,
+    "word": "行",
+    "mi": 1,
+    "pinyin": "xíng",
+    "meaning": "行走",
+    "example": "臣请缚一人，过王而行",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 100,
+    "word": "行",
+    "mi": 2,
+    "pinyin": "xíng",
+    "meaning": "做，实行，实施",
+    "example": "大道之行也",
+    "source": "大道之行也",
+    "note": ""
+  },
+  {
+    "id": 100,
+    "word": "行",
+    "mi": 3,
+    "pinyin": "xíng",
+    "meaning": "品德，品行",
+    "example": "将军向宠，性行淑均",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 101,
+    "word": "形",
+    "mi": 1,
+    "pinyin": "xíng",
+    "meaning": "身体，形体",
+    "example": "无案牍之劳形",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 101,
+    "word": "形",
+    "mi": 2,
+    "pinyin": "xíng",
+    "meaning": "形状，样子",
+    "example": "罔不因势象形",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 102,
+    "word": "兴",
+    "mi": 1,
+    "pinyin": "xīng",
+    "meaning": "起，兴起",
+    "example": "清风徐来，水波不兴",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 102,
+    "word": "兴",
+    "mi": 2,
+    "pinyin": "xīng",
+    "meaning": "兴办，创办",
+    "example": "越明年，政通人和，百废具兴",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 102,
+    "word": "兴",
+    "mi": 3,
+    "pinyin": "xīng",
+    "meaning": "兴盛，振兴，复兴",
+    "example": "此先汉所以兴隆也",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 103,
+    "word": "修",
+    "mi": 1,
+    "pinyin": "xiū",
+    "meaning": "修建，建造",
+    "example": "乃重修岳阳楼",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 103,
+    "word": "修",
+    "mi": 2,
+    "pinyin": "xiū",
+    "meaning": "长，高",
+    "example": "邹忌修八尺有余",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 103,
+    "word": "修",
+    "mi": 3,
+    "pinyin": "xiū",
+    "meaning": "培养",
+    "example": "选贤与能，讲信修睦",
+    "source": "大道之行也",
+    "note": ""
+  },
+  {
+    "id": 104,
+    "word": "徐",
+    "mi": 1,
+    "pinyin": "xú",
+    "meaning": "缓缓地，缓慢，慢慢地",
+    "example": "徐以杓酌油沥之",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 105,
+    "word": "许",
+    "mi": 1,
+    "pinyin": "xǔ",
+    "meaning": "表约数，上下，光景",
+    "example": "自富阳至桐庐一百许里",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 105,
+    "word": "许",
+    "mi": 2,
+    "pinyin": "xǔ",
+    "meaning": "赞同，答应，应允",
+    "example": "杂然相许",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 106,
+    "word": "寻",
+    "mi": 1,
+    "pinyin": "xún",
+    "meaning": "找寻，寻求，探求",
+    "example": "乃入吴寻二陆",
+    "source": "周处",
+    "note": ""
+  },
+  {
+    "id": 106,
+    "word": "寻",
+    "mi": 2,
+    "pinyin": "xún",
+    "meaning": "不久，随即",
+    "example": "未果，寻病终",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 107,
+    "word": "业",
+    "mi": 1,
+    "pinyin": "yè",
+    "meaning": "事业，功业",
+    "example": "先帝创业未半，而中道崩殂",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 107,
+    "word": "业",
+    "mi": 2,
+    "pinyin": "yè",
+    "meaning": "职业",
+    "example": "晋太元中，武陵人捕鱼为业",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 107,
+    "word": "业",
+    "mi": 3,
+    "pinyin": "yè",
+    "meaning": "学业，学习的功课",
+    "example": "其业有不精，德有不成者",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 108,
+    "word": "遗",
+    "mi": 1,
+    "pinyin": "yí",
+    "meaning": "遗留，留下",
+    "example": "邻人京城氏之孀妻有遗男",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 108,
+    "word": "遗",
+    "mi": 2,
+    "pinyin": "wèi",
+    "meaning": "wèi 留给，送给，馈赠",
+    "example": "是以先帝简拔以遗陛下",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 109,
+    "word": "贻",
+    "mi": 1,
+    "pinyin": "yí",
+    "meaning": "赠给",
+    "example": "尝贻余核舟一",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 110,
+    "word": "夷",
+    "mi": 1,
+    "pinyin": "yí",
+    "meaning": "平坦",
+    "example": "其船背稍夷",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 110,
+    "word": "夷",
+    "mi": 2,
+    "pinyin": "yí",
+    "meaning": "平易",
+    "example": "言和而色夷",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 111,
+    "word": "异",
+    "mi": 1,
+    "pinyin": "yì",
+    "meaning": "不同，不同的",
+    "example": "所以然者何？水土异已",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 111,
+    "word": "异",
+    "mi": 2,
+    "pinyin": "yì",
+    "meaning": "不同的",
+    "example": "览物之情，得无异乎",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 111,
+    "word": "异",
+    "mi": 3,
+    "pinyin": "yì",
+    "meaning": "特别的，奇特的，奇怪的",
+    "example": "奇山异水，天下独绝",
+    "source": "与朱元思书",
+    "note": ""
+  },
+  {
+    "id": 112,
+    "word": "易",
+    "mi": 1,
+    "pinyin": "yì",
+    "meaning": "容易",
+    "example": "天下事有难易乎",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 112,
+    "word": "易",
+    "mi": 2,
+    "pinyin": "yì",
+    "meaning": "交换，更换",
+    "example": "寒暑易节，始一反焉",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 113,
+    "word": "诣",
+    "mi": 1,
+    "pinyin": "yì",
+    "meaning": "到，去（拜访）",
+    "example": "酒酣，吏二缚一人诣王",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 114,
+    "word": "益",
+    "mi": 1,
+    "pinyin": "yì",
+    "meaning": "增长，增加",
+    "example": "所以动心忍性，增益其所不能",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 114,
+    "word": "益",
+    "mi": 2,
+    "pinyin": "yì",
+    "meaning": "好处，利益",
+    "example": "必能裨补阙漏，有所广益",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 114,
+    "word": "益",
+    "mi": 3,
+    "pinyin": "yì",
+    "meaning": "更，更加",
+    "example": "香远益清",
+    "source": "爱莲说",
+    "note": ""
+  },
+  {
+    "id": 115,
+    "word": "阴",
+    "mi": 1,
+    "pinyin": "yīn",
+    "meaning": "山之北，水之南",
+    "example": "达于汉阴，可乎",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 115,
+    "word": "阴",
+    "mi": 2,
+    "pinyin": "yīn",
+    "meaning": "阴沉，阴冷",
+    "example": "朝晖夕阴，气象万千",
+    "source": "岳阳楼记",
+    "note": ""
+  },
+  {
+    "id": 115,
+    "word": "阴",
+    "mi": 3,
+    "pinyin": "yīn",
+    "meaning": "阴影",
+    "example": "野芳发而幽香，佳木秀而繁阴",
+    "source": "醉翁亭记",
+    "note": ""
+  },
+  {
+    "id": 116,
+    "word": "引",
+    "mi": 1,
+    "pinyin": "yǐn",
+    "meaning": "称引",
+    "example": "不宜妄自菲薄，引喻失义",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 116,
+    "word": "引",
+    "mi": 2,
+    "pinyin": "yǐn",
+    "meaning": "牵，拉",
+    "example": "友人惭，下车引之",
+    "source": "陈太丘与友期行",
+    "note": ""
+  },
+  {
+    "id": 116,
+    "word": "引",
+    "mi": 3,
+    "pinyin": "yǐn",
+    "meaning": "延长",
+    "example": "属引凄异",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 117,
+    "word": "盈",
+    "mi": 1,
+    "pinyin": "yíng",
+    "meaning": "满，充满",
+    "example": "而计其长，曾不盈寸",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 117,
+    "word": "盈",
+    "mi": 2,
+    "pinyin": "yíng",
+    "meaning": "增长，旺盛",
+    "example": "彼竭我盈，故克之",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 118,
+    "word": "余",
+    "mi": 1,
+    "pinyin": "yú",
+    "meaning": "我，我的",
+    "example": "尝贻余核舟一",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 118,
+    "word": "余",
+    "mi": 2,
+    "pinyin": "yú",
+    "meaning": "剩下，多余",
+    "example": "以残年余力",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 118,
+    "word": "余",
+    "mi": 3,
+    "pinyin": "yú",
+    "meaning": "多，表示整数后的不确定零数",
+    "example": "邹忌修八尺有余",
+    "source": "邹忌讽齐王纳谏",
+    "note": ""
+  },
+  {
+    "id": 119,
+    "word": "狱",
+    "mi": 1,
+    "pinyin": "yù",
+    "meaning": "诉讼案件",
+    "example": "小大之狱",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 120,
+    "word": "御",
+    "mi": 1,
+    "pinyin": "yù",
+    "meaning": "驾驭",
+    "example": "虽乘奔御风，不以疾也",
+    "source": "三峡",
+    "note": ""
+  },
+  {
+    "id": 121,
+    "word": "缘",
+    "mi": 1,
+    "pinyin": "yuán",
+    "meaning": "沿着，顺着",
+    "example": "缘溪行，忘路之远近",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 122,
+    "word": "远",
+    "mi": 1,
+    "pinyin": "yuǎn",
+    "meaning": "遥远（指空间距离大）",
+    "example": "可远观而不可亵玩也",
+    "source": "爱莲说",
+    "note": ""
+  },
+  {
+    "id": 122,
+    "word": "远",
+    "mi": 2,
+    "pinyin": "yuǎn",
+    "meaning": "疏远，不亲近，不接近",
+    "example": "亲贤臣，远小人",
+    "source": "出师表",
+    "note": "旧读 yuàn（疏远，动词）"
+  },
+  {
+    "id": 123,
+    "word": "云",
+    "mi": 1,
+    "pinyin": "yún",
+    "meaning": "说",
+    "example": "孔子云：何陋之有",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 123,
+    "word": "云",
+    "mi": 2,
+    "pinyin": "yún",
+    "meaning": "天空里的云，云彩",
+    "example": "高峰入云，清流见底",
+    "source": "答谢中书书",
+    "note": ""
+  },
+  {
+    "id": 124,
+    "word": "章",
+    "mi": 1,
+    "pinyin": "zhāng",
+    "meaning": "印章",
+    "example": "又用篆章一",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 125,
+    "word": "知",
+    "mi": 1,
+    "pinyin": "zhī",
+    "meaning": "知道",
+    "example": "西蜀之去南海，不知几千里也",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 125,
+    "word": "知",
+    "mi": 2,
+    "pinyin": "zhī",
+    "meaning": "懂得",
+    "example": "汝亦知射乎",
+    "source": "卖油翁",
+    "note": ""
+  },
+  {
+    "id": 125,
+    "word": "知",
+    "mi": 3,
+    "pinyin": "zhì",
+    "meaning": "通智。聪明，智慧",
+    "example": "孰为女多知乎！",
+    "source": "两小儿辩日",
+    "note": ""
+  },
+  {
+    "id": 126,
+    "word": "止",
+    "mi": 1,
+    "pinyin": "zhǐ",
+    "meaning": "停止",
+    "example": "又一大儿醒，絮絮不止",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 126,
+    "word": "止",
+    "mi": 2,
+    "pinyin": "zhǐ",
+    "meaning": "制止，阻止",
+    "example": "河曲智叟笑而止之曰",
+    "source": "愚公移山",
+    "note": ""
+  },
+  {
+    "id": 126,
+    "word": "止",
+    "mi": 3,
+    "pinyin": "zhǐ",
+    "meaning": "只是，仅仅",
+    "example": "担中肉尽，止有剩骨",
+    "source": "狼",
+    "note": ""
+  },
+  {
+    "id": 127,
+    "word": "志",
+    "mi": 1,
+    "pinyin": "zhì",
+    "meaning": "标记，记号",
+    "example": "寻向所志，遂迷，不复得路",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 127,
+    "word": "志",
+    "mi": 2,
+    "pinyin": "zhì",
+    "meaning": "做标记，做记号",
+    "example": "便扶向路，处处志之",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 127,
+    "word": "志",
+    "mi": 3,
+    "pinyin": "zhì",
+    "meaning": "志向，心意",
+    "example": "恢弘志士之气",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 128,
+    "word": "致",
+    "mi": 1,
+    "pinyin": "zhì",
+    "meaning": "取得，得到",
+    "example": "家贫，无以致书以观",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 129,
+    "word": "质",
+    "mi": 1,
+    "pinyin": "zhì",
+    "meaning": "询问",
+    "example": "余立侍左右，援疑质理",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 129,
+    "word": "质",
+    "mi": 2,
+    "pinyin": "zhì",
+    "meaning": "资质",
+    "example": "非天质之卑",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 130,
+    "word": "专",
+    "mi": 1,
+    "pinyin": "zhuān",
+    "meaning": "独有，独占，专享",
+    "example": "衣食所安，弗敢专也，必以分人",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 130,
+    "word": "专",
+    "mi": 2,
+    "pinyin": "zhuān",
+    "meaning": "专门，专一",
+    "example": "则心不若余之专耳",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 131,
+    "word": "走",
+    "mi": 1,
+    "pinyin": "zǒu",
+    "meaning": "跑，逃跑",
+    "example": "两股战战，几欲先走",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 131,
+    "word": "走",
+    "mi": 2,
+    "pinyin": "zǒu",
+    "meaning": "奔向，趋向",
+    "example": "无奔走之劳矣",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 132,
+    "word": "足",
+    "mi": 1,
+    "pinyin": "zú",
+    "meaning": "脚",
+    "example": "细若蚊足，勾画了了",
+    "source": "核舟记",
+    "note": ""
+  },
+  {
+    "id": 132,
+    "word": "足",
+    "mi": 2,
+    "pinyin": "zú",
+    "meaning": "足够，充足",
+    "example": "吾一瓶一钵足矣",
+    "source": "为学（六上）",
+    "note": ""
+  },
+  {
+    "id": 132,
+    "word": "足",
+    "mi": 3,
+    "pinyin": "zú",
+    "meaning": "值得，够得上",
+    "example": "不足为外人道也",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 133,
+    "word": "卒",
+    "mi": 1,
+    "pinyin": "zú",
+    "meaning": "最后，终于",
+    "example": "故余虽愚，卒获有所闻",
+    "source": "送东阳马生序",
+    "note": ""
+  },
+  {
+    "id": 134,
+    "word": "作",
+    "mi": 1,
+    "pinyin": "zuò",
+    "meaning": "振作，奋发",
+    "example": "困于心，衡于虑，而后作",
+    "source": "生于忧患，死于安乐",
+    "note": ""
+  },
+  {
+    "id": 134,
+    "word": "作",
+    "mi": 2,
+    "pinyin": "zuò",
+    "meaning": "发出，出现",
+    "example": "火爆声，呼呼风声，百千齐作",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 134,
+    "word": "作",
+    "mi": 3,
+    "pinyin": "zuò",
+    "meaning": "写作，创作",
+    "example": "自是指物作诗，立就",
+    "source": "伤仲永",
+    "note": ""
+  },
+  {
+    "id": 135,
+    "word": "坐",
+    "mi": 1,
+    "pinyin": "zuò",
+    "meaning": "坐着，坐下",
+    "example": "口技人坐屏障中",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 135,
+    "word": "坐",
+    "mi": 2,
+    "pinyin": "zuò",
+    "meaning": "座位",
+    "example": "满坐寂然，无敢哗者",
+    "source": "口技",
+    "note": ""
+  },
+  {
+    "id": 135,
+    "word": "坐",
+    "mi": 3,
+    "pinyin": "zuò",
+    "meaning": "犯…罪，获罪",
+    "example": "王曰：何坐？曰：坐盗。",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 136,
+    "word": "卑鄙",
+    "mi": 1,
+    "pinyin": "bēi bǐ",
+    "meaning": "社会地位低微，见识短浅",
+    "example": "先帝不以臣卑鄙",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 137,
+    "word": "布衣",
+    "mi": 1,
+    "pinyin": "bù yī",
+    "meaning": "平民百姓",
+    "example": "臣本布衣，躬耕于南阳",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 138,
+    "word": "菲薄",
+    "mi": 1,
+    "pinyin": "fěi bó",
+    "meaning": "轻视，小看",
+    "example": "不宜妄自菲薄，引喻失义",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 139,
+    "word": "其实",
+    "mi": 1,
+    "pinyin": "qí shí",
+    "meaning": "其，它的。实，果实",
+    "example": "叶徒相似，其实味不同",
+    "source": "橘逾淮为枳",
+    "note": ""
+  },
+  {
+    "id": 140,
+    "word": "亲戚",
+    "mi": 1,
+    "pinyin": "qīn qī",
+    "meaning": "亲属。亲，指族内；戚，指族外",
+    "example": "寡助之至，亲戚畔之",
+    "source": "得道者多助失道者寡助",
+    "note": ""
+  },
+  {
+    "id": 141,
+    "word": "驱驰",
+    "mi": 1,
+    "pinyin": "qū chí",
+    "meaning": "奔走效劳",
+    "example": "由是感激，遂许先帝以驱驰",
+    "source": "出师表",
+    "note": ""
+  },
+  {
+    "id": 141,
+    "word": "驱驰",
+    "mi": 2,
+    "pinyin": "qū chí",
+    "meaning": "策马快奔",
+    "example": "将军约，军中不得驱驰",
+    "source": "周亚夫军细柳",
+    "note": ""
+  },
+  {
+    "id": 142,
+    "word": "无论",
+    "mi": 1,
+    "pinyin": "wú lùn",
+    "meaning": "不要说，更不必说",
+    "example": "乃不知有汉，无论魏晋",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 143,
+    "word": "牺牲",
+    "mi": 1,
+    "pinyin": "xī shēng",
+    "meaning": "指祭祀用的纯色全体牲畜",
+    "example": "牺牲玉帛，弗敢加也，必以信",
+    "source": "曹刿论战",
+    "note": ""
+  },
+  {
+    "id": 144,
+    "word": "鸿儒",
+    "mi": 1,
+    "pinyin": "hóng rú",
+    "meaning": "学问渊博的读书人",
+    "example": "谈笑有鸿儒，往来无白丁",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 145,
+    "word": "白丁",
+    "mi": 1,
+    "pinyin": "bái dīng",
+    "meaning": "平民，此指无学问的人",
+    "example": "谈笑有鸿儒，往来无白丁",
+    "source": "陋室铭",
+    "note": ""
+  },
+  {
+    "id": 146,
+    "word": "阡陌",
+    "mi": 1,
+    "pinyin": "qiān mò",
+    "meaning": "田间小路",
+    "example": "阡陌交通，鸡犬相闻",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 147,
+    "word": "交通",
+    "mi": 1,
+    "pinyin": "jiāo tōng",
+    "meaning": "彼此交错相通",
+    "example": "阡陌交通，鸡犬相闻",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 148,
+    "word": "问津",
+    "mi": 1,
+    "pinyin": "wèn jīn",
+    "meaning": "问路，探访",
+    "example": "后遂无问津者",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 149,
+    "word": "绝境",
+    "mi": 1,
+    "pinyin": "jué jìng",
+    "meaning": "与世隔绝的地方",
+    "example": "率妻子邑人来此绝境",
+    "source": "桃花源记",
+    "note": ""
+  },
+  {
+    "id": 150,
+    "word": "妻子",
+    "mi": 1,
+    "pinyin": "qī zǐ",
+    "meaning": "妻子儿女",
+    "example": "率妻子邑人来此绝境",
+    "source": "桃花源记",
+    "note": ""
+  }
+]

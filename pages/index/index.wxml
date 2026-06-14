@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
   <!-- 标题区域 -->
   <view class="header {{inputCollapsed ? 'collapsed' : ''}}">
     <text class="title">古字通</text>
@@ -48,11 +48,6 @@
   <view class="real-words-section" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
     <view class="real-words-header">
       <text class="section-title">中考高频实词</text>
-      <view class="header-right">
-        <view class="detail-btn" bindtap="goToRealWordsPage">
-          <text class="detail-btn-text">查看全部</text>
-        </view>
-      </view>
     </view>
     <view class="word-tags" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
       <view
@@ -108,5 +103,8 @@
   <!-- 错误提示 -->
   <view class="error-section" wx:if="{{showError}}">
     <text class="error-text">{{errorMessage}}</text>
+    <view class="retry-btn" bindtap="searchWord">
+      <text class="retry-btn-text">重新查询</text>
+    </view>
   </view>
 </view>

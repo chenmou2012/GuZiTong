@@ -1,48 +1,87 @@
 <!-- pages/learn/learn.wxml -->
-<view class="container">
-  <!-- 学习进度卡片 -->
-  <view wx:if="{{!learning}}" class="progress-card">
-    <view class="progress-card-main">
-      <view class="progress-card-info">
-        <text class="progress-card-status">正在学习</text>
-        <text class="progress-card-title">《初中文言文字词》</text>
-        <text class="progress-card-current">当前: {{currentLearningWord}}</text>
-      </view>
-      <view class="progress-card-ring">
-        <view class="progress-ring-outer">
-          <view class="progress-ring-bg"></view>
-          <view class="progress-ring-progress {{learnProgress >= 50 ? 'half' : ''}}" style="transform: rotate({{learnProgress * 3.6}}deg)"></view>
-          <view class="progress-ring-center">
-            <text class="progress-ring-percent">{{learnProgress}}%</text>
+<view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
+  <!-- BEGIN: MainHeader -->
+  <header wx:if="{{!learning}}" class="main-header">
+    <h1 class="header-title">文言文学习</h1>
+  </header>
+  <!-- END: MainHeader -->
+
+  <!-- BEGIN: ContentArea -->
+  <main wx:if="{{!learning}}" class="content-area">
+    <!-- BEGIN: ProgressCard -->
+    <section class="progress-card">
+      <view class="progress-card-inner">
+        <view class="progress-card-left">
+          <view class="progress-card-status-area">
+            <text class="progress-card-status">正在学习</text>
+          </view>
+          <view class="progress-card-title-area">
+            <text class="progress-card-title">《初中文言文字词》</text>
+          </view>
+          <view class="progress-card-info-area">
+            <text class="progress-card-current">当前章节 <text class="divider">|</text> <text class="current-word">{{currentLearningWord}}</text></text>
+            <text class="progress-card-chapter">本章进度 <text class="divider">|</text> <text class="chapter-count">{{learnedCount}} / {{totalCount}} 词</text></text>
+          </view>
+        </view>
+        <!-- Progress Indicator -->
+        <view class="progress-card-right">
+          <view class="progress-ring-container">
+            <view class="progress-ring-bg"></view>
+            <view class="progress-ring-progress {{learnProgress >= 50 ? 'half' : ''}}" style="transform: rotate({{learnProgress * 3.6}}deg)"></view>
+            <view class="progress-ring-center">
+              <text class="progress-ring-percent">{{learnProgress}}%</text>
+              <text class="progress-ring-label">总进度</text>
+            </view>
           </view>
         </view>
       </view>
-    </view>
-    <view class="progress-card-footer">
-      <text class="progress-card-chapter">本章进度</text>
-      <text class="progress-card-remaining">还剩 {{totalCount - learnedCount}} 词</text>
-    </view>
-  </view>
-
-  <!-- 开始学习按钮 -->
-  <view wx:if="{{!learning}}" class="start-screen">
-    <view class="start-card">
-      <text class="start-title">文言文学习</text>
-      <text class="start-desc">每组 5 个词</text>
-      <text class="start-desc">先展示后练习</text>
-      <view class="start-card-btns">
-        <button class="start-btn learn-btn" bindtap="startLearn">开始学习</button>
-        <button class="start-btn review-btn" bindtap="startReview">复习{{reviewCount > 0 ? '(' + reviewCount + ')' : ''}}</button>
+      <!-- Word Count Footer in Card -->
+      <view class="progress-card-footer">
+        <text class="footer-quote">学而不思则罔，思而不学则殆</text>
+        <text class="footer-remaining">还剩 {{totalCount - learnedCount}} 词</text>
       </view>
+    </section>
+    <!-- END: ProgressCard -->
+
+    <!-- BEGIN: SessionInfo -->
+    <section class="session-info">
+      <text class="session-tip">每组 5 个词 · 先展示后练习</text>
+    </section>
+    <!-- END: SessionInfo -->
+
+    <!-- BEGIN: ActionButtons -->
+    <nav class="action-buttons">
+      <!-- Start Button: Solid Scholarly Red -->
+      <button class="action-btn start-btn" bindtap="startLearn">
+        <text class="action-btn-text">开始学习</text>
+      </button>
+      <!-- Review Button: Outlined Scholarly Style -->
+      <button class="action-btn review-btn" bindtap="startReview">
+        <text class="action-btn-text">温故复习{{reviewCount > 0 ? '(' + reviewCount + ')' : ''}}</text>
+      </button>
+    </nav>
+    <!-- END: ActionButtons -->
+
+    <!-- 字音跟读入口 -->
+    <view class="pronounce-entry" bindtap="goPronounce">
+      <text class="pronounce-entry-icon">🔊</text>
+      <text class="pronounce-entry-text">字音跟读 · 150字正音</text>
+      <text class="pronounce-entry-arrow">›</text>
     </view>
-  </view>
+  </main>
+  <!-- END: ContentArea -->
 
   <!-- 学习中 -->
   <view wx:else>
+    <!-- 退出按钮 -->
+    <view class="exit-btn" style="top: calc(20rpx + {{statusBarHeight}}px)" bindtap="exitLearn">
+      <text class="exit-btn-text">✕ 退出</text>
+    </view>
+
     <!-- 展示环节 -->
     <view wx:if="{{phase === 'intro'}}" class="intro-phase">
       <view class="phase-title">先看看这组词的意思</view>
-      <view class="group-progress">第 {{groupIndex + 1}} 组 · {{introIndex + 1}}/5</view>
+      <view class="group-progress">已学 {{learnedCount}}/{{totalCount}}</view>
 
       <!-- 当前展示的词 -->
       <view class="intro-word-item" wx:if="{{groupWords[introIndex]}}">
@@ -69,7 +108,7 @@
     <!-- 练习环节 -->
     <view wx:if="{{phase === 'practice'}}" class="practice-phase">
       <!-- 顶部进度条 -->
-      <view class="header-progress-bar">
+      <view class="header-progress-bar" style="top: {{statusBarHeight}}px">
         <view class="header-progress-bg">
           <view class="header-progress-fill" style="width: {{(currentWordIndex * 5 + practiceCount) / 25 * 100}}%"></view>
         </view>
@@ -83,7 +122,7 @@
           <text class="progress-text">{{currentWordIndex + 1}}/5 · 第 {{practiceCount + 1}}次</text>
         </view>
         <view class="group-info">
-          <text class="group-label">组 {{groupIndex + 1}}/{{totalGroups}}</text>
+          <text class="group-label">已学 {{learnedCount}}/{{totalCount}}</text>
         </view>
       </view>
 

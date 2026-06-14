@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   TRANSLATIONS: 'translations',
   PENDING_QUERY: 'pendingQuery',
   LEARNED_WORDS: 'learnedWords',
-  REVIEW_RECORDS: 'reviewRecords'
+  REVIEW_RECORDS: 'reviewRecords',
+  LEARN_LIST: 'learnList'  // 学习列表（随机排列）
 };
 
 const MAX_ITEMS = 50;
@@ -152,11 +153,59 @@ function syncToCloud(data) {
   }
 }
 
+// 获取学习列表（随机排列的词序）
+function getLearnList() {
+  return wx.getStorageSync(STORAGE_KEYS.LEARN_LIST) || [];
+}
+
+// 初始化学习列表（首次学习时随机排列并存储）
+function initLearnList(words) {
+  const list = [...words];
+  // 随机打乱
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, list);
+  // 同步到云端
+  if (wx.cloud) {
+    cloudStorage.saveCloudLearnList('auto', list).catch(() => {});
+  }
+  return list;
+}
+
 // 启用云端存储
 function enableCloudSync() {
   if (wx.cloud) {
     cloudStorage.syncLearnedWords();
   }
+}
+
+// 同步学习列表（从云端获取或初始化）
+async function syncLearnList(words) {
+  const localList = getLearnList();
+
+  if (!localList || localList.length === 0) {
+    // 本地无列表，尝试从云端获取
+    if (wx.cloud) {
+      try {
+        const openId = await cloudStorage.getOpenId();
+        if (openId) {
+          const cloudList = await cloudStorage.getCloudLearnList(openId);
+          if (cloudList && cloudList.length > 0) {
+            wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, cloudList);
+            return cloudList;
+          }
+        }
+      } catch (e) {
+        console.log('获取云端学习列表失败', e);
+      }
+    }
+    // 云端无数据，初始化本地列表
+    return initLearnList(words);
+  }
+
+  return localList;
 }
 
 // 获取复习记录
@@ -267,6 +316,8 @@ module.exports = {
   // 学习相关
   getLearnedWords,
   markWordLearned,
+  getLearnList,
+  initLearnList,
   getReviewRecords,
   updateReviewTime,
   getLastReviewTime,
@@ -279,5 +330,6 @@ module.exports = {
   incrementErrorCount,
   resetErrorCount,
   // 云端同步
-  enableCloudSync
+  enableCloudSync,
+  syncLearnList
 };
