@@ -6,16 +6,7 @@
     <text class="subtitle">共 {{realWords.length}} 个</text>
   </view>
 
-  <!-- 搜索框 -->
-  <view class="search-section">
-    <input
-      class="search-input"
-      placeholder="搜索实词..."
-      bindinput="onSearch"
-      value="{{keyword}}"
-    />
-  </view>
-
+  
   <!-- 实词网格 -->
   <view class="word-grid">
     <view
