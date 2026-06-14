@@ -1,4 +1,7 @@
 {
   "usingComponents": {},
-  "navigationBarTitleText": "查词"
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "查词",
+  "navigationBarTextStyle": "white",
+  "navigationBarBackgroundColor": "#bc262e"
 }
