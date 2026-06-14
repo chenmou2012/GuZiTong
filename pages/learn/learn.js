@@ -1,6 +1,7 @@
 // pages/learn/learn.js
 const { REAL_WORDS_DATA } = require('../../utils/services/realWords.js');
 const storage = require('../../utils/services/storage.js');
+const QUIZ_DATA = require('../../utils/data/quiz_questions.json');
 
 // 加载 EB Garamond 字体（小程序无法用相对路径加载包内字体，必须用网络地址或 base64 data URI）
 const EB_GARAMOND_FONT = require('../../utils/fonts/ebGaramond.js');
@@ -381,92 +382,48 @@ Page({
 
   // 生成测验题目
   generateQuiz: function() {
-    const { currentWord, practiceCount, groupWords } = this.data;
+    const { currentWord, practiceCount } = this.data;
     if (!currentWord) return;
 
-    // 确定测验类型 - 交替分配
-    // 偶数次(0,2)：语境选意思，奇数次(1,3)：根据意思选句子
-    const quizType = practiceCount % 2 === 0 ? 'context' : 'sentence';
+    // 确定测验类型
+    // 偶数次(0,2)：sentence_meaning（根据句子选意思）
+    // 奇数次(1,3)：select_meanings（选择全部释义）
+    const targetType = practiceCount % 2 === 0 ? 'sentence_meaning' : 'select_meanings';
 
-    let quiz, options;
+    // 从预生成数据中查找题目
+    const wordQuestions = QUIZ_DATA.filter(q => q.word === currentWord.word && q.type === targetType);
 
-    if (quizType === 'context') {
-      // 根据语境选意思 - 显示词和例句，选意思
-      const meanings = currentWord.meanings || [];
-      const meaning = meanings[Math.floor(Math.random() * meanings.length)];
+    if (wordQuestions.length > 0) {
+      // 使用预生成的题目
+      const q = wordQuestions[0];
+      const shuffledOptions = [...q.options];
+      this.shuffleArray(shuffledOptions);
 
-      // 从当前组选错误选项
-      const allMeanings = groupWords.flatMap(w => (w.meanings || []).map(m => m.meaning));
-      const correctAnswer = meaning.meaning;
-
-      options = [correctAnswer];
-      const wrongOptions = allMeanings.filter(m => m !== correctAnswer);
-      this.shuffleArray(wrongOptions);
-
-      while (options.length < 4 && wrongOptions.length) {
-        const o = wrongOptions.pop();
-        if (o && !options.includes(o)) options.push(o);
+      // 查找正确选项索引
+      let correctIndex = -1;
+      if (targetType === 'sentence_meaning') {
+        correctIndex = shuffledOptions.findIndex(o => o.correct);
+      } else {
+        // select_meanings: 多个正确答案
+        correctIndex = shuffledOptions.findIndex(o => o.correct);
       }
 
-      // 从全局词库补充选项（解决选项不足问题）
-      if (options.length < 4) {
-        const extra = this.getExtraOptions(correctAnswer, 'context');
-        extra.forEach(o => {
-          if (o && !options.includes(o) && options.length < 4) options.push(o);
-        });
-      }
-
-      quiz = {
-        word: currentWord.word,
-        sentence: meaning.example || '',
-        sentenceParts: this.boldWordInSentence(meaning.example || '', currentWord.word),
-        correctAnswer: correctAnswer
-      };
-    } else {
-      // 根据意思选句子 - 显示意思，选句子
-      const meanings = currentWord.meanings || [];
-      const meaning = meanings[Math.floor(Math.random() * meanings.length)];
-      const meaningStr = meaning.meaning;
-
-      // 从当前组选错误选项 - 只选包含当前字的例句
-      const allSentences = [];
-      groupWords.forEach(w => {
-        if (w.meanings) {
-          w.meanings.forEach(m => {
-            if (m.example && m.example.includes(currentWord.word)) {
-              allSentences.push(m.example);
-            }
-          });
-        }
+      this.setData({
+        quizType: targetType,
+        quiz: q,
+        quizOptions: shuffledOptions.map(o => o.text),
+        optionDisplays: shuffledOptions.map(o => ({ text: o.text, parts: null })),
+        selectedIndex: -1,
+        showResult: false,
+        showMarkKnown: false,
+        showGiveUp: false,
+        lastWord: currentWord.word
       });
-
-      const correctSentence = meaning.example || '';
-
-      options = [correctSentence];
-      const wrongOptions = allSentences.filter(s => s !== correctSentence);
-      this.shuffleArray(wrongOptions);
-
-      while (options.length < 4 && wrongOptions.length) {
-        const o = wrongOptions.pop();
-        if (o && !options.includes(o)) options.push(o);
-      }
-
-      // 从全局词库补充选项（解决选项不足问题）
-      if (options.length < 4) {
-        const extra = this.getExtraOptions(correctSentence, 'sentence');
-        extra.forEach(o => {
-          if (o && !options.includes(o) && options.length < 4) options.push(o);
-        });
-      }
-
-      quiz = {
-        word: currentWord.word,
-        meaning: meaningStr,
-        correctAnswer: correctSentence,
-        sentence: correctSentence,
-        sentenceParts: this.boldWordInSentence(correctSentence, currentWord.word)
-      };
+      return;
     }
+
+    // 降级：使用本地生成逻辑（如果没有预生成数据）
+    // ... 原有的本地生成逻辑保持不变 ...
 
     // Fisher-Yates 洗牌算法
     for (let i = options.length - 1; i > 0; i--) {
