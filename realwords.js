@@ -48,7 +48,7 @@ Page({
     const word = e.currentTarget.dataset.word;
     // 保存到全局数据，跳转后查询
     storage.setPendingQuery(word);
-    wx.switchTab({
+    wx.navigateTo({
       url: '/pages/index/index'
     });
   },
