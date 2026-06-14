@@ -16,6 +16,10 @@ Page({
     this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
   },
 
+  goBack: function() {
+    wx.navigateBack();
+  },
+
   onSearch: function(e) {
     const kw = (e.detail.value || '').trim();
     if (!kw) {

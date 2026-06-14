@@ -5,6 +5,18 @@
   padding: 0 20rpx;
 }
 
+.back-btn {
+  position: fixed;
+  top: calc(20rpx + {{statusBarHeight}}px);
+  left: 20rpx;
+  z-index: 100;
+}
+
+.back-text {
+  font-size: 28rpx;
+  color: #bc262e;
+}
+
 .header {
   padding: 40rpx 0;
   text-align: center;
