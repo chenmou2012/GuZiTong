@@ -41,10 +41,12 @@
     "secret": "你的AppSecret"
   },
   "zhipu": {
-    "api_key": "智谱API Key"
+    "api_key": "你的智谱API Key"
   }
 }
 ```
+
+> 注意：AppID 和 Secret 必须在微信公众平台开通登录权限
 
 ### 2. 后端服务器配置
 
