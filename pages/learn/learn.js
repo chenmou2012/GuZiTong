@@ -28,6 +28,7 @@ function loadFont() {
 
 const GROUP_SIZE = 5;
 const TOTAL_PRACTICE = 4;
+const STORAGE_KEY = 'learnProgress';
 const PRACTICE_CONTEXT = 2;  // 偶数次：语境选意思 (0, 2)
 const PRACTICE_SENTENCE = 3; // 奇数次：根据意思选句子 (1, 3)
 
@@ -81,8 +82,29 @@ Page({
   },
 
   onShow: function() {
+    const progress = wx.getStorageSync(STORAGE_KEY);
+
     if (this.data.learning) {
       this.loadData();
+    } else if (progress && progress.learning) {
+      // 非学习状态但有保存的进度，加载数据后再恢复
+      this.loadData();
+      // 延迟检查恢复（等待数据加载完成）
+      setTimeout(() => {
+        if (this.restoreProgress()) {
+          wx.showModal({
+            title: '继续学习',
+            content: '检测到上次学习进度，是否继续？',
+            success: (res) => {
+              if (res.confirm) {
+                this.setData({ learning: true });
+                this.startPractice();
+              }
+              wx.removeStorageSync(STORAGE_KEY);
+            }
+          });
+        }
+      }, 500);
     }
   },
 
@@ -159,6 +181,64 @@ Page({
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  },
+
+  // 从全局词库获取额外选项（解决选项不足问题）
+  getExtraOptions: function(correctAnswer, type) {
+    const allWords = this.data.allWords;
+    if (!allWords || allWords.length === 4) return [];
+
+    let pool = [];
+    if (type === 'context') {
+      // 语境选意思：从所有词的意思中获取
+      pool = allWords.flatMap(w => (w.meanings || []).map(m => m.meaning));
+    } else {
+      // 根据意思选句子：从所有词的例句中获取
+      pool = allWords.flatMap(w => (w.meanings || []).map(m => m.example).filter(e => e));
+    }
+
+    // 过滤掉正确答案和已选选项
+    const currentOptions = this.data.quizOptions || [];
+    pool = pool.filter(o => o !== correctAnswer && !currentOptions.includes(o));
+
+    this.shuffleArray(pool);
+    return pool.slice(0, 4 - currentOptions.length);
+  },
+
+  // 保存学习进度
+  saveProgress: function() {
+    const { groupIndex, currentWordIndex, practiceCount, phase, learning } = this.data;
+    const progress = {
+      groupIndex,
+      currentWordIndex,
+      practiceCount,
+      phase,
+      learning,
+      savedAt: Date.now()
+    };
+    wx.setStorageSync(STORAGE_KEY, progress);
+  },
+
+  // 恢复学习进度
+  restoreProgress: function() {
+    const progress = wx.getStorageSync(STORAGE_KEY);
+    if (!progress) return false;
+
+    // 检查是否在合理时间内（24小时内）
+    if (Date.now() - progress.savedAt > 24 * 60 * 60 * 1000) {
+      wx.removeStorageSync(STORAGE_KEY);
+      return false;
+    }
+
+    this.setData({
+      groupIndex: progress.groupIndex || 0,
+      currentWordIndex: progress.currentWordIndex || 0,
+      practiceCount: progress.practiceCount || 0,
+      phase: progress.phase || 'intro',
+      learning: progress.learning || false
+    });
+
+    return true;
   },
 
   // 解析句子并返回加粗HTML
@@ -257,9 +337,11 @@ Page({
   exitLearn: function() {
     wx.showModal({
       title: '退出学习',
-      content: '确定要退出当前学习吗？',
+      content: '确定要退出当前学习吗？\n\n进度将被保存，下次可继续。',
       success: (res) => {
         if (res.confirm) {
+          // 保存进度后再退出
+          this.saveProgress();
           this.setData({
             learning: false,
             phase: 'intro'
@@ -326,6 +408,14 @@ Page({
         if (o && !options.includes(o)) options.push(o);
       }
 
+      // 从全局词库补充选项（解决选项不足问题）
+      if (options.length < 4) {
+        const extra = this.getExtraOptions(correctAnswer, 'context');
+        extra.forEach(o => {
+          if (o && !options.includes(o) && options.length < 4) options.push(o);
+        });
+      }
+
       quiz = {
         word: currentWord.word,
         sentence: meaning.example || '',
@@ -359,6 +449,14 @@ Page({
       while (options.length < 4 && wrongOptions.length) {
         const o = wrongOptions.pop();
         if (o && !options.includes(o)) options.push(o);
+      }
+
+      // 从全局词库补充选项（解决选项不足问题）
+      if (options.length < 4) {
+        const extra = this.getExtraOptions(correctSentence, 'sentence');
+        extra.forEach(o => {
+          if (o && !options.includes(o) && options.length < 4) options.push(o);
+        });
       }
 
       quiz = {
