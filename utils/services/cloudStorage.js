@@ -372,6 +372,7 @@ function enableCloudStorage() {
 module.exports = {
   init,
   isEnabled,
+  getOpenId,
   // 搜索记录
   getCloudSearchHistory,
   saveCloudSearchHistory,

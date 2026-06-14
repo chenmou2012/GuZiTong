@@ -15,8 +15,8 @@ ALLOWED_DATA_TYPES = {'learn', 'settings', 'progress'}
 # 允许的 data_key 值
 ALLOWED_DATA_KEYS = {
     'collections', 'history', 'translations',
-    'learned_words', 'review_records',
-    'preferences', 'theme'
+    'learned_words', 'learnedWords', 'review_records',
+    'learnOrder', 'preferences', 'theme'
 }
 
 

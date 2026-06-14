@@ -1,0 +1,45 @@
+<!-- pages/review/review.wxml -->
+<view class="container">
+  <!-- 复习中 -->
+  <view wx:if="{{currentWord}}" class="review-content">
+    <!-- 进度 -->
+    <view class="progress-bar">
+      <view class="progress-fill" style="width:{{progressPercent}}%"></view>
+    </view>
+    <view class="progress-text">{{currentIndex + 1}} / {{totalCount}}</view>
+
+    <!-- 题目卡片 -->
+    <view class="quiz-area">
+      <view class="main-card">
+        <text class="word">{{currentWord.word}}</text>
+      </view>
+
+      <!-- 释义 -->
+      <view wx:if="{{showMeaning}}" class="meaning-area">
+        <view class="meaning-list">
+          <block wx:for="{{currentWord.meanings}}" wx:key="*this" wx:for-item="m">
+            <view class="meaning-item">
+              <text class="meaning-number">{{index + 1}}.</text>
+              <text class="meaning-text">{{m.meaning}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="btns">
+      <button wx:if="{{!showMeaning}}" class="btn-unknown" bindtap="markUnknown">不认识</button>
+      <button wx:if="{{showMeaning}}" class="btn-next" bindtap="nextWord">下一词</button>
+      <button class="btn-known" bindtap="markKnown">认识</button>
+    </view>
+  </view>
+
+  <!-- 复习完成 -->
+  <view wx:if="{{!currentWord}}" class="done-content">
+    <text class="done-title">复习完成</text>
+    <text class="done-subtitle">今日复习 {{totalCount}} 个词</text>
+
+    <button class="btn-home" bindtap="goHome">返回主页</button>
+  </view>
+</view>

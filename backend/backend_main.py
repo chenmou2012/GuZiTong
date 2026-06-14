@@ -320,12 +320,49 @@ async def login(req: LoginRequest):
         # 新用户，创建
         token_info = create_token(openid)
         create_user(openid, token_info["token"], token_info["expire_time"])
+        # 新用户：生成背诵顺序
+        init_learn_order(openid)
 
     return {
         "openid": openid,
         "token": token_info["token"],
         "expire_days": token_info["expire_days"]
     }
+
+
+def init_learn_order(openid: str):
+    """新用户首次登录时生成背诵顺序"""
+    import random
+    from database import save_user_data
+
+    # 从 realWords.js 获取词表
+    try:
+        # 读取 realWords 数据
+        with open('/root/backend/realwords.json', 'r', encoding='utf-8') as f:
+            import json
+            words_data = json.load(f)
+
+        words = [w['word'] for w in words_data]
+        # 随机打乱
+        random.shuffle(words)
+
+        # 添加序号和初始复习时间
+        order = []
+        now = 0  # 初始间隔0
+        for i, word in enumerate(words):
+            order.append({
+                'word': word,
+                'order': i + 1,
+                'learnedTime': 0,
+                'lastReview': 0,
+                'reviewCount': 0,
+                'nextReview': now
+            })
+
+        save_user_data(openid, 'learn', 'learnOrder', json.dumps(order))
+        print(f"为用户 {openid} 生成了 {len(order)} 个词的背诵顺序")
+    except Exception as e:
+        print(f"生成背诵顺序失败: {e}")
 
 
 @app.get("/api/user")
@@ -370,14 +407,33 @@ async def get_user_data_api(token: str, data_type: str = None):
 
 
 @app.put("/api/user/data")
-async def save_user_data_api(token: str, req: SyncRequest):
+async def save_user_data_api(
+    token: str,
+    data_type: str = None,
+    data_key: str = None,
+    data_value: str = None,
+    req: SyncRequest = None
+):
     """保存用户数据"""
+    # 兼容两种请求方式：body 或 query
+    if req:
+        dt = req.data_type
+        dk = req.data_key
+        dv = req.data_value
+    else:
+        dt = data_type
+        dk = data_key
+        dv = data_value
+
+    print(f"[SAVE] data_type={dt}, data_key={dk}")
     openid, valid = verify_token(token)
     if not valid:
+        print(f"[SAVE] 无效token")
         return {"error": "无效的 token"}
 
     import json
-    save_user_data(openid, req.data_type, req.data_key, json.dumps(req.data_value))
+    save_user_data(openid, dt, dk, json.dumps(dv))
+    print(f"[SAVE] 成功: openid={openid}, key={dk}")
     return {"success": True}
 
 

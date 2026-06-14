@@ -5,7 +5,9 @@
     "pages/profile/profile",
     "pages/learn/learn",
     "pages/pronounce/pronounce",
-    "realwords"
+    "pages/done/done",
+    "pages/groupdone/groupdone",
+    "pages/review/review"
   ],
   "usingComponents": {},
   "window": {

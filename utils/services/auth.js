@@ -158,10 +158,8 @@ async function getUserData(dataType) {
   if (!token) return {};
 
   try {
-    const url = dataType ? `/api/user/data?data_type=${dataType}` : '/api/user/data';
-    const response = await request(url, {
-      header: { 'Authorization': 'Bearer ' + token }
-    });
+    const url = dataType ? `/api/user/data?token=${token}&data_type=${dataType}` : `/api/user/data?token=${token}`;
+    const response = await request(url);
     return response.data || {};
   } catch (e) {
     return {};
@@ -173,20 +171,22 @@ async function getUserData(dataType) {
  */
 async function saveUserData(dataType, dataKey, dataValue) {
   const token = getToken();
+  console.log('saveUserData token:', token ? 'exists' : 'null');
   if (!token) return false;
 
   try {
-    const response = await request('/api/user/data', {
+    const response = await request(`/api/user/data?token=${token}`, {
       method: 'PUT',
       data: {
         data_type: dataType,
         data_key: dataKey,
-        data_value: dataValue
-      },
-      header: { 'Authorization': 'Bearer ' + token }
+        data_value: JSON.stringify(dataValue)
+      }
     });
+    console.log('saveUserData response:', response);
     return response.success;
   } catch (e) {
+    console.log('saveUserData error:', e);
     return false;
   }
 }

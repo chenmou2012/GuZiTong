@@ -1,0 +1,75 @@
+/* pages/done/done.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+}
+
+.header {
+  padding: 40rpx 32rpx;
+}
+
+.header-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #bc262e;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 32rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 48rpx;
+}
+
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx 64rpx;
+  margin-bottom: 64rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 8rpx;
+}
+
+.stats-value {
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #bc262e;
+}
+
+.btns {
+  display: flex;
+  gap: 24rpx;
+  width: 100%;
+}
+
+.btn {
+  flex: 1;
+  padding: 28rpx 0;
+  border-radius: 24rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.btn.primary {
+  background: #bc262e;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #f5f5f5;
+  color: #666;
+}

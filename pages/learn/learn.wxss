@@ -7,11 +7,15 @@ page {
 
 .container {
   min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #fcf9f8 0%, #f7f3f0 100%);
   padding: 48rpx;
   font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 统一原生 button 默认样式：去掉默认描边/背景，避免按钮大小粗细不一致 */
@@ -132,11 +136,21 @@ button::after {
 
 /* Progress Indicator */
 .progress-card-right {
-  width: 192rpx;
-  height: 192rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.progress-card-right .progress-text {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #bc262e;
+}
+
+.progress-card-right .progress-label {
+  font-size: 24rpx;
+  color: #999;
 }
 
 .progress-ring-container {
@@ -166,9 +180,8 @@ button::after {
   border: 10rpx solid transparent;
   border-top-color: #bc262e;
   border-right-color: #bc262e;
-  transform: rotate(0deg);
   box-sizing: border-box;
-  transition: all 0.35s;
+  transition: transform 0.5s ease-out;
 }
 
 .progress-ring-progress.half {
@@ -387,8 +400,8 @@ button::after {
   border: 8rpx solid transparent;
   border-top-color: #bc262e;
   border-right-color: #bc262e;
-  transform: rotate(0deg);
   box-sizing: border-box;
+  transition: transform 0.5s ease-out;
 }
 
 .progress-ring-progress.half {
@@ -643,16 +656,17 @@ button::after {
   top: 0;
   left: 0;
   width: 100%;
+  height: 4rpx;
 }
 
 .header-progress-bg {
-  height: 8rpx;
+  height: 4rpx;
   background: #e4e2e1;
   width: 100%;
 }
 
 .header-progress-fill {
-  height: 8rpx;
+  height: 4rpx;
   background: #bc262e;
   transition: width 0.3s ease;
 }
@@ -662,7 +676,7 @@ button::after {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  padding: 120rpx 0 32rpx;
+  padding: 80rpx 0 24rpx;
 }
 
 .progress-info {
@@ -705,15 +719,17 @@ button::after {
 
 .quiz-area {
   width: 100%;
+  flex-shrink: 0;
 }
 
 .main-card {
   background: #fff;
-  border-radius: 24rpx;
-  padding: 48rpx 32rpx;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
   text-align: center;
   border: 1rpx solid rgba(193, 201, 191, 0.4);
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 16rpx;
 }
 
 .quote-text {
@@ -723,12 +739,20 @@ button::after {
   line-height: 1.8;
 }
 
+.quote-source {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  text-align: right;
+  margin-top: 8rpx;
+}
+
 .question-text {
   text-align: center;
   font-family: 'EB Garamond', serif;
-  font-size: 36rpx;
+  font-size: 28rpx;
   color: #1b1c1c;
-  padding: 24rpx 0 32rpx;
+  padding: 12rpx 0 16rpx;
 }
 
 .bold-word {
@@ -739,14 +763,15 @@ button::after {
 .options-area {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
 }
 
 .option-btn {
-  padding: 32rpx;
+  padding: 24rpx 32rpx;
   background: #fff;
-  border-radius: 24rpx;
-  font-size: 32rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
   text-align: center;
   border: 1rpx solid rgba(193, 201, 191, 0.4);
   transition: all 0.2s ease;
@@ -758,15 +783,21 @@ button::after {
 }
 
 .option-btn.correct {
-  background: #E8F5E9;
-  border-color: #4CAF50;
-  color: #4CAF50;
+  background: #E8F5E9 !important;
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
 }
 
 .option-btn.wrong {
-  background: #FFEBEE;
-  border-color: #F44336;
-  color: #F44336;
+  background: #FFEBEE !important;
+  border-color: #F44336 !important;
+  color: #F44336 !important;
+}
+
+.option-btn.selected {
+  background: #E3F2FD !important;
+  border-color: #1976D2 !important;
+  color: #1976D2 !important;
 }
 
 @keyframes correctPulse {
@@ -831,7 +862,42 @@ button::after {
   background: #bc262e;
   color: #fff;
   border-radius: 24rpx;
-  border: 2rpx solid transparent;
+}
+
+/* 结果页面左右按钮 */
+.result-btns {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 24rpx 32rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FDFBF7;
+  z-index: 100;
+}
+
+.result-btns .answer-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #666;
+}
+
+.result-btns .next-btn {
+  flex: 1;
+  background: #bc262e;
+  color: #fff;
+}
+
+.result-btns .next-btn.disabled {
+  flex: 1;
+  background: #ccc;
+  color: #888;
+}
+
+.result-btns .next-btn:only-child {
+  margin: 0 auto;
 }
 
 .action-btns .btn.next {
@@ -841,27 +907,6 @@ button::after {
   border-radius: 40rpx;
   font-size: 28rpx;
   border: none;
-}
-
-/* 底部标熟 */
-.mark-known-area {
-  position: fixed;
-  bottom: 48rpx;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  padding: 24rpx;
-}
-
-.mark-known-btn {
-  font-size: 24rpx;
-  text-transform: uppercase;
-  letter-spacing: 4rpx;
-  color: rgba(27, 28, 28, 0.5);
-  background: transparent;
-  border: none;
-  padding: 16rpx 32rpx;
 }
 
 .btn-give-up {

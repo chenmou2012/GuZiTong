@@ -19,17 +19,55 @@ Page({
       totalWrong: 0,
       stageCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
     },
-    statusBarHeight: 20
+    pieChart: {
+      unlearned: 0,
+      reviewing: 0,
+      reviewed: 0,
+      unlearnedPercent: 0,
+      reviewingPercent: 0,
+      reviewedPercent: 0
+    },
+    statusBarHeight: 20,
+    settings: {},
+    showSettingsModal: false
   },
 
   onLoad: function() {
     this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
     this.checkLogin();
+    this.loadSettings();
+  },
+
+  loadSettings: function() {
+    const settings = storage.getSettings();
+    this.setData({ settings });
+  },
+
+  // 修改每组字数
+  changeGroupSize: function(e) {
+    const size = parseInt(e.currentTarget.dataset.size);
+    storage.setGroupSize(size);
+    this.setData({
+      settings: Object.assign(this.data.settings, { groupSize: size })
+    });
+    wx.showToast({ title: '已更新', icon: 'success' });
+  },
+
+  // 显示设置弹窗
+  showSettings: function() {
+    this.setData({ showSettingsModal: true });
+  },
+
+  // 关闭设置弹窗
+  hideSettings: function() {
+    this.setData({ showSettingsModal: false });
   },
 
   onShow: function() {
     this.checkLogin();
     this.loadStats();
+    // 尝试从服务器恢复复习统计
+    storage.restoreReviewStatsFromServer();
   },
 
   checkLogin: function() {
@@ -44,7 +82,45 @@ Page({
   loadStats: function() {
     const stats = storage.getStats();
     const reviewStats = storage.getEbbinghausStats();
-    this.setData({ stats, reviewStats });
+    const learned = storage.getLearnedWords() || [];
+
+    // 计算饼图数据
+    const totalWords = 150;
+    const learnedCount = learned.length;
+
+    // 根据艾宾浩斯阶段计算复习状态
+    // 阶段: 1, 2, 4, 7, 15, 30 天 (最大阶段为 6)
+    const stage = reviewStats?.ebbinghausStage || {};
+    let reviewing = 0;
+    let reviewed = 0;
+
+    learned.forEach(w => {
+      const wordStage = stage[w.word] || 0;
+      if (wordStage >= 6) {
+        reviewed++; // 阶段6（30天）已完成
+      } else {
+        reviewing++; // 未完成复习
+      }
+    });
+
+    // 未学习 = 总数 - 已学习
+    const unlearned = Math.max(0, totalWords - learnedCount);
+
+    // 计算角度
+    const total = unlearned + reviewing + reviewed || 1;
+    const unlearnedAngle = (unlearned / total) * 360;
+    const reviewingAngle = (reviewing / total) * 360;
+
+    const pieChart = {
+      unlearned,
+      reviewing,
+      reviewed,
+      unlearnedPercent: unlearnedAngle,
+      reviewingPercent: reviewingAngle,
+      reviewedPercent: 360 - unlearnedAngle - reviewingAngle
+    };
+
+    this.setData({ stats, reviewStats, pieChart });
   },
 
   // 登录/登出
@@ -81,7 +157,7 @@ Page({
     }
   },
 
-  // 同步数据
+  // 同步数据（上传并下载合并）
   syncData: function() {
     if (!this.data.loggedIn) {
       wx.showToast({ title: '请先登录', icon: 'none' });
@@ -90,78 +166,43 @@ Page({
 
     wx.showLoading({ title: '同步中...' });
 
-    // 同步收藏
+    // 先上传本地数据到云端
     const collections = storage.getCollections();
+    const history = storage.getHistory();
+
     auth.saveUserData('learn', 'collections', collections)
-      .then(() => {
-        // 同步学习记录
-        const history = storage.getHistory();
-        return auth.saveUserData('learn', 'history', history);
-      })
-      .then(() => {
-        // 同步翻译记录
-        const translations = storage.getTranslations();
-        return auth.saveUserData('learn', 'translations', translations);
-      })
-      .then(() => {
+      .then(() => auth.saveUserData('learn', 'history', history))
+      .then(() => auth.getUserData('learn'))
+      .then((cloudData) => {
+        // 合并云端数据
+        if (cloudData && cloudData.collections) {
+          const local = storage.getCollections();
+          const cloud = cloudData.collections;
+          const merged = [...local];
+          cloud.forEach(item => {
+            if (!local.some(l => l.word === item.word)) {
+              merged.push(item);
+            }
+          });
+          merged.forEach(item => storage.addCollection(item));
+        }
+
+        if (cloudData && cloudData.history) {
+          const local = storage.getHistory();
+          const cloud = cloudData.history;
+          cloud.forEach(item => {
+            if (!local.some(l => l.word === item.word)) {
+              storage.addHistory(item);
+            }
+          });
+        }
+
         wx.hideLoading();
         wx.showToast({ title: '同步成功', icon: 'success' });
       })
       .catch((err) => {
         wx.hideLoading();
         wx.showToast({ title: '同步失败', icon: 'none' });
-      });
-  },
-
-  // 下载云端数据
-  downloadData: function() {
-    if (!this.data.loggedIn) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
-
-    wx.showLoading({ title: '下载中...' });
-
-    auth.getUserData('learn')
-      .then((data) => {
-        wx.hideLoading();
-
-        if (!data || Object.keys(data).length === 0) {
-          wx.showToast({ title: '暂无云端数据', icon: 'none' });
-          return;
-        }
-
-        // 合并数据
-        if (data.collections) {
-          const local = storage.getCollections();
-          const cloud = data.collections;
-          // 简单合并：去重
-          const merged = [...local];
-          cloud.forEach(item => {
-            if (!local.some(l => l.word === item.word)) {
-              merged.push(item);
-            }
-          });
-          // 保存
-          merged.forEach(item => storage.addCollection(item));
-        }
-
-        if (data.history) {
-          const local = storage.getHistory();
-          const cloud = data.history;
-          const merged = [...local];
-          cloud.forEach(item => {
-            if (!local.some(l => l.word === item.word)) {
-              merged.push(item);
-            }
-          });
-        }
-
-        wx.showToast({ title: '下载成功', icon: 'success' });
-      })
-      .catch((err) => {
-        wx.hideLoading();
-        wx.showToast({ title: '下载失败', icon: 'none' });
       });
   },
 

@@ -1,7 +1,7 @@
 // pages/learn/learn.js
 const { REAL_WORDS_DATA } = require('../../utils/services/realWords.js');
 const storage = require('../../utils/services/storage.js');
-const QUIZ_DATA = require('../../utils/data/quiz_questions.json');
+const QUIZ_DATA = require('../../utils/data/quiz_questions.js');
 
 // 加载 EB Garamond 字体（小程序无法用相对路径加载包内字体，必须用网络地址或 base64 data URI）
 const EB_GARAMOND_FONT = require('../../utils/fonts/ebGaramond.js');
@@ -27,8 +27,8 @@ function loadFont() {
   });
 }
 
-const GROUP_SIZE = 5;
-const TOTAL_PRACTICE = 4;
+let GROUP_SIZE = 5;
+const TOTAL_PRACTICE = 2;  // 1次sentence_meaning + 1次select_meanings
 const STORAGE_KEY = 'learnProgress';
 const PRACTICE_CONTEXT = 2;  // 偶数次：语境选意思 (0, 2)
 const PRACTICE_SENTENCE = 3; // 奇数次：根据意思选句子 (1, 3)
@@ -52,17 +52,22 @@ Page({
     practiceCount: 0,          // 当前词已练习次数
 
     // 测验
-    quizType: 'context',      // context(语境选意思), sentence(根据意思选句子)
+    quizType: 'sentence_meaning',
     quizOptions: [],
     optionDisplays: [],
+    sentenceParts: null,   // 句子的高亮部分
     selectedIndex: -1,
+    selectedIndexes: [],     // 多选已选中的索引
+    pendingNext: false,     // 多选是否待提交
     showResult: false,
     isCorrect: false,
     quiz: {},
+    correctIndex: -1,
+    correctAnswers: [],
+    correctCount: 0,
 
     // 按钮状态
-    showMarkKnown: false,    // 显示"标熟"按钮
-    showGiveUp: false,     // 显示"我不会"按钮
+        showGiveUp: false,     // 显示"我不会"按钮
 
     // 统计
     learnedCount: 0,
@@ -78,11 +83,25 @@ Page({
 
   onLoad: function() {
     this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+    GROUP_SIZE = storage.getGroupSize() || 5;
     loadFont();
     this.loadData();
   },
 
+  // 刷新进度显示
+  refreshProgress: function() {
+    const learned = storage.getLearnedWords() || [];
+    const words = storage.getLearnList() || [];
+    this.setData({
+      learnedCount: learned.length,
+      learnProgress: Math.round((learned.length / (words.length || 150)) * 100) || 0
+    });
+  },
+
   onShow: function() {
+    // 每次显示页面时刷新进度
+    this.refreshProgress();
+
     const progress = wx.getStorageSync(STORAGE_KEY);
 
     if (this.data.learning) {
@@ -111,7 +130,16 @@ Page({
 
   loadData: async function() {
     const words = REAL_WORDS_DATA || [];
-    const learned = storage.getLearnedWords() || [];
+
+    // 先尝试从服务器恢复学习数据
+    let learned = storage.getLearnedWords() || [];
+    if (learned.length === 0) {
+      const serverData = await storage.restoreFromServer();
+      if (serverData && serverData.length > 0) {
+        learned = serverData;
+        console.log('从服务器恢复学习数据:', learned.length, '个词');
+      }
+    }
 
     // 尝试从云端同步数据
     if (wx.cloud) {
@@ -151,7 +179,7 @@ Page({
   calculateReview: function(learned) {
     const now = Date.now();
     const result = [];
-    const intervals = [1, 3, 7, 15, 30];  // 天数
+    const intervals = [1, 2, 4, 7, 15, 30];  // 天数
     const learnList = storage.getLearnList() || [];
 
     // 只复习 learnList 中学过的词
@@ -316,9 +344,8 @@ Page({
 
   // 开始复习
   startReview: function() {
-    this.setData({
-      learning: true,
-      phase: 'review'
+    wx.navigateTo({
+      url: '/pages/review/review'
     });
   },
 
@@ -330,25 +357,26 @@ Page({
     });
   },
 
+  // 继续学习
+  continueLearn: function() {
+    this.loadData();
+    this.setData({
+      groupIndex: 0,
+      phase: 'intro'
+    });
+    this.startLearn();
+  },
+
   // 进入字音跟读页
   goPronounce: function() {
     wx.navigateTo({ url: '/pages/pronounce/pronounce' });
   },
 
   exitLearn: function() {
-    wx.showModal({
-      title: '退出学习',
-      content: '确定要退出当前学习吗？\n\n进度将被保存，下次可继续。',
-      success: (res) => {
-        if (res.confirm) {
-          // 保存进度后再退出
-          this.saveProgress();
-          this.setData({
-            learning: false,
-            phase: 'intro'
-          });
-        }
-      }
+    // 直接返回，不保存
+    this.setData({
+      learning: false,
+      phase: 'intro'
     });
   },
 
@@ -385,13 +413,25 @@ Page({
     const { currentWord, practiceCount } = this.data;
     if (!currentWord) return;
 
-    // 确定测验类型
-    // 偶数次(0,2)：sentence_meaning（根据句子选意思）
-    // 奇数次(1,3)：select_meanings（选择全部释义）
-    const targetType = practiceCount % 2 === 0 ? 'sentence_meaning' : 'select_meanings';
+    // 偶数次：sentence_meaning（单选），奇数次：select_meanings（多选）
+    // 检查当前词有几个意思
+    const wordMeanings = currentWord.meanings || [];
+    const hasMultipleMeanings = wordMeanings.length >= 2;
+
+    // 如果只有1个意思，只能做单选题
+    const targetType = (!hasMultipleMeanings || practiceCount % 2 === 0) ? 'sentence_meaning' : 'select_meanings';
+    console.log('generateQuiz:', { word: currentWord.word, targetType, practiceCount, hasMultipleMeanings });
 
     // 从预生成数据中查找题目
     const wordQuestions = QUIZ_DATA.filter(q => q.word === currentWord.word && q.type === targetType);
+
+    // 如果没找到多选题（词只有1个意思），改用单选题
+    if (wordQuestions.length === 0 && targetType === 'select_meanings') {
+      console.log('没有多选题，改用单选');
+      targetType = 'sentence_meaning';
+    }
+
+    console.log('found questions:', wordQuestions.length);
 
     if (wordQuestions.length > 0) {
       // 使用预生成的题目
@@ -399,7 +439,7 @@ Page({
       const shuffledOptions = [...q.options];
       this.shuffleArray(shuffledOptions);
 
-      // 查找正确选项索引
+      // 查找正确选项在打乱后的索引
       let correctIndex = -1;
       if (targetType === 'sentence_meaning') {
         correctIndex = shuffledOptions.findIndex(o => o.correct);
@@ -408,103 +448,178 @@ Page({
         correctIndex = shuffledOptions.findIndex(o => o.correct);
       }
 
+      // 记录正确答案的文本（用于显示）
+      const correctAnswers = q.options.filter(o => o.correct).map(o => o.text);
+
+      // 为句子生成带高亮的 parts
+      let sentenceParts = null;
+      if (targetType === 'sentence_meaning' && q.sentence) {
+        sentenceParts = this.boldWordInSentence(q.sentence, q.word);
+      }
+
+      // 为每个选项添加 selected 属性
+      const optionDisplaysWithSelected = shuffledOptions.map((o, i) => ({
+        text: o.text,
+        selected: false
+      }));
+
       this.setData({
         quizType: targetType,
         quiz: q,
         quizOptions: shuffledOptions.map(o => o.text),
-        optionDisplays: shuffledOptions.map(o => ({ text: o.text, parts: null })),
+        optionDisplays: optionDisplaysWithSelected,
+        sentenceParts: sentenceParts,
+        correctIndex: correctIndex,
+        correctAnswers: correctAnswers,
+        correctCount: correctAnswers.length,
         selectedIndex: -1,
+        selectedIndexes: [],
         showResult: false,
-        showMarkKnown: false,
         showGiveUp: false,
         lastWord: currentWord.word
       });
+      console.log('setData correctIndex:', correctIndex);
       return;
     }
 
-    // 降级：使用本地生成逻辑（如果没有预生成数据）
-    // ... 原有的本地生成逻辑保持不变 ...
-
-    // Fisher-Yates 洗牌算法
-    for (let i = options.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [options[i], options[j]] = [options[j], options[i]];
-    }
-    const correctIdx = options.indexOf(quiz.correctAnswer);
-    quiz.correctIndex = correctIdx;
-
-    // 生成选项的显示文本（加粗）
-    const optionDisplays = options.map(opt => {
-      if (quizType === 'sentence') {
-        // 根据意思选句子：选项是句子，需要加粗词
-        return {
-          text: opt,
-          parts: this.boldWordInSentence(opt, currentWord.word)
-        };
-      } else {
-        // 语境选意思：选项是意思，不需要加粗
-        return { text: opt, parts: null };
-      }
-    });
-
-    this.setData({
-      quizType: quizType,
-      quiz: quiz,
-      quizOptions: options,
-      optionDisplays: optionDisplays,
-      selectedIndex: -1,
-      showResult: false,
-      showMarkKnown: false,
-      showGiveUp: false,
-      lastWord: currentWord.word
-    });
+    // 降级：如果没有预生成数据则显示空
+    console.log('NO QUESTIONS FOUND for', currentWord.word, targetType);
   },
 
   // 选择答案
   selectAnswer: function(e) {
-    const { showResult } = this.data;
+    const { showResult, quizType, selectedIndexes, selectedIndex, correctIndex } = this.data;
     if (showResult) return;
 
-    const index = e.currentTarget.dataset.index;
-    const { quiz, currentWord, practiceCount } = this.data;
+    const index = Number(e.currentTarget.dataset.index);
+    console.log('selectAnswer:', { index, selectedIndex, correctIndex, quizType });
+    const { quiz, currentWord } = this.data;
 
-    const correct = index === quiz.correctIndex;
+    let newSelectedIndexes;
+    let isCorrect;
 
-    // 播放音效反馈
-    if (correct) {
+    if (quizType === 'select_meanings') {
+      // 多选：切换选中状态
+      if (selectedIndexes.includes(index)) {
+        newSelectedIndexes = selectedIndexes.filter(i => i !== index);
+      } else {
+        newSelectedIndexes = [...selectedIndexes, index];
+      }
+      // 更新 optionDisplays 的 selected 属性
+      const optionDisplays = this.data.optionDisplays.map((opt, i) => ({
+        ...opt,
+        selected: newSelectedIndexes.includes(i)
+      }));
+      this.setData({
+        selectedIndexes: newSelectedIndexes,
+        optionDisplays: optionDisplays
+      });
+      return;
+    } else {
+      // 单选：选择后直接跳转下一题
+      const { correctIndex } = this.data;
+      const correct = index === correctIndex;
+      isCorrect = correct;
+
+      // 播放音效反馈
+      if (correct) {
+        wx.vibrateShort({ success: () => {} });
+      } else {
+        wx.vibrateLong({ success: () => {} });
+      }
+
+      this.setData({
+        selectedIndex: index,
+        showResult: true,
+        isCorrect: correct,
+        showGiveUp: true
+      });
+
+      // 更新复习统计
+      storage.updateReviewStats(correct, currentWord.word);
+
+      // 实时更新已学数量和进度
+      const learned = storage.getLearnedWords() || [];
+      const words = storage.getLearnList() || [];
+      this.setData({
+        learnedCount: learned.length,
+        learnProgress: Math.round((learned.length / (words.length || 150)) * 100) || 0
+      });
+
+      // 单选：不自动跳转，等待用户点击下一题
+    }
+  },
+
+  // 自动提交多选
+  autoSubmitMultiSelect: function(selectedIndexes) {
+    const { correctAnswers, optionDisplays, currentWord } = this.data;
+
+    const isCorrect = correctAnswers.length === selectedIndexes.length &&
+      selectedIndexes.every(i => {
+        const text = optionDisplays[i].text;
+        return correctAnswers.includes(text);
+      });
+
+    if (isCorrect) {
       wx.vibrateShort({ success: () => {} });
     } else {
       wx.vibrateLong({ success: () => {} });
     }
 
     this.setData({
-      selectedIndex: index,
       showResult: true,
-      isCorrect: correct,
-      showMarkKnown: true,
+      isCorrect: isCorrect,
       showGiveUp: true
     });
 
-    // 更新复习统计
-    storage.updateReviewStats(correct, currentWord.word);
+    storage.updateReviewStats(isCorrect, currentWord.word);
 
-    if (!correct) {
-      // 错一道：重置 practiceCount = 0，重新练习4次
-      setTimeout(() => {
-        this.setData({
-          practiceCount: 0  // 重置为0，重新练习
-        });
-        this.generateQuiz();
-      }, 1500);
-    }
+    // 实时更新已学数量和进度
+    const learned = storage.getLearnedWords() || [];
+    const words = storage.getLearnList() || [];
+    this.setData({
+      learnedCount: learned.length,
+      learnProgress: Math.round((learned.length / (words.length || 150)) * 100) || 0
+    });
+  },
+
+  // 确认多选答案（保留兼容）
+  confirmMultiSelect: function() {
+    const { selectedIndexes } = this.data;
+    this.autoSubmitMultiSelect(selectedIndexes);
   },
 
   // 下一题
   nextQuestion: function() {
-    const { currentWordIndex, practiceCount, groupWords, groupIndex, totalGroups, lastWord } = this.data;
+    const { quizType, showResult, selectedIndexes, pendingNext } = this.data;
+
+    // 多选题：第一次点击提交显示结果，第二次点击跳转
+    if (quizType === 'select_meanings') {
+      if (selectedIndexes.length > 0 && !showResult) {
+        // 第一次点击，提交并标记，显示结果
+        this.autoSubmitMultiSelect(selectedIndexes);
+        this.setData({ pendingNext: true });
+        return;
+      } else if (showResult && pendingNext) {
+        // 第二次点击，直接跳转
+        this.setData({ pendingNext: false });
+        return this.goToNextQuestion();
+      }
+    }
+
+    return this.goToNextQuestion();
+  },
+
+  goToNextQuestion: function() {
+    const { currentWordIndex, practiceCount, groupWords, groupIndex, totalGroups, lastWord, isCorrect } = this.data;
 
     let newPracticeCount = practiceCount + 1;
     let newWordIndex = currentWordIndex;
+
+    // 答错了，重新练习当前词
+    if (!isCorrect) {
+      newPracticeCount = 0;
+    }
 
     // 当前词4次用完了，进入下一个词
     if (newPracticeCount >= TOTAL_PRACTICE) {
@@ -519,27 +634,29 @@ Page({
 
     // 当前组5个词都用完了或找不到不重复的词
     if (newWordIndex >= groupWords.length) {
-      // 进入下一组
+      console.log('一组学完:', { groupIndex, totalGroups, groupWords: groupWords.length });
+      // 标记当前组所有词为已学习
+      groupWords.forEach(w => {
+        storage.markWordLearned(w.word);
+      });
+
+      // 检查是否还有下一组
       const nextGroupIndex = groupIndex + 1;
       if (nextGroupIndex >= totalGroups) {
-        // 没有更多组了
-        wx.showModal({
-          title: '恭喜！',
-          content: '本轮学习完成！',
-          showCancel: false,
-          success: () => {
-            this.setData({
-              learning: false,
-              phase: 'intro'
-            });
-          }
+        console.log('没有更多组了');
+        // 没有更多组了，跳转到完成页面
+        wx.navigateTo({
+          url: '/pages/done/done?count=' + this.data.learnedCount
         });
         return;
       }
 
-      // 进入下一组
+      // 跳转到本组完成页面
+      const learnedCount = groupWords.length;
       this.setData({ groupIndex: nextGroupIndex });
-      this.startLearn();
+      wx.navigateTo({
+        url: '/pages/groupdone/groupdone?groupIndex=' + groupIndex + '&count=' + learnedCount
+      });
       return;
     }
 
@@ -552,73 +669,19 @@ Page({
     this.generateQuiz();
   },
 
-  // 标熟 - 标记已掌握，跳过此词
-  markKnown: function() {
-    const { currentWord, groupWords, currentWordIndex, practiceCount, groupIndex, totalGroups } = this.data;
-
-    // 标记为已掌握
-    storage.markWordLearned(currentWord.word);
-
-    // 实时更新已学数量
-    const learned = storage.getLearnedWords() || [];
-    this.setData({ learnedCount: learned.length });
-
-    // 跳到下一个词
-    let newWordIndex = currentWordIndex + 1;
-    let newPracticeCount = 0;
-
-    if (newWordIndex >= groupWords.length) {
-      const nextGroupIndex = groupIndex + 1;
-      if (nextGroupIndex >= totalGroups) {
-        wx.showModal({
-          title: '恭喜！',
-          content: '本轮学习完成！',
-          showCancel: false,
-          success: () => {
-            this.setData({
-              learning: false,
-              phase: 'intro'
-            });
-          }
-        });
-        return;
-      }
-      this.setData({ groupIndex: nextGroupIndex });
-      this.startLearn();
-      return;
-    }
-
-    this.setData({
-      currentWordIndex: newWordIndex,
-      practiceCount: newPracticeCount,
-      currentWord: groupWords[newWordIndex]
-    });
-
-    this.generateQuiz();
-  },
-
-  // 我不会 - 显示答案，跳过此题
+  // 我不会 - 显示答案
   giveUp: function() {
-    const { quiz, currentWord, practiceCount } = this.data;
+    const { quiz, currentWord } = this.data;
 
     this.setData({
       selectedIndex: -1,
       showResult: true,
       isCorrect: false,
-      showMarkKnown: true,
       showGiveUp: false
     });
 
     // 记录错误次数
     storage.incrementErrorCount(currentWord.word);
-
-    // 错误：这个词重来
-    setTimeout(() => {
-      this.setData({
-        practiceCount: practiceCount
-      });
-      this.generateQuiz();
-    }, 1500);
   },
 
   // 重新学习当前词

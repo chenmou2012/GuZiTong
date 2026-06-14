@@ -46,9 +46,9 @@ Page({
   // 点击实词查询
   onWordTap: function(e) {
     const word = e.currentTarget.dataset.word;
-    // 保存到全局数据，跳转后查询
+    // 保存到全局数据，切换到查词页面后查询
     storage.setPendingQuery(word);
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/index/index'
     });
   },

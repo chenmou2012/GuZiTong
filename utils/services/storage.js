@@ -140,8 +140,20 @@ function markWordLearned(word) {
     });
     wx.setStorageSync(STORAGE_KEYS.LEARNED_WORDS, learned);
 
-    // 同步到云端
+    // 更新今日学习数
+    const stats = getReviewStats();
+    const today = new Date().toLocaleDateString('zh-CN');
+    if (stats.lastReviewDate !== today) {
+      stats.todayLearn = 0;
+    }
+    stats.todayLearn = (stats.todayLearn || 0) + 1;
+    stats.lastReviewDate = today;
+    wx.setStorageSync('reviewStats', stats);
+    syncReviewStatsToServer(stats);
+
+    // 同步到云端和服务器
     syncToCloud(learned);
+    syncToServer(learned);
   }
   return learned;
 }
@@ -151,6 +163,43 @@ function syncToCloud(data) {
   if (wx.cloud) {
     cloudStorage.saveCloudLearnedWords('auto', data).catch(() => {});
   }
+}
+
+// 同步到服务器
+function syncToServer(data) {
+  const auth = require('./auth.js');
+  const token = auth.getToken();
+  console.log('syncToServer called, token:', token ? 'exists' : 'null');
+  if (!token) {
+    console.log('未登录，不能同步');
+    return;
+  }
+
+  console.log('开始同步, data length:', data.length);
+  auth.saveUserData('learn', 'learnedWords', data).then(success => {
+    console.log('同步到服务器:', success ? '成功' : '失败');
+  }).catch(err => {
+    console.log('同步失败:', err);
+  });
+}
+
+// 从服务器恢复学习数据
+async function restoreFromServer() {
+  const auth = require('./auth.js');
+  const token = auth.getToken();
+  if (!token) return null;
+
+  try {
+    const data = await auth.getUserData('learn');
+    if (data && data.learnedWords) {
+      const learned = typeof data.learnedWords === 'string' ? JSON.parse(data.learnedWords) : data.learnedWords;
+      wx.setStorageSync(STORAGE_KEYS.LEARNED_WORDS, learned);
+      return learned;
+    }
+  } catch (e) {
+    console.log('恢复学习数据失败', e);
+  }
+  return null;
 }
 
 // 获取学习列表（随机排列的词序）
@@ -181,12 +230,28 @@ function enableCloudSync() {
   }
 }
 
-// 同步学习列表（从云端获取或初始化）
+// 同步学习列表（从服务器获取或初始化）
 async function syncLearnList(words) {
   const localList = getLearnList();
 
   if (!localList || localList.length === 0) {
-    // 本地无列表，尝试从云端获取
+    // 本地无列表，尝试从服务器获取
+    const auth = require('./auth.js');
+    const token = auth.getToken();
+    if (token) {
+      try {
+        const response = await auth.request('/api/user/data?token=' + token + '&data_type=learn');
+        if (response.data && response.data.learn && response.data.learn.learnOrder) {
+          const serverList = JSON.parse(response.data.learn.learnOrder);
+          wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, serverList);
+          return serverList;
+        }
+      } catch (e) {
+        console.log('获取服务器学习列表失败', e);
+      }
+    }
+
+    // 尝试从云端获取
     if (wx.cloud) {
       try {
         const openId = await cloudStorage.getOpenId();
@@ -201,7 +266,8 @@ async function syncLearnList(words) {
         console.log('获取云端学习列表失败', e);
       }
     }
-    // 云端无数据，初始化本地列表
+
+    // 都没有，初始化本地列表
     return initLearnList(words);
   }
 
@@ -298,18 +364,49 @@ function resetErrorCount(word) {
 }
 
 // ==================== 复习统计数据 ====================
-const REVIEW_INTERVALS = [1, 3, 7, 15, 30]; // 艾宾浩斯间隔（天）
+const REVIEW_INTERVALS = [1, 2, 4, 7, 15, 30]; // 艾宾浩斯间隔（天）
 
 function getReviewStats() {
   return wx.getStorageSync('reviewStats') || {
     todayReview: 0,
     todayDone: 0,
+    todayLearn: 0,
     streakDays: 0,
     lastReviewDate: null,
     totalCorrect: 0,
     totalWrong: 0,
     ebbinghausStage: {} // { wordId: stage }
   };
+}
+
+// 同步复习统计到服务器
+function syncReviewStatsToServer(stats) {
+  const auth = require('./auth.js');
+  const token = auth.getToken();
+  if (!token) return;
+
+  auth.saveUserData('learn', 'reviewStats', stats).then(success => {
+    console.log('同步复习统计:', success ? '成功' : '失败');
+  }).catch(() => {});
+}
+
+// 从服务器恢复复习统计
+async function restoreReviewStatsFromServer() {
+  const auth = require('./auth.js');
+  const token = auth.getToken();
+  if (!token) return null;
+
+  try {
+    const data = await auth.getUserData('learn');
+    if (data && data.reviewStats) {
+      const stats = typeof data.reviewStats === 'string' ? JSON.parse(data.reviewStats) : data.reviewStats;
+      wx.setStorageSync('reviewStats', stats);
+      return stats;
+    }
+  } catch (e) {
+    console.log('恢复复习统计失败', e);
+  }
+  return null;
 }
 
 function updateReviewStats(isCorrect, wordId) {
@@ -349,6 +446,10 @@ function updateReviewStats(isCorrect, wordId) {
   stats.lastReviewDate = today;
 
   wx.setStorageSync('reviewStats', stats);
+
+  // 同步到服务器
+  syncReviewStatsToServer(stats);
+
   return stats;
 }
 
@@ -363,10 +464,31 @@ function getEbbinghausStats() {
   return {
     todayReview: stats.todayReview,
     todayDone: stats.todayDone,
+    todayLearn: stats.todayLearn || 0,
     streakDays: stats.streakDays,
     totalCorrect: stats.totalCorrect,
     totalWrong: stats.totalWrong,
     stageCounts
+  };
+}
+
+// ==================== 用户设置 ====================
+const DEFAULT_GROUP_SIZE = 5;
+const SETTING_KEYS = {
+  GROUP_SIZE: 'groupSize'
+};
+
+function getGroupSize() {
+  return wx.getStorageSync(SETTING_KEYS.GROUP_SIZE) || DEFAULT_GROUP_SIZE;
+}
+
+function setGroupSize(size) {
+  wx.setStorageSync(SETTING_KEYS.GROUP_SIZE, size);
+}
+
+function getSettings() {
+  return {
+    groupSize: getGroupSize()
   };
 }
 
@@ -406,7 +528,13 @@ module.exports = {
   getReviewStats,
   updateReviewStats,
   getEbbinghausStats,
+  restoreReviewStatsFromServer,
   // 云端同步
   enableCloudSync,
-  syncLearnList
+  syncLearnList,
+  restoreFromServer,
+  // 设置
+  getGroupSize,
+  setGroupSize,
+  getSettings
 };

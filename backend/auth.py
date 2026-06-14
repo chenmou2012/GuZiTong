@@ -72,8 +72,17 @@ def verify_token(token: str) -> tuple:
     if not user:
         return None, False
 
-    # 检查是否过期
-    expire_time = datetime.fromisoformat(user["expire_time"])
+    # 检查是否过期 - 支持时间戳和iso格式
+    expire_val = user["expire_time"]
+    try:
+        # 尝试时间戳格式
+        if isinstance(expire_val, (int, float)):
+            expire_time = datetime.fromtimestamp(expire_val)
+        else:
+            expire_time = datetime.fromisoformat(str(expire_val))
+    except:
+        return None, False
+
     if datetime.now() > expire_time:
         return None, False
 

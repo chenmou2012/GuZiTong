@@ -1,0 +1,17 @@
+<!-- pages/groupdone/groupdone.wxml -->
+<view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
+  <view class="content">
+    <text class="title">本组完成</text>
+    <text class="subtitle">已掌握 {{learnedCount}} 个词</text>
+
+    <view class="stats-card">
+      <text class="stats-label">当前组别</text>
+      <text class="stats-value">第 {{groupIndex}} 组</text>
+    </view>
+
+    <view class="btns">
+      <button class="btn secondary" bindtap="goHome">返回主页</button>
+      <button class="btn primary" bindtap="continueNext">继续下一组</button>
+    </view>
+  </view>
+</view>

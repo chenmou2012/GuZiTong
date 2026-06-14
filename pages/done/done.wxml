@@ -1,0 +1,20 @@
+<!-- pages/done/done.wxml -->
+<view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
+  <view class="header">
+    <text class="header-title">学习完成</text>
+  </view>
+
+  <main class="content">
+    <text class="subtitle">本轮已学完所有词</text>
+
+    <view class="stats-card">
+      <text class="stats-label">已掌握</text>
+      <text class="stats-value">{{learnedCount}} 词</text>
+    </view>
+
+    <view class="btns">
+      <button class="btn secondary" bindtap="goHome">返回主界面</button>
+      <button class="btn primary" bindtap="continueLearn">继续学习</button>
+    </view>
+  </main>
+</view>

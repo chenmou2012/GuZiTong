@@ -25,14 +25,8 @@
         </view>
         <!-- Progress Indicator -->
         <view class="progress-card-right">
-          <view class="progress-ring-container">
-            <view class="progress-ring-bg"></view>
-            <view class="progress-ring-progress {{learnProgress >= 50 ? 'half' : ''}}" style="transform: rotate({{learnProgress * 3.6}}deg)"></view>
-            <view class="progress-ring-center">
-              <text class="progress-ring-percent">{{learnProgress}}%</text>
-              <text class="progress-ring-label">总进度</text>
-            </view>
-          </view>
+          <text class="progress-text">{{learnProgress}}%</text>
+          <text class="progress-label">总进度</text>
         </view>
       </view>
       <!-- Word Count Footer in Card -->
@@ -128,76 +122,84 @@
 
       <!-- 题目卡片 -->
       <view class="quiz-area">
-        <!-- 语境选意思 -->
-        <view wx:if="{{quizType === 'context'}}" class="main-card">
-          <view class="quote-text">
-            <text wx:for="{{quiz.sentenceParts}}" wx:key="index" wx:for-item="part" class="{{part.isBold ? 'bold-word' : ''}}">{{part.text}}</text>
+        <!-- 题目 -->
+        <view class="main-card">
+          <view wx:if="{{quizType === 'sentence_meaning' && sentenceParts}}" class="quote-text">
+            <text wx:for="{{sentenceParts}}" wx:key="index" wx:for-item="part" class="{{part.isBold ? 'bold-word' : ''}}">{{part.text}}</text>
           </view>
-        </view>
-
-        <!-- 根据意思选句子 -->
-        <view wx:if="{{quizType === 'sentence'}}" class="main-card">
-          <view class="quote-text">"{{quiz.word}}" - "{{quiz.meaning}}"</view>
+          <view wx:elif="{{quizType === 'sentence_meaning'}}" class="quote-text">{{quiz.sentence}}</view>
+          <view wx:else class="quote-text">{{quiz.word}}</view>
+          <!-- 来源 -->
+          <text wx:if="{{quizType === 'sentence_meaning' && quiz.source}}" class="quote-source">（——{{quiz.source}}）</text>
         </view>
 
         <!-- 问题 -->
         <view class="question-text">
-          <text wx:if="{{quizType === 'context'}}">句中加粗字的意思？</text>
-          <text wx:if="{{quizType === 'sentence'}}">选择正确的句子</text>
+          <text wx:if="{{quizType === 'sentence_meaning'}}">根据句子选意思</text>
+          <text wx:elif="{{quizType === 'select_meanings'}}">哪{{correctCount}}项是"{{quiz.word}}"的意思</text>
+          <text wx:else>选择正确的释义</text>
         </view>
 
         <!-- 选项 -->
         <view class="options-area">
-          <block wx:for="{{optionDisplays}}" wx:key="index">
-            <view class="option-btn {{selectedIndex === index ? (index === quiz.correctIndex ? 'correct' : 'wrong') : ''}}"
-                  bindtap="selectAnswer" data-index="{{index}}">
-              <text>{{item.text}}</text>
+          <block wx:if="{{quizType === 'select_meanings'}}">
+            <view wx:for="{{optionDisplays}}" wx:key="idx" wx:for-item="opt" wx:for-index="idx"
+                  class="option-btn {{opt.selected ? 'selected' : ''}}"
+                  bindtap="selectAnswer" data-index="{{idx}}">
+              <text>{{opt.text}}</text>
             </view>
           </block>
-        </view>
-
-        <!-- 看答案 -->
-        <view class="answer-btn-area" wx:if="{{!showResult}}">
-          <button class="answer-btn" bindtap="giveUp">看答案</button>
+          <block wx:else>
+            <view wx:for="{{optionDisplays}}" wx:key="idx" wx:for-item="opt" wx:for-index="idx"
+                  class="option-btn {{selectedIndex == idx ? (idx == correctIndex ? 'correct' : 'wrong') : ''}}"
+                  bindtap="selectAnswer" data-index="{{idx}}">
+              <text>{{opt.text}}</text>
+            </view>
+          </block>
         </view>
 
         <!-- 结果 -->
         <view wx:if="{{showResult}}" class="result-area">
           <text wx:if="{{isCorrect}}" class="result-correct">✓ 回答正确！</text>
-          <text wx:else class="result-wrong">✗ 正确答案是：{{quiz.correctAnswer}}</text>
+          <text wx:else class="result-wrong">✗ 回答错误</text>
+          <view wx:if="{{quizType === 'select_meanings'}}" class="correct-answers">
+            <text>正确答案：</text>
+            <block wx:for="{{quiz.options}}" wx:key="index" wx:for-item="o">
+              <text wx:if="{{o.correct}}">{{o.text}}；</text>
+            </block>
+          </view>
+          <view wx:if="{{quizType === 'sentence_meaning'}}" class="correct-answers">
+            <text>正确答案：{{correctAnswers[0]}}</text>
+          </view>
         </view>
 
-        <!-- 下一题 -->
-        <view wx:if="{{showResult}}" class="next-btn-area">
+        <!-- 全部按钮：统一在 result-btns 中处理 -->
+        <!-- 单选时：未选择时下一题灰色不可点 -->
+        <view wx:if="{{quizType === 'sentence_meaning' && selectedIndex === -1}}" class="result-btns">
+          <button class="answer-btn" bindtap="giveUp">看答案</button>
+          <button class="next-btn disabled">下一题</button>
+        </view>
+        <!-- 单选时：已选择但未提交结果 -->
+        <view wx:if="{{quizType === 'sentence_meaning' && selectedIndex !== -1 && !showResult}}" class="result-btns">
+          <button class="answer-btn" bindtap="giveUp">看答案</button>
+          <button class="next-btn" bindtap="nextQuestion">下一题</button>
+        </view>
+        <!-- 单选时：已提交显示灰色看答案 -->
+        <view wx:if="{{quizType === 'sentence_meaning' && showResult}}" class="result-btns">
+          <button class="answer-btn disabled" style="background:#ccc;color:#888">看答案</button>
+          <button class="next-btn" bindtap="nextQuestion">下一题</button>
+        </view>
+        <!-- 多选时：未选择时 -->
+        <view wx:if="{{quizType === 'select_meanings' && selectedIndexes.length === 0}}" class="result-btns">
+          <button class="answer-btn" bindtap="giveUp">看答案</button>
+          <button class="next-btn disabled">下一题</button>
+        </view>
+        <!-- 多选时：已选择(未提交或已提交) -->
+        <view wx:if="{{quizType === 'select_meanings' && selectedIndexes.length > 0}}" class="result-btns">
+          <button class="answer-btn {{showResult ? 'disabled' : ''}}" style="{{showResult ? 'background:#ccc;color:#888' : ''}}">看答案</button>
           <button class="next-btn" bindtap="nextQuestion">下一题</button>
         </view>
       </view>
-
-      <!-- 底部标熟 -->
-      <view class="mark-known-area">
-        <button class="mark-known-btn" bindtap="markKnown">标熟</button>
-      </view>
-    </view>
-
-    <!-- 复习阶段 -->
-    <view wx:if="{{phase === 'review'}}" class="review-phase">
-      <view class="review-header">
-        <text class="review-title">复习</text>
-        <button class="btn-back" bindtap="goHome">返回</button>
-      </view>
-      <view class="review-tip">今日待复习: {{reviewWords.length}} 个</view>
-      <scroll-view scroll-y class="review-list" wx:if="{{reviewWords.length > 0}}">
-        <block wx:for="{{reviewWords}}" wx:key="word">
-          <view class="review-item">
-            <text class="review-word">{{item.word}}</text>
-            <view class="review-btns">
-              <button size="mini" class="btn-know" bindtap="markReviewKnown" data-word="{{item.word}}">认识</button>
-              <button size="mini" class="btn-forget" bindtap="markReviewForget" data-word="{{item.word}}">不认识</button>
-            </view>
-          </view>
-        </block>
-      </scroll-view>
-      <view wx:if="{{reviewWords.length === 0}}" class="no-review">🎉 今日复习完成！</view>
     </view>
   </view>
 </view>
