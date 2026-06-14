@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+openai
+pydantic
+rich
+websockets
+httpx
+python-multipart
