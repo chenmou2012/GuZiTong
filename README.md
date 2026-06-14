@@ -7,10 +7,10 @@
 | 页面 | 功能 |
 |------|------|
 | 查词 | 查询文言文字词的含义和例句 |
-| 学习 | 中考必备 330 个文言实词练习 |
+| 学习 | 初中 150 个文言实词练习 |
 | 翻译 | 文言文翻译成现代汉语 |
 | 朗读 | 古字正确发音示范 |
-| 我的 | 收藏夹、学习记录与云端同步 |
+| 我的 | 收藏夹、学习统计与云端同步 |
 
 ## 技术栈
 
@@ -28,19 +28,22 @@
 
 ```
 ├── pages/
-│   ├── index/       # 查词页面
+│   ├── index/        # 查词页面
 │   ├── learn/       # 学习页面
 │   ├── translate/   # 翻译页面
 │   ├── pronounce/  # 朗读页面
-│   └── profile/    # 我的页面
+│   ├── profile/    # 我的页面
+│   ├── done/       # 学习完成页面
+│   ├── groupdone/   # 组完成页面
+│   └── review/     # 复习页面
 ├── backend/
 │   ├── backend_main.py  # FastAPI 主服务
-│   ├── ragService.py    # RAG 检索服务
-│   └── poems.json      # 古诗文知识库
+│   └── ragService.py   # RAG 检索服务
 ├── utils/
 │   ├── data/          # 数据文件
-│   ├── services/      # 业务服务
-│   └── fonts/         # 字体文件
+│   └── services/      # 业务服务
+├── data/
+│   └── realwords.js   # 150个文言实词数据
 ├── assets/icons/     # 图标资源
 └── app.*             # 小程序入口文件
 ```
