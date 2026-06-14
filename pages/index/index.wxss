@@ -21,7 +21,7 @@
 
 .title {
   font-size: 44rpx;
-  color: #2C3E50;
+  color: #bc262e;
   font-weight: bold;
   letter-spacing: 8rpx;
   margin-bottom: 12rpx;
