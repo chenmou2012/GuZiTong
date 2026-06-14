@@ -50,6 +50,9 @@ Page({
     this.setData({
       settings: Object.assign(this.data.settings, { groupSize: size })
     });
+    // 保存到全局
+    getApp().globalData = getApp().globalData || {};
+    getApp().globalData.groupSize = size;
     wx.showToast({ title: '已更新', icon: 'success' });
   },
 
@@ -65,6 +68,7 @@ Page({
 
   onShow: function() {
     this.checkLogin();
+    this.loadSettings();
     this.loadStats();
     // 尝试从服务器恢复复习统计
     storage.restoreReviewStatsFromServer();

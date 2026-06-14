@@ -56,7 +56,7 @@
         </view>
         <view class="stats-item">
           <text class="stats-item-number">{{reviewStats.streakDays}}</text>
-          <text class="stats-item-label">天</text>
+          <text class="stats-item-label">连续学习（天）</text>
         </view>
       </view>
     </view>

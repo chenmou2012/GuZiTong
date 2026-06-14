@@ -28,10 +28,11 @@ function saveHistory(word, content) {
   }
   wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, history);
 
-  // 同步到云端
+  // 同步到云端和服务器
   if (wx.cloud) {
     cloudStorage.saveCloudSearchHistory('auto', history).catch(() => {});
   }
+  syncDataToServer('search', 'history', history);
   return history;
 }
 
@@ -93,6 +94,7 @@ function addTranslation(original, translated) {
     translations = translations.slice(0, MAX_ITEMS);
   }
   wx.setStorageSync(STORAGE_KEYS.TRANSLATIONS, translations);
+  syncDataToServer('search', 'translations', translations);
   return translations;
 }
 
@@ -166,6 +168,15 @@ function syncToCloud(data) {
 }
 
 // 同步到服务器
+// 通用同步函数
+function syncDataToServer(dataType, dataKey, data) {
+  const auth = require('./auth.js');
+  const token = auth.getToken();
+  if (!token) return;
+
+  auth.saveUserData(dataType, dataKey, data).catch(() => {});
+}
+
 function syncToServer(data) {
   const auth = require('./auth.js');
   const token = auth.getToken();
@@ -473,7 +484,7 @@ function getEbbinghausStats() {
 }
 
 // ==================== 用户设置 ====================
-const DEFAULT_GROUP_SIZE = 5;
+const DEFAULT_GROUP_SIZE = 3;
 const SETTING_KEYS = {
   GROUP_SIZE: 'groupSize'
 };

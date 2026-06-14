@@ -145,6 +145,7 @@ Page({
 
   // 返回主页
   goHome: function() {
+    wx.removeStorageSync('learnProgress');
     wx.switchTab({ url: '/pages/learn/learn' });
   }
 });

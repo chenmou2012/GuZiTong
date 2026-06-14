@@ -27,7 +27,7 @@ function loadFont() {
   });
 }
 
-let GROUP_SIZE = 5;
+let GROUP_SIZE = 0;  // 动态获取
 const TOTAL_PRACTICE = 2;  // 1次sentence_meaning + 1次select_meanings
 const STORAGE_KEY = 'learnProgress';
 const PRACTICE_CONTEXT = 2;  // 偶数次：语境选意思 (0, 2)
@@ -40,7 +40,8 @@ Page({
     phase: 'intro',          // intro(展示), practice(练习), done(完成)
 
     // 词组
-    groupWords: [],          // 当前组的5个词
+    groupWords: [],          // 当前组的词
+    groupSize: 0,           // 每组字数（动态设置）
     groupIndex: 0,          // 当前组索引
     introIndex: 0,         // 当前展示的词索引
     totalGroups: 0,          // 总组数
@@ -82,34 +83,39 @@ Page({
   },
 
   onLoad: function() {
-    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
-    GROUP_SIZE = storage.getGroupSize() || 5;
+    const groupSize = storage.getGroupSize() || 5;
+    GROUP_SIZE = groupSize;
+    this.setData({
+      statusBarHeight: getApp().globalData.statusBarHeight,
+      groupSize: groupSize
+    });
+    // 保存到全局
+    getApp().globalData.groupSize = groupSize;
     loadFont();
     this.loadData();
   },
 
-  // 刷新进度显示
-  refreshProgress: function() {
-    const learned = storage.getLearnedWords() || [];
-    const words = storage.getLearnList() || [];
-    this.setData({
-      learnedCount: learned.length,
-      learnProgress: Math.round((learned.length / (words.length || 150)) * 100) || 0
-    });
-  },
-
   onShow: function() {
-    // 每次显示页面时刷新进度
-    this.refreshProgress();
+    // 检查全局状态，如果被重置则同步
+    const app = getApp();
+    if (app.globalData && app.globalData.learning === false) {
+      this.data.learning = false;
+      app.globalData.learning = null; // 重置
+    }
+
+    // 每次显示时检查 groupSize 是否变化
+    const currentGroupSize = getApp().globalData.groupSize || storage.getGroupSize() || 5;
+    if (currentGroupSize !== this.data.groupSize) {
+      GROUP_SIZE = currentGroupSize;
+      this.setData({ groupSize: GROUP_SIZE });
+    }
 
     const progress = wx.getStorageSync(STORAGE_KEY);
 
-    if (this.data.learning) {
-      this.loadData();
-    } else if (progress && progress.learning) {
+    // 有保存进度才恢复，否则显示主界面
+    if (this.data.learning && progress && progress.learning) {
       // 非学习状态但有保存的进度，加载数据后再恢复
       this.loadData();
-      // 延迟检查恢复（等待数据加载完成）
       setTimeout(() => {
         if (this.restoreProgress()) {
           wx.showModal({
@@ -125,10 +131,22 @@ Page({
           });
         }
       }, 500);
+    } else {
+      // 正常显示主界面
+      this.data.learning = false;
+      this.loadData();
     }
   },
 
   loadData: async function() {
+    // 如果正在学习，不更新 learning 状态
+    if (this.data.learning === true) {
+      return;
+    }
+
+    // 强制设置 learning 为 false
+    this.data.learning = false;
+
     const words = REAL_WORDS_DATA || [];
 
     // 先尝试从服务器恢复学习数据
@@ -155,7 +173,7 @@ Page({
     // 当前学习进度 = 已掌握数
     const currentIndex = learned.length;
 
-    const totalGroups = Math.ceil(learnList.length / GROUP_SIZE);
+    const totalGroups = Math.ceil(learnList.length / (this.data.groupSize || GROUP_SIZE || 5));
 
     // 计算需要复习的词
     const reviewWords = this.calculateReview(learned);
@@ -307,25 +325,26 @@ Page({
 
   // 展示：下一个
   nextIntro: function() {
-    const { introIndex } = this.data;
-    if (introIndex < 4) {
+    const { introIndex, groupSize } = this.data;
+    if (introIndex < groupSize - 1) {
       this.setData({ introIndex: introIndex + 1 });
     }
   },
 
   // 开始学习
   startLearn: function() {
-    const { allWords, groupIndex } = this.data;
+    const { allWords, groupIndex, groupSize } = this.data;
+    const size = groupSize || storage.getGroupSize() || 5;
 
-    // 获取当前组的5个词并随机打乱
-    const startIdx = groupIndex * GROUP_SIZE;
-    const groupWords = allWords.slice(startIdx, startIdx + GROUP_SIZE);
+    // 获取当前组的词并随机打乱
+    const startIdx = groupIndex * size;
+    const groupWords = allWords.slice(startIdx, startIdx + size);
     this.shuffleArray(groupWords);
 
-    if (!groupWords.length || groupWords.length < GROUP_SIZE) {
-      // 词不够5个，重新开始
+    if (!groupWords.length || groupWords.length < size) {
+      // 词不够，重新开始
       this.loadData();
-      if (this.data.allWords.length < GROUP_SIZE) {
+      if (this.data.allWords.length < size) {
         wx.showToast({ title: '没有更多词了', icon: 'none' });
         return;
       }
@@ -373,11 +392,21 @@ Page({
   },
 
   exitLearn: function() {
-    // 直接返回，不保存
+    // 清除学习进度
+    wx.removeStorageSync(STORAGE_KEY);
+    // 重置状态 - 使用 phase 来控制显示
     this.setData({
       learning: false,
-      phase: 'intro'
+      phase: 'intro',
+      groupIndex: 0,
+      introIndex: 0,
+      currentWordIndex: 0,
+      practiceCount: 0
     });
+    // 刷新数据
+    setTimeout(() => {
+      this.loadData();
+    }, 50);
   },
 
   // 复习：认识
@@ -653,7 +682,9 @@ Page({
 
       // 跳转到本组完成页面
       const learnedCount = groupWords.length;
-      this.setData({ groupIndex: nextGroupIndex });
+      // 先设置 learning=false
+      this.data.learning = false;
+      this.setData({ groupIndex: nextGroupIndex, learning: false });
       wx.navigateTo({
         url: '/pages/groupdone/groupdone?groupIndex=' + groupIndex + '&count=' + learnedCount
       });

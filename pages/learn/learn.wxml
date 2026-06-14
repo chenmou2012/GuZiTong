@@ -39,7 +39,7 @@
 
     <!-- BEGIN: SessionInfo -->
     <section class="session-info">
-      <text class="session-tip">每组 5 个词 · 先展示后练习</text>
+      <text class="session-tip">每组 {{groupSize}} 个词 · 先展示后练习</text>
     </section>
     <!-- END: SessionInfo -->
 
@@ -93,27 +93,20 @@
       <!-- 导航按钮 -->
       <view class="intro-btns">
         <button class="btn-prev" bindtap="prevIntro" wx:if="{{introIndex > 0}}">上一个</button>
-        <button class="btn-next" bindtap="nextIntro" wx:if="{{introIndex < 4}}">下一个</button>
+        <button class="btn-next" bindtap="nextIntro" wx:if="{{introIndex < groupSize - 1}}">下一个</button>
       </view>
 
-      <button class="start-btn" bindtap="startPractice" wx:if="{{introIndex === 4}}">开始练习</button>
+      <button class="start-btn" bindtap="startPractice" wx:if="{{introIndex === groupSize - 1}}">开始练习</button>
     </view>
 
     <!-- 练习环节 -->
     <view wx:if="{{phase === 'practice'}}" class="practice-phase">
-      <!-- 顶部进度条 -->
-      <view class="header-progress-bar" style="top: {{statusBarHeight}}px">
-        <view class="header-progress-bg">
-          <view class="header-progress-fill" style="width: {{(currentWordIndex * 5 + practiceCount) / 25 * 100}}%"></view>
-        </view>
-      </view>
-
       <!-- 头部信息 -->
       <view class="header-info">
         <view class="progress-info">
           <text class="page-title">文言文学习</text>
           <text class="progress-label">词进度</text>
-          <text class="progress-text">{{currentWordIndex + 1}}/5 · 第 {{practiceCount + 1}}次</text>
+          <text class="progress-text">{{currentWordIndex + 1}}/{{groupSize}} · 第 {{practiceCount + 1}}次</text>
         </view>
         <view class="group-info">
           <text class="group-label">已学 {{learnedCount}}/{{totalCount}}</text>
@@ -135,7 +128,7 @@
 
         <!-- 问题 -->
         <view class="question-text">
-          <text wx:if="{{quizType === 'sentence_meaning'}}">根据句子选意思</text>
+          <text wx:if="{{quizType === 'sentence_meaning'}}">选择加粗字的意思</text>
           <text wx:elif="{{quizType === 'select_meanings'}}">哪{{correctCount}}项是"{{quiz.word}}"的意思</text>
           <text wx:else>选择正确的释义</text>
         </view>
@@ -198,6 +191,13 @@
         <view wx:if="{{quizType === 'select_meanings' && selectedIndexes.length > 0}}" class="result-btns">
           <button class="answer-btn {{showResult ? 'disabled' : ''}}" style="{{showResult ? 'background:#ccc;color:#888' : ''}}">看答案</button>
           <button class="next-btn" bindtap="nextQuestion">下一题</button>
+        </view>
+      </view>
+
+      <!-- 底部进度条 -->
+      <view class="header-progress-bar">
+        <view class="header-progress-bg">
+          <view class="header-progress-fill" style="width: {{(currentWordIndex * groupSize + practiceCount) / (groupSize * groupSize) * 100}}%"></view>
         </view>
       </view>
     </view>

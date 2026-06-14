@@ -23,6 +23,11 @@ Page({
   goHome: function() {
     // 清除学习进度
     wx.removeStorageSync('learnProgress');
+    // 强制重置全局状态
+    const app = getApp();
+    app.globalData = app.globalData || {};
+    app.globalData.learning = false;
+    // 跳转到学习页面
     wx.switchTab({ url: '/pages/learn/learn' });
   }
 });
