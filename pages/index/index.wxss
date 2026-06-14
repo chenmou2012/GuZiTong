@@ -518,6 +518,14 @@
   margin-bottom: 20rpx;
 }
 
+.view-all-btn {
+  font-size: 24rpx;
+  color: #bc262e;
+  padding: 8rpx 16rpx;
+  border: 1rpx solid #bc262e;
+  border-radius: 20rpx;
+}
+
 .real-words-picker {
   display: flex;
   justify-content: space-between;

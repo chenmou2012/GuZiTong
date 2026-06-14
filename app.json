@@ -4,7 +4,8 @@
     "pages/translate/translate",
     "pages/profile/profile",
     "pages/learn/learn",
-    "pages/pronounce/pronounce"
+    "pages/pronounce/pronounce",
+    "realwords"
   ],
   "usingComponents": {},
   "window": {

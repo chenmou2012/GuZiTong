@@ -88,6 +88,12 @@ Page({
     }, 100);
   },
 
+  goToRealWords: function() {
+    wx.navigateTo({
+      url: '/realwords'
+    });
+  },
+
   onRealWordSelect: function(e) {
     const index = e.detail.value;
     const word = this.data.realWords[index];

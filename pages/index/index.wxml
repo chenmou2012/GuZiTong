@@ -48,6 +48,7 @@
   <view class="real-words-section" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
     <view class="real-words-header">
       <text class="section-title">中考高频实词</text>
+      <text class="view-all-btn" bindtap="goToRealWords">查看全部</text>
     </view>
     <view class="word-tags" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
       <view
