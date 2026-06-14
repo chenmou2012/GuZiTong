@@ -1,20 +1,30 @@
 // realwords.js
 const constants = require('./utils/services/constants');
 const storage = require('./utils/services/storage');
-const markdown = require('./utils/services/markdown');
 
-const { API_BASE_URL, REAL_WORDS } = constants;
+const { REAL_WORDS } = constants;
 
 Page({
   data: {
     realWords: REAL_WORDS,
-    isLoading: false,
-    result: {},
-    resultParsed: null,
-    streamingText: ''
+    filteredWords: REAL_WORDS,
+    keyword: '',
+    statusBarHeight: 20
   },
 
-  onLoad: function() {},
+  onLoad: function() {
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+  },
+
+  onSearch: function(e) {
+    const kw = (e.detail.value || '').trim();
+    if (!kw) {
+      this.setData({ keyword: '', filteredWords: this.data.realWords });
+      return;
+    }
+    const filtered = this.data.realWords.filter(w => w.includes(kw));
+    this.setData({ keyword: kw, filteredWords: filtered });
+  },
 
   onShow: function() {
     if (this.socketTask) {

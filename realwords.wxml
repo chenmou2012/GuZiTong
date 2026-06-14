@@ -1,0 +1,31 @@
+<!-- realwords.wxml -->
+<view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
+  <!-- 标题 -->
+  <view class="header">
+    <text class="title">中考实词</text>
+    <text class="subtitle">共 {{realWords.length}} 个</text>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="search-section">
+    <input
+      class="search-input"
+      placeholder="搜索实词..."
+      bindinput="onSearch"
+      value="{{keyword}}"
+    />
+  </view>
+
+  <!-- 实词列表 -->
+  <scroll-view class="word-list" scroll-y>
+    <view
+      class="word-item"
+      wx:for="{{filteredWords}}"
+      wx:key="index"
+      bindtap="onWordTap"
+      data-word="{{item}}"
+    >
+      <text class="word-text">{{item}}</text>
+    </view>
+  </scroll-view>
+</view>

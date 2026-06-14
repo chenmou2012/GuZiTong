@@ -1,0 +1,52 @@
+/* realwords.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+  padding: 0 30rpx;
+}
+
+.header {
+  padding: 40rpx 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 44rpx;
+  color: #bc262e;
+  font-weight: bold;
+  display: block;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.search-section {
+  padding: 20rpx 0;
+}
+
+.search-input {
+  width: 100%;
+  height: 80rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.word-list {
+  height: calc(100vh - 200rpx);
+}
+
+.word-item {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #eee;
+  text-align: center;
+}
+
+.word-text {
+  font-size: 36rpx;
+  color: #2C3E50;
+}
