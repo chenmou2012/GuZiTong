@@ -11,6 +11,14 @@ Page({
       collections: 0,
       translations: 0
     },
+    reviewStats: {
+      todayReview: 0,
+      todayDone: 0,
+      streakDays: 0,
+      totalCorrect: 0,
+      totalWrong: 0,
+      stageCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    },
     statusBarHeight: 20
   },
 
@@ -35,7 +43,8 @@ Page({
 
   loadStats: function() {
     const stats = storage.getStats();
-    this.setData({ stats });
+    const reviewStats = storage.getEbbinghausStats();
+    this.setData({ stats, reviewStats });
   },
 
   // 登录/登出

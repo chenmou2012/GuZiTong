@@ -45,6 +45,79 @@
     <button class="sync-btn download-btn" bindtap="downloadData">下载云端</button>
   </view>
 
+  <!-- 学习统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-card-header">
+      <text class="stats-card-title">学习统计</text>
+    </view>
+    <view class="stats-card-content">
+      <view class="stats-row">
+        <view class="stats-item">
+          <text class="stats-item-number">{{reviewStats.todayReview}}</text>
+          <text class="stats-item-label">今日复习</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-item-number">{{reviewStats.todayDone}}</text>
+          <text class="stats-item-label">已完成</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-item-number">{{reviewStats.streakDays}}</text>
+          <text class="stats-item-label">连续学习</text>
+        </view>
+      </view>
+      <view class="stats-row">
+        <view class="stats-item">
+          <text class="stats-item-number">{{reviewStats.totalCorrect > 0 ? Math.round(reviewStats.totalCorrect / (reviewStats.totalCorrect + reviewStats.totalWrong) * 100) : 0}}%</text>
+          <text class="stats-item-label">正确率</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 艾宾浩斯进度 -->
+  <view class="ebbinghaus-card">
+    <view class="ebbinghaus-header">
+      <text class="ebbinghaus-title">艾宾浩斯记忆曲线</text>
+    </view>
+    <view class="ebbinghaus-content">
+      <view class="ebbinghaus-stage">
+        <text class="stage-label">阶段1 (1天)</text>
+        <view class="stage-bar">
+          <view class="stage-fill" style="width: {{reviewStats.stageCounts[1] / 33 * 100}}%"></view>
+        </view>
+        <text class="stage-count">{{reviewStats.stageCounts[1]}}</text>
+      </view>
+      <view class="ebbinghaus-stage">
+        <text class="stage-label">阶段2 (3天)</text>
+        <view class="stage-bar">
+          <view class="stage-fill" style="width: {{reviewStats.stageCounts[2] / 33 * 100}}%"></view>
+        </view>
+        <text class="stage-count">{{reviewStats.stageCounts[2]}}</text>
+      </view>
+      <view class="ebbinghaus-stage">
+        <text class="stage-label">阶段3 (7天)</text>
+        <view class="stage-bar">
+          <view class="stage-fill" style="width: {{reviewStats.stageCounts[3] / 33 * 100}}%"></view>
+        </view>
+        <text class="stage-count">{{reviewStats.stageCounts[3]}}</text>
+      </view>
+      <view class="ebbinghaus-stage">
+        <text class="stage-label">阶段4 (15天)</text>
+        <view class="stage-bar">
+          <view class="stage-fill" style="width: {{reviewStats.stageCounts[4] / 33 * 100}}%"></view>
+        </view>
+        <text class="stage-count">{{reviewStats.stageCounts[4]}}</text>
+      </view>
+      <view class="ebbinghaus-stage">
+        <text class="stage-label">阶段5 (30天)</text>
+        <view class="stage-bar">
+          <view class="stage-fill" style="width: {{reviewStats.stageCounts[5] / 33 * 100}}%"></view>
+        </view>
+        <text class="stage-count">{{reviewStats.stageCounts[5]}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 功能列表 -->
   <view class="menu-section">
     <!-- 学习记录 -->

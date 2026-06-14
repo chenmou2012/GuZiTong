@@ -430,11 +430,14 @@ Page({
       showGiveUp: true
     });
 
+    // 更新复习统计
+    storage.updateReviewStats(correct, currentWord.word);
+
     if (!correct) {
-      // 错误：这个词重来
+      // 错一道：重置 practiceCount = 0，重新练习4次
       setTimeout(() => {
         this.setData({
-          practiceCount: practiceCount  // 保持当前练习次数，重新生成题目
+          practiceCount: 0  // 重置为0，重新练习
         });
         this.generateQuiz();
       }, 1500);

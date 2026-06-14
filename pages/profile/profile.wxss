@@ -193,3 +193,111 @@
   font-size: 22rpx;
   color: #ddd;
 }
+
+/* 学习统计卡片 */
+.stats-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.stats-card-header {
+  margin-bottom: 20rpx;
+}
+
+.stats-card-title {
+  font-size: 32rpx;
+  color: #2C3E50;
+  font-weight: bold;
+}
+
+.stats-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-item-number {
+  font-size: 40rpx;
+  color: #bc262e;
+  font-weight: bold;
+}
+
+.stats-item-label {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 8rpx;
+}
+
+/* 艾宾浩斯进度卡片 */
+.ebbinghaus-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.ebbinghaus-header {
+  margin-bottom: 20rpx;
+}
+
+.ebbinghaus-title {
+  font-size: 32rpx;
+  color: #2C3E50;
+  font-weight: bold;
+}
+
+.ebbinghaus-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.ebbinghaus-stage {
+  display: flex;
+  align-items: center;
+}
+
+.stage-label {
+  font-size: 24rpx;
+  color: #666;
+  width: 160rpx;
+}
+
+.stage-bar {
+  flex: 1;
+  height: 16rpx;
+  background-color: #f0f0f0;
+  border-radius: 8rpx;
+  margin: 0 16rpx;
+  overflow: hidden;
+}
+
+.stage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #bc262e, #e53935);
+  border-radius: 8rpx;
+  transition: width 0.3s ease;
+}
+
+.stage-count {
+  font-size: 24rpx;
+  color: #bc262e;
+  font-weight: bold;
+  width: 40rpx;
+  text-align: right;
+}

@@ -297,6 +297,79 @@ function resetErrorCount(word) {
   return records;
 }
 
+// ==================== 复习统计数据 ====================
+const REVIEW_INTERVALS = [1, 3, 7, 15, 30]; // 艾宾浩斯间隔（天）
+
+function getReviewStats() {
+  return wx.getStorageSync('reviewStats') || {
+    todayReview: 0,
+    todayDone: 0,
+    streakDays: 0,
+    lastReviewDate: null,
+    totalCorrect: 0,
+    totalWrong: 0,
+    ebbinghausStage: {} // { wordId: stage }
+  };
+}
+
+function updateReviewStats(isCorrect, wordId) {
+  const stats = getReviewStats();
+  const today = new Date().toLocaleDateString('zh-CN');
+
+  // 更新今日复习数
+  if (stats.lastReviewDate !== today) {
+    stats.todayReview = 0;
+    stats.todayDone = 0;
+  }
+
+  stats.todayReview++;
+  if (isCorrect) {
+    stats.todayDone++;
+    stats.totalCorrect++;
+    // 更新艾宾浩斯阶段
+    const currentStage = stats.ebbinghausStage[wordId] || 0;
+    if (currentStage < REVIEW_INTERVALS.length) {
+      stats.ebbinghausStage[wordId] = currentStage + 1;
+    }
+  } else {
+    stats.totalWrong++;
+    // 错误重置到阶段1
+    stats.ebbinghausStage[wordId] = 1;
+  }
+
+  // 更新连续学习天数
+  if (stats.lastReviewDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('zh-CN');
+    if (stats.lastReviewDate === yesterday) {
+      stats.streakDays++;
+    } else if (stats.lastReviewDate !== today) {
+      stats.streakDays = 1;
+    }
+  }
+  stats.lastReviewDate = today;
+
+  wx.setStorageSync('reviewStats', stats);
+  return stats;
+}
+
+function getEbbinghausStats() {
+  const stats = getReviewStats();
+  const stageCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  const stage = stats.ebbinghausStage || {};
+  for (const wordId in stage) {
+    const s = stage[wordId];
+    if (s >= 1 && s <= 5) stageCounts[s]++;
+  }
+  return {
+    todayReview: stats.todayReview,
+    todayDone: stats.todayDone,
+    streakDays: stats.streakDays,
+    totalCorrect: stats.totalCorrect,
+    totalWrong: stats.totalWrong,
+    stageCounts
+  };
+}
+
 module.exports = {
   STORAGE_KEYS,
   getHistory,
@@ -329,6 +402,10 @@ module.exports = {
   getErrorCount,
   incrementErrorCount,
   resetErrorCount,
+  // 复习统计
+  getReviewStats,
+  updateReviewStats,
+  getEbbinghausStats,
   // 云端同步
   enableCloudSync,
   syncLearnList
