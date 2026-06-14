@@ -2,7 +2,7 @@
 .container {
   min-height: 100vh;
   background-color: #FDFBF7;
-  padding: 0 30rpx;
+  padding: 0 20rpx;
 }
 
 .header {
@@ -36,17 +36,25 @@
   box-sizing: border-box;
 }
 
-.word-list {
-  height: calc(100vh - 200rpx);
+.word-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 20rpx;
 }
 
 .word-item {
-  padding: 24rpx 0;
-  border-bottom: 1rpx solid #eee;
+  width: 20%;
+  padding: 16rpx 0;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .word-text {
-  font-size: 36rpx;
+  display: inline-block;
+  font-size: 32rpx;
   color: #2C3E50;
+  padding: 12rpx 8rpx;
+  background-color: #fff;
+  border-radius: 8rpx;
+  border: 1rpx solid #eee;
 }

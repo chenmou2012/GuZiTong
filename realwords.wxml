@@ -16,8 +16,8 @@
     />
   </view>
 
-  <!-- 实词列表 -->
-  <scroll-view class="word-list" scroll-y>
+  <!-- 实词网格 -->
+  <view class="word-grid">
     <view
       class="word-item"
       wx:for="{{filteredWords}}"
@@ -27,5 +27,5 @@
     >
       <text class="word-text">{{item}}</text>
     </view>
-  </scroll-view>
+  </view>
 </view>
