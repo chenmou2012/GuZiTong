@@ -44,17 +44,18 @@
 
 .word-item {
   width: 20%;
-  padding: 16rpx 0;
-  text-align: center;
+  padding: 12rpx 8rpx;
   box-sizing: border-box;
 }
 
 .word-text {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
   font-size: 32rpx;
   color: #2C3E50;
-  padding: 12rpx 8rpx;
   background-color: #fff;
-  border-radius: 8rpx;
+  border-radius: 12rpx;
   border: 1rpx solid #eee;
 }
