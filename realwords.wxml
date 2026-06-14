@@ -2,7 +2,7 @@
 <view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
   <!-- 返回按钮 -->
   <view class="back-btn" bindtap="goBack">
-    <text class="back-text">← 返回</text>
+    <text class="back-text">返回</text>
   </view>
 
   <!-- 标题 -->
