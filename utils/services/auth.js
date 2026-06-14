@@ -1,6 +1,6 @@
 // 登录认证服务
 const app = getApp();
-const API_BASE_URL = 'https://api.domain.com'; // 需要替换为实际后端地址
+const API_BASE_URL = 'https://share.sng-oj.cn';
 
 const STORAGE_KEYS = {
   TOKEN: 'auth_token',
