@@ -2,7 +2,7 @@
 <view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
   <!-- 标题 -->
   <view class="header">
-    <text class="title">中考实词</text>
+    <text class="title">实词</text>
     <text class="subtitle">共 {{realWords.length}} 个</text>
   </view>
 
