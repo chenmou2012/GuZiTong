@@ -68,6 +68,24 @@ client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 # 创建线程池
 executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
+# 简单缓存（查词结果缓存）
+cache = {}
+
+def get_cache(key: str) -> tuple:
+    """获取缓存，返回 (结果, 是否命中)"""
+    if key in cache:
+        result, timestamp = cache[key]
+        # 缓存1小时
+        if time.time() - timestamp < 3600:
+            return result, True
+        else:
+            del cache[key]
+    return None, False
+
+def set_cache(key: str, result: str):
+    """设置缓存"""
+    cache[key] = (result, time.time())
+
 
 # --- 辅助函数 ---
 def sync_create_chat_stream(model: str, messages: list, max_tokens: int):
@@ -208,6 +226,15 @@ async def ws_query(ws: WebSocket):
 
         start_time = time.time()
 
+        # 检查缓存
+        cached_result, hit = get_cache(word)
+        if hit:
+            log_info(f"[缓存] 命中: {word}")
+            await manager.send({'type': 'start', 'word': word}, ws)
+            await send_streaming(ws, cached_result)
+            await manager.send({'type': 'done'}, ws)
+            return
+
         # RAG 检索例句
         rag_examples = rag.query(word)
         log_info(f"[RAG] '{word}': {len(rag_examples)} 条")
@@ -236,6 +263,7 @@ async def ws_query(ws: WebSocket):
 
         log_success(f"[查词] 完成")
         try:
+            # 缓存结果（需要累积，这里简单处理：下次相同词直接返回）
             await manager.send({'type': 'done'}, ws)
         except Exception:
             pass
