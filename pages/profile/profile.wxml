@@ -7,16 +7,16 @@
         <text class="avatar-text">古</text>
       </view>
 
-      <!-- 未登录：昵称文本直接触发登录 -->
-      <view wx:if="{{!loggedIn}}" class="user-info" bindtap="onAvatarTap">
-        <text class="username">点击登录</text>
+      <!-- 未登录：昵称文本直接触发登录（catchtap 阻止冒泡到外层 onAvatarTap） -->
+      <view wx:if="{{!loggedIn}}" class="user-info" catchtap="onAvatarTap">
+        <text class="username">{{displayNickname}}</text>
         <text class="user-level user-level-hint">未登录</text>
       </view>
 
       <!-- 已登录 + 查看态：昵称 + 细线箭头提示可点，整行可点进入编辑 -->
       <view wx:elif="{{!editingNickname}}" class="user-info">
-        <view class="nickname-row" bindtap="onNicknameEdit">
-          <text class="username">{{getDisplayNickname()}}</text>
+        <view class="nickname-row" catchtap="onNicknameEdit">
+          <text class="username">{{displayNickname}}</text>
           <text class="edit-arrow">›</text>
         </view>
       </view>
@@ -34,8 +34,8 @@
           />
         </view>
         <view class="nickname-edit-btns">
-          <text class="edit-btn edit-btn-cancel" bindtap="onNicknameCancel">取消</text>
-          <text class="edit-btn edit-btn-save" bindtap="onNicknameSave">保存</text>
+          <text class="edit-btn edit-btn-cancel" catchtap="onNicknameCancel">取消</text>
+          <text class="edit-btn edit-btn-save" catchtap="onNicknameSave">保存</text>
         </view>
       </view>
     </view>

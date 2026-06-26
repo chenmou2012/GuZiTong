@@ -7,6 +7,7 @@ Page({
   data: {
     loggedIn: false,
     userInfo: null,
+    displayNickname: '点击登录',
     editingNickname: false,
     nicknameDraft: '',
     stats: {
@@ -79,6 +80,21 @@ Page({
     const loggedIn = auth.checkLogin();
     const userInfo = auth.getUserInfo();
     this.setData({ loggedIn, userInfo });
+    this._refreshDisplayNickname();
+  },
+
+  // 计算并刷新显示用的昵称：已设置 → 用之；未登录 → "点击登录"；登录但未设置 → 默认昵称
+  _refreshDisplayNickname: function() {
+    const ui = this.data.userInfo;
+    let name;
+    if (ui && ui.nickname) {
+      name = ui.nickname;
+    } else if (!this.data.loggedIn) {
+      name = '点击登录';
+    } else {
+      name = auth.getDefaultNickname();
+    }
+    this.setData({ displayNickname: name });
   },
 
   loadStats: function() {
@@ -141,13 +157,10 @@ Page({
       });
   },
 
-  // 昵称编辑：进入编辑态
+  // 昵称编辑：进入编辑态（用 displayNickname 作为初值，统一的回退逻辑）
   onNicknameEdit: function() {
     if (!this.data.loggedIn) return;
-    const current = this.data.userInfo && this.data.userInfo.nickname
-      ? this.data.userInfo.nickname
-      : auth.getDefaultNickname();
-    this.setData({ editingNickname: true, nicknameDraft: current });
+    this.setData({ editingNickname: true, nicknameDraft: this.data.displayNickname });
   },
 
   // 昵称输入实时同步到 draft
@@ -182,20 +195,13 @@ Page({
       editingNickname: false,
       nicknameDraft: ''
     });
+    this._refreshDisplayNickname();
     wx.showToast({ title: '已保存', icon: 'success' });
   },
 
   // 取消编辑
   onNicknameCancel: function() {
     this.setData({ editingNickname: false, nicknameDraft: '' });
-  },
-
-  // 显示用的昵称：未设置时回退到默认（基于 openid）
-  getDisplayNickname: function() {
-    const ui = this.data.userInfo;
-    if (ui && ui.nickname) return ui.nickname;
-    if (!this.data.loggedIn) return '点击登录';
-    return auth.getDefaultNickname();
   },
 
   // 退出登录
@@ -208,6 +214,7 @@ Page({
           auth.logout();
           this.hideSettings();
           this.setData({ loggedIn: false, userInfo: null });
+          this._refreshDisplayNickname();
           wx.showToast({ title: '已退出', icon: 'success' });
         }
       }
