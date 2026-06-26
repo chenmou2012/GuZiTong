@@ -3,6 +3,7 @@ const constants = require('../../utils/services/constants');
 const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
+const auth = require('../../utils/services/auth.js');
 
 const { API_BASE_URL } = constants;
 
@@ -77,8 +78,9 @@ Page({
 
     const that = this;
 
-    // 连接 WebSocket
-    wsClient.connect('/ws/translate', {
+    // WebSocket 协议不支持自定义 header，token 只能通过 URL query 传递
+    const token = auth.getToken() || '';
+    wsClient.connect('/ws/translate?token=' + encodeURIComponent(token), {
       onOpen: function() {
         console.log('WebSocket 连接 open');
         // 发送翻译请求

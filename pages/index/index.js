@@ -3,6 +3,7 @@ const constants = require('../../utils/services/constants');
 const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
+const auth = require('../../utils/services/auth.js');
 
 const { API_BASE_URL, REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 
@@ -147,7 +148,9 @@ Page({
     const that = this;
     console.log('发送数据: text=' + query);
 
-    wsClient.connect('/ws/query', {
+    // WebSocket 协议不支持自定义 header，token 只能通过 URL query 传递
+    const token = auth.getToken() || '';
+    wsClient.connect('/ws/query?token=' + encodeURIComponent(token), {
       onOpen: function() {
         wsClient.send({ text: query });
       },
