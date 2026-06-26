@@ -345,6 +345,16 @@ from database import (
     create_user, get_user_by_openid, update_user_token, update_user_info,
     save_user_data, get_user_data
 )
+from fastapi import Header
+
+
+def _extract_token(authorization: str = None) -> str | None:
+    """从 Authorization: Bearer xxx 头提取 token"""
+    if not authorization:
+        return None
+    if authorization.startswith("Bearer "):
+        return authorization[7:]
+    return authorization
 
 
 class LoginRequest(BaseModel):
@@ -422,9 +432,10 @@ def init_learn_order(openid: str):
 
 
 @app.get("/api/user")
-async def get_user_info(token: str):
+async def get_user_info(authorization: str = Header(None)):
     """获取用户信息"""
-    openid, valid = verify_token(token)
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         return {"error": "无效的 token"}
 
@@ -441,9 +452,14 @@ async def get_user_info(token: str):
 
 
 @app.put("/api/user")
-async def update_user(token: str, nickname: str = None, avatar: str = None):
+async def update_user(
+    authorization: str = Header(None),
+    nickname: str = None,
+    avatar: str = None,
+):
     """更新用户信息"""
-    openid, valid = verify_token(token)
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         return {"error": "无效的 token"}
 
@@ -452,9 +468,10 @@ async def update_user(token: str, nickname: str = None, avatar: str = None):
 
 
 @app.get("/api/user/data")
-async def get_user_data_api(token: str, data_type: str = None):
+async def get_user_data_api(authorization: str = Header(None), data_type: str = None):
     """获取用户数据"""
-    openid, valid = verify_token(token)
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         return {"error": "无效的 token"}
 
@@ -464,7 +481,7 @@ async def get_user_data_api(token: str, data_type: str = None):
 
 @app.put("/api/user/data")
 async def save_user_data_api(
-    token: str,
+    authorization: str = Header(None),
     data_type: str = None,
     data_key: str = None,
     data_value: str = None,
@@ -482,7 +499,8 @@ async def save_user_data_api(
         dv = data_value
 
     print(f"[SAVE] data_type={dt}, data_key={dk}")
-    openid, valid = verify_token(token)
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         print(f"[SAVE] 无效token")
         return {"error": "无效的 token"}
