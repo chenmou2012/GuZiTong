@@ -44,7 +44,9 @@ Page({
       };
     });
 
-    const percent = reviewWordsWithMeanings.length > 0 ? Math.round((1 / reviewWordsWithMeanings.length) * 100) : 0;
+    const total = reviewWordsWithMeanings.length;
+    // 进入复习页时尚未开始，进度为 0；答完第 1 题后由 nextWord 跳到 1/N
+    const percent = 0;
     this.setData({
       reviewWords: reviewWordsWithMeanings,
       totalCount: reviewWordsWithMeanings.length,
