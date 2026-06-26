@@ -37,30 +37,56 @@ class ChineseRAG:
             console.log(f"[yellow]RAG: 文件不存在 {self.path}[/yellow]")
 
     def query(self, word: str, limit: int = None) -> str:
-        """检索包含指定字词的例句"""
+        """检索包含指定字词的例句
+
+        多样性策略：
+        1. 先按 type（诗/词/曲/文言文）分桶，保证类型覆盖
+        2. 每桶均匀轮转采样，避免同义项扎堆
+        3. 桶内按 entry 顺序遍历取前 N 条
+        """
         if not word or not self.db:
             return "暂无例句"
 
         limit = limit or RAG_LIMIT
-        res = []
 
+        # 第一遍：按 type 分桶收集候选
+        buckets = {}  # type -> [(line, title, author)]
         for item in self.db:
             content = item.get("content", "")
             lines = re.split(r"[，。？！；、\n\r]", content)
+            type_ = item.get("type", "其他")
+            title = item.get("title", "未知")
+            author = item.get("author", "佚名")
 
             for line in lines:
                 line = line.strip()
                 if word in line and 0 < len(line) <= MAX_LINE_LENGTH:
-                    title = item.get("title", "未知")
-                    author = item.get("author", "佚名")
                     info = f"{line}（《{title}》{author}）"
+                    buckets.setdefault(type_, []).append(info)
 
-                    if info not in res:
-                        res.append(info)
+        if not buckets:
+            return "暂无例句"
 
-                if len(res) >= limit:
-                    break
-            if len(res) >= limit:
+        # 第二遍：桶间轮转采样，保证多样性
+        res = []
+        types = list(buckets.keys())
+        idx_per_type = {t: 0 for t in types}
+
+        while len(res) < limit:
+            progress = False
+            for t in types:
+                bucket = buckets[t]
+                idx = idx_per_type[t]
+                if idx < len(bucket):
+                    candidate = bucket[idx]
+                    if candidate not in res:
+                        res.append(candidate)
+                        progress = True
+                    idx_per_type[t] = idx + 1
+                    if len(res) >= limit:
+                        break
+            # 所有桶都遍历完都没新内容，退出
+            if not progress:
                 break
 
         if not res:
