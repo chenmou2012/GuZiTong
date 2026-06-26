@@ -83,10 +83,8 @@ Page({
   onQuickWordTap: function(e) {
     const word = e.currentTarget.dataset.word;
     this.setData({ inputText: word });
-    // 延迟确保 setData 完成
-    setTimeout(() => {
-      this.searchWord();
-    }, 100);
+    // setData 后 this.data 已同步更新，直接调用无需 setTimeout
+    this.searchWord();
   },
 
   goToRealWords: function() {
