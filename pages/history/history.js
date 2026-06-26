@@ -15,6 +15,10 @@ Page({
     this.refresh();
   },
 
+  goBack: function() {
+    wx.navigateBack();
+  },
+
   refresh: function() {
     this.setData({ history: storage.getHistory() });
   },

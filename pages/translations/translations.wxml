@@ -1,5 +1,15 @@
 <!-- pages/translations/translations.wxml -->
 <view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <text class="back-text">‹ 返回</text>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">翻译历史</text>
+  </view>
+
   <records-list
     list="{{translations}}"
     title-field="original"
