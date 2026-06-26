@@ -85,7 +85,8 @@ def verify_token(token: str) -> tuple:
             expire_time = datetime.fromtimestamp(expire_val)
         else:
             expire_time = datetime.fromisoformat(str(expire_val))
-    except:
+    except (ValueError, TypeError, OverflowError) as e:
+        log_warning(f"[auth.verify_token] expire_time 解析失败: {e}")
         return None, False
 
     if datetime.now() > expire_time:

@@ -523,7 +523,10 @@ async def save_user_data_api(
     # 这里统一转字符串再交给数据库层（database.save_user_data 会再 json.loads 校验合法性）
     if dv is not None and not isinstance(dv, str):
         dv = json.dumps(dv, ensure_ascii=False)
-    save_user_data(openid, dt, dk, dv)
+    ok = save_user_data(openid, dt, dk, dv)
+    if not ok:
+        log_error(f"[save_user_data] 写入失败, key={dk}")
+        return {"success": False}
     return {"success": True}
 
 
