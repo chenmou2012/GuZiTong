@@ -180,7 +180,7 @@ async function saveUserData(dataType, dataKey, dataValue) {
       data: {
         data_type: dataType,
         data_key: dataKey,
-        data_value: JSON.stringify(dataValue)
+        data_value: dataValue
       }
     });
     console.log('saveUserData response:', response);

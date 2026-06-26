@@ -465,8 +465,9 @@ async def save_user_data_api(
         print(f"[SAVE] 无效token")
         return {"error": "无效的 token"}
 
-    import json
-    save_user_data(openid, dt, dk, json.dumps(dv))
+    # wx.request 会将 data 对象自动 JSON 序列化，所以 dv 此时已是 JSON 字符串
+    # 直接存储，不再重复 json.dumps（避免双重序列化）
+    save_user_data(openid, dt, dk, dv)
     print(f"[SAVE] 成功: openid={openid}, key={dk}")
     return {"success": True}
 

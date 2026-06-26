@@ -225,6 +225,17 @@ def get_user_data(openid: str, data_type: str = None) -> dict:
     if not validate_openid(openid):
         return {}
 
+    def _parse_legacy_safe(value: str):
+        """解析 data_value，向后兼容历史上的双重 JSON 序列化数据"""
+        parsed = json.loads(value)
+        # 如果解析后仍是字符串，说明是老数据被双重 JSON 序列化（前端 JSON.stringify + 后端 json.dumps）
+        if isinstance(parsed, str):
+            try:
+                parsed = json.loads(parsed)
+            except json.JSONDecodeError:
+                pass  # 不是 JSON 字符串则保持原样
+        return parsed
+
     with get_conn() as conn:
         cursor = conn.cursor()
         if data_type:
@@ -244,11 +255,11 @@ def get_user_data(openid: str, data_type: str = None) -> dict:
         result = {}
         for row in rows:
             if data_type:
-                result[row["data_key"]] = json.loads(row["data_value"])
+                result[row["data_key"]] = _parse_legacy_safe(row["data_value"])
             else:
                 if row["data_type"] not in result:
                     result[row["data_type"]] = {}
-                result[row["data_type"]][row["data_key"]] = json.loads(row["data_value"])
+                result[row["data_type"]][row["data_key"]] = _parse_legacy_safe(row["data_value"])
         return result
 
 
