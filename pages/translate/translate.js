@@ -71,6 +71,21 @@ Page({
       return;
     }
 
+    // 未登录拦截：WebSocket 必须带 token，未登录会被后端拒绝
+    if (!auth.checkLogin()) {
+      wx.showModal({
+        title: '提示',
+        content: '翻译需要登录，是否前往"我的"页面登录？',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/profile/profile' });
+          }
+        }
+      });
+      return;
+    }
+
     // 关闭之前的 WebSocket 连接
     wsClient.close();
 
@@ -130,10 +145,12 @@ Page({
         }
       },
       onError: function(res) {
-        console.error('WebSocket 错误:', res);
-        that.showErrorMessage('网络错误');
+        console.error('[WS /ws/translate] 连接错误:', res);
+        wx.hideLoading();
+        that.showErrorMessage('网络错误，请稍后重试');
       },
-      onClose: function() {
+      onClose: function(res) {
+        console.log('[WS /ws/translate] 连接关闭:', res);
         // 由 wsClient 处理重连
       }
     });

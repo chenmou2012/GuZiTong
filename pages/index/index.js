@@ -130,6 +130,22 @@ Page({
       return;
     }
 
+    // 未登录拦截：WebSocket 必须带 token，后端会拒绝未授权连接（403）
+    // 不在这里直接弹"网络错误"，引导用户去登录页
+    if (!auth.checkLogin()) {
+      wx.showModal({
+        title: '提示',
+        content: '查词需要登录，是否前往"我的"页面登录？',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/profile/profile' });
+          }
+        }
+      });
+      return;
+    }
+
     // 关闭之前的 WebSocket
     wsClient.close();
 
@@ -178,11 +194,13 @@ Page({
           that.handleQueryResult(that.data.streamingText);
         }
       },
-      onError: function() {
+      onError: function(res) {
+        console.error('[WS /ws/query] 连接错误:', res);
         wx.hideLoading();
-        that.showErrorMessage('网络错误');
+        that.showErrorMessage('网络错误，请稍后重试');
       },
-      onClose: function() {
+      onClose: function(res) {
+        console.log('[WS /ws/query] 连接关闭:', res);
         // 由 wsClient 处理重连
       }
     });
