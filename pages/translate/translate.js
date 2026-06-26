@@ -2,6 +2,7 @@
 const constants = require('../../utils/services/constants');
 const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
+const wsClient = require('../../utils/services/websocket.js');
 
 const { API_BASE_URL } = constants;
 
@@ -24,10 +25,7 @@ Page({
 
   onShow: function() {
     // 每次切换回来时重置到初始界面
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
     this.setData({
       inputText: '',
       showResult: false,
@@ -63,10 +61,7 @@ Page({
     }
 
     // 关闭之前的 WebSocket 连接
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
 
     this.setData({
       isLoading: true,
@@ -81,31 +76,15 @@ Page({
     });
 
     const that = this;
-    const host = API_BASE_URL.replace('http://', '').replace('https://', '');
-    const wsUrl = (API_BASE_URL.startsWith('https') ? 'wss://' : 'ws://') + host;
 
     // 连接 WebSocket
-    this.socketTask = wx.connectSocket({
-      url: wsUrl + '/ws/translate',
-      header: {},
-      method: 'GET',
-      protocols: []
-    });
-
-    this.socketTask.onOpen(function(res) {
-      console.log('WebSocket 连接 open');
-      // 发送翻译请求
-      const sendData = JSON.stringify({
-        text: text
-      });
-      that.socketTask.send({
-        data: sendData
-      });
-    });
-
-    this.socketTask.onMessage(function(res) {
-      try {
-        const data = JSON.parse(res.data);
+    wsClient.connect('/ws/translate', {
+      onOpen: function() {
+        console.log('WebSocket 连接 open');
+        // 发送翻译请求
+        wsClient.send({ text: text });
+      },
+      onMessage: function(data) {
         console.log('收到消息:', data);
 
         if (data.error) {
@@ -137,21 +116,13 @@ Page({
           that.handleTranslateResult(that.data.streamingText);
           return;
         }
-      } catch (e) {
-        console.error('解析消息失败:', e);
-      }
-    });
-
-    this.socketTask.onError(function(res) {
-      console.error('WebSocket 错误:', res);
-      that.showErrorMessage('网络错误');
-    });
-
-    this.socketTask.onClose(function(res) {
-      console.log('WebSocket 关闭');
-      if (that.data.isLoading && that.data.streamingText) {
-        wx.hideLoading();
-        that.handleTranslateResult(that.data.streamingText);
+      },
+      onError: function(res) {
+        console.error('WebSocket 错误:', res);
+        that.showErrorMessage('网络错误');
+      },
+      onClose: function() {
+        // 由 wsClient 处理重连
       }
     });
   },
@@ -174,10 +145,7 @@ Page({
     });
 
     // 关闭 WebSocket
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
   },
 
   showErrorMessage: function(message) {
@@ -194,10 +162,7 @@ Page({
     });
 
     // 关闭 WebSocket
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
   },
 
   collectTranslation: function() {
@@ -230,10 +195,7 @@ Page({
   stopOrClear: function() {
     if (this.data.isLoading) {
       // 停止输出
-      if (this.socketTask) {
-        this.socketTask.close();
-        this.socketTask = null;
-      }
+      wsClient.close();
       wx.hideLoading();
       this.setData({
         isLoading: false,
@@ -244,10 +206,7 @@ Page({
       wx.showToast({ title: '已停止', icon: 'none' });
     } else {
       // 清空 - 先关闭 WebSocket
-      if (this.socketTask) {
-        this.socketTask.close();
-        this.socketTask = null;
-      }
+      wsClient.close();
       wx.hideLoading();
       this.setData({
         inputText: '',
@@ -262,10 +221,7 @@ Page({
 
   onPullDownRefresh: function() {
     // 关闭 WebSocket
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
 
     this.setData({
       inputText: '',
@@ -279,9 +235,6 @@ Page({
 
   onUnload: function() {
     // 页面卸载时关闭 WebSocket
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
   }
 });

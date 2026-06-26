@@ -4,6 +4,28 @@ const constants = require('./constants');
 
 let socketTask = null;
 let currentHandlers = null;
+let currentEndpoint = null;
+let reconnectAttempts = 0;
+let manualClosed = false;
+let reconnectTimer = null;
+const MAX_RECONNECT = 3;
+const BASE_DELAY = 1000;
+
+function getReconnectDelay() {
+  return BASE_DELAY * Math.pow(2, reconnectAttempts - 1);
+}
+
+function scheduleReconnect() {
+  if (manualClosed || reconnectAttempts >= MAX_RECONNECT || reconnectTimer) return;
+  reconnectAttempts++;
+  const delay = getReconnectDelay();
+  console.log('[WS] 重连第', reconnectAttempts, '/', MAX_RECONNECT, '次，', delay, 'ms 后');
+  reconnectTimer = setTimeout(function() {
+    reconnectTimer = null;
+    if (manualClosed || !currentHandlers || !currentEndpoint) return;
+    doConnect(currentEndpoint, currentHandlers);
+  }, delay);
+}
 
 /**
  * 创建 WebSocket 连接
@@ -15,6 +37,13 @@ let currentHandlers = null;
  *   - onClose()
  */
 function connect(endpoint, handlers) {
+  manualClosed = false;
+  reconnectAttempts = 0;
+  currentEndpoint = endpoint;
+  return doConnect(endpoint, handlers);
+}
+
+function doConnect(endpoint, handlers) {
   // 关闭之前的连接
   if (socketTask) {
     socketTask.close();
@@ -23,7 +52,6 @@ function connect(endpoint, handlers) {
 
   currentHandlers = handlers;
 
-  const that = this;
   const host = constants.API_BASE_URL.replace('http://', '').replace('https://', '');
   const wsUrl = (constants.API_BASE_URL.startsWith('https') ? 'wss://' : 'ws://') + host + endpoint;
 
@@ -61,6 +89,7 @@ function connect(endpoint, handlers) {
     if (handlers.onClose) {
       handlers.onClose(res);
     }
+    scheduleReconnect();
   });
 
   return socketTask;
@@ -81,10 +110,17 @@ function send(data) {
  * 关闭连接
  */
 function close() {
+  manualClosed = true;
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  reconnectAttempts = 0;
   if (socketTask) {
     socketTask.close();
     socketTask = null;
     currentHandlers = null;
+    currentEndpoint = null;
   }
 }
 

@@ -2,6 +2,7 @@
 const constants = require('../../utils/services/constants');
 const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
+const wsClient = require('../../utils/services/websocket.js');
 
 const { API_BASE_URL, REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 
@@ -131,10 +132,7 @@ Page({
     }
 
     // 关闭之前的 WebSocket
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
 
     this.setData({
       isLoading: true,
@@ -149,26 +147,13 @@ Page({
     wx.showLoading({ title: '正在查询...', mask: true });
 
     const that = this;
-    const sendData = JSON.stringify({ text: query });
-    // 获取域名部分
-    const host = API_BASE_URL.replace('http://', '').replace('https://', '');
-    const wsUrl = (API_BASE_URL.startsWith('https') ? 'wss://' : 'ws://') + host;
-    console.log('发送数据:', sendData, 'wsUrl:', wsUrl);
+    console.log('发送数据: text=' + query);
 
-    this.socketTask = wx.connectSocket({
-      url: wsUrl + '/ws/query',
-      header: {},
-      method: 'GET',
-      protocols: []
-    });
-
-    this.socketTask.onOpen(function() {
-      that.socketTask.send({ data: sendData });
-    });
-
-    this.socketTask.onMessage(function(res) {
-      try {
-        const data = JSON.parse(res.data);
+    wsClient.connect('/ws/query', {
+      onOpen: function() {
+        wsClient.send({ text: query });
+      },
+      onMessage: function(data) {
         console.log('收到:', data);
 
         if (data.error) {
@@ -191,14 +176,14 @@ Page({
         if (data.type === 'done') {
           that.handleQueryResult(that.data.streamingText);
         }
-      } catch (e) {
-        console.error('解析失败:', e);
+      },
+      onError: function() {
+        wx.hideLoading();
+        that.showErrorMessage('网络错误');
+      },
+      onClose: function() {
+        // 由 wsClient 处理重连
       }
-    });
-
-    this.socketTask.onError(function() {
-      wx.hideLoading();
-      that.showErrorMessage('网络错误');
     });
   },
 
@@ -225,10 +210,7 @@ Page({
     storage.saveHistory(this.data.inputText, content);
     this.checkCollectStatus();
 
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
   },
 
   showErrorMessage: function(message) {
@@ -240,10 +222,7 @@ Page({
       inputCollapsed: false,
       showQuickWords: true
     });
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
     setTimeout(() => {
       this.setData({ showError: false });
     }, 5000);
@@ -284,10 +263,7 @@ Page({
   stopOrClear: function() {
     if (this.data.isLoading) {
       // 停止输出
-      if (this.socketTask) {
-        this.socketTask.close();
-        this.socketTask = null;
-      }
+      wsClient.close();
       wx.hideLoading();
       this.setData({
         isLoading: false,
@@ -299,10 +275,7 @@ Page({
       wx.showToast({ title: '已停止', icon: 'none' });
     } else {
       // 清空 - 先关闭 WebSocket
-      if (this.socketTask) {
-        this.socketTask.close();
-        this.socketTask = null;
-      }
+      wsClient.close();
       wx.hideLoading();
       this.setData({
         inputText: '',
@@ -318,10 +291,7 @@ Page({
   },
 
   onPullDownRefresh: function() {
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
     this.setData({
       inputText: '',
       showResult: false,
@@ -338,9 +308,6 @@ Page({
   },
 
   onUnload: function() {
-    if (this.socketTask) {
-      this.socketTask.close();
-      this.socketTask = null;
-    }
+    wsClient.close();
   }
 });
