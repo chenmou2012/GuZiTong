@@ -71,23 +71,33 @@ client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 # 创建线程池
 executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
-# 简单缓存（查词结果缓存）
-cache = {}
+# 简单缓存（查词结果缓存）：用 OrderedDict 实现 LRU + TTL
+# - 最多 MAX_CACHE_SIZE 项，防止内存无限增长
+# - 每项 TTL = CACHE_TTL 秒，过期自动淘汰
+from collections import OrderedDict
+
+MAX_CACHE_SIZE = 500
+CACHE_TTL = 3600  # 1 小时
+cache = OrderedDict()
 
 def get_cache(key: str) -> tuple:
     """获取缓存，返回 (结果, 是否命中)"""
     if key in cache:
         result, timestamp = cache[key]
-        # 缓存1小时
-        if time.time() - timestamp < 3600:
+        if time.time() - timestamp < CACHE_TTL:
+            cache.move_to_end(key)  # LRU 更新
             return result, True
         else:
             del cache[key]
     return None, False
 
 def set_cache(key: str, result: str):
-    """设置缓存"""
+    """设置缓存（超出容量时淘汰最旧）"""
+    if key in cache:
+        cache.move_to_end(key)
     cache[key] = (result, time.time())
+    if len(cache) > MAX_CACHE_SIZE:
+        cache.popitem(last=False)
 
 
 # --- 辅助函数 ---
