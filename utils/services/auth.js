@@ -208,10 +208,14 @@ function request(url, options = {}) {
     const fullUrl = API_BASE_URL + url;
     const token = getToken();
 
+    // 默认 15s 超时，避免弱网下 loading 卡死
+    const timeout = options.timeout || 15000;
+
     wx.request({
       url: fullUrl,
       method: options.method || 'GET',
       data: options.data || {},
+      timeout: timeout,
       header: {
         'Content-Type': 'application/json',
         ...options.header
