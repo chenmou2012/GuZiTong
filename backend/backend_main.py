@@ -2,6 +2,7 @@ import json
 import time
 import asyncio
 import os
+import random
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -117,15 +118,16 @@ class QueryRequest(BaseModel):
 # --- WebSocket 管理器 ---
 class ConnectionManager:
     def __init__(self):
-        self.active = []
+        # 用 set 替代 list：O(1) 增删改查，并避免 'in' 判断的 O(N) 扫描
+        self.active = set()
 
     async def connect(self, ws: WebSocket):
         await ws.accept()
-        self.active.append(ws)
+        self.active.add(ws)
 
     def disconnect(self, ws):
-        if ws in self.active:
-            self.active.remove(ws)
+        # discard 在元素不存在时也不会抛异常，比 remove 更安全
+        self.active.discard(ws)
 
     async def send(self, msg: dict, ws: WebSocket):
         await ws.send_json(msg)
@@ -199,13 +201,11 @@ def health():
 
 
 async def send_streaming(ws: WebSocket, content: str):
-    """流式发送内容"""
-    for char in content:
-        try:
-            await manager.send({'type': 'content', 'content': char}, ws)
-            await asyncio.sleep(0)
-        except Exception:
-            break
+    """流式发送一个 chunk（不再逐字符拆分，避免包数暴增和 UI 卡顿）"""
+    try:
+        await manager.send({'type': 'content', 'content': content}, ws)
+    except Exception:
+        pass
 
 
 @app.websocket("/ws/query")
@@ -366,14 +366,11 @@ async def login(req: LoginRequest):
 
 def init_learn_order(openid: str):
     """新用户首次登录时生成背诵顺序"""
-    import random
-    from database import save_user_data
+    # realwords.json 在项目根目录（backend 的父目录），不再硬编码 /root/backend/
+    realwords_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "realwords.json")
 
-    # 从 realWords.js 获取词表
     try:
-        # 读取 realWords 数据
-        with open('/root/backend/realwords.json', 'r', encoding='utf-8') as f:
-            import json
+        with open(realwords_path, 'r', encoding='utf-8') as f:
             words_data = json.load(f)
 
         words = [w['word'] for w in words_data]
@@ -394,9 +391,11 @@ def init_learn_order(openid: str):
             })
 
         save_user_data(openid, 'learn', 'learnOrder', json.dumps(order))
-        print(f"为用户 {openid} 生成了 {len(order)} 个词的背诵顺序")
+        log_info(f"为用户 {openid} 生成了 {len(order)} 个词的背诵顺序")
+    except FileNotFoundError:
+        log_error(f"realwords.json 不存在: {realwords_path}")
     except Exception as e:
-        print(f"生成背诵顺序失败: {e}")
+        log_error(f"生成背诵顺序失败: {e}")
 
 
 @app.get("/api/user")
