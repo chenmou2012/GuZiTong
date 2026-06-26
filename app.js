@@ -1,5 +1,6 @@
 // app.js
 const sm2 = require('./utils/services/sm2.js');
+const auth = require('./utils/services/auth.js');
 
 App({
   globalData: {
@@ -30,6 +31,10 @@ App({
       console.warn('读取状态栏高度失败', e);
     }
 
+    // 静默登录：调 wx.login() 换 code → 后端 code2session → 写入 token
+    // 失败不阻塞启动（用户仍可在"我的"页手动触发登录）
+    this._silentLogin();
+
     // 初始化云开发
     if (wx.cloud) {
       wx.cloud.init({
@@ -37,5 +42,20 @@ App({
       });
       console.log('云开发已初始化');
     }
+  },
+
+  // 静默登录：拉起 wx.login() 拿到 code → 换 openid/token → 拉取用户资料
+  // - 已有 token：仅刷新 userInfo（防止后端昵称变更后前端不一致）
+  // - 无 token：完整登录流程
+  // - 失败：仅 console.warn，不弹 toast、不阻塞 UI
+  _silentLogin: function() {
+    if (auth.checkLogin()) {
+      auth.fetchUserInfo().catch((e) => console.warn('[auto login] refresh failed:', e.message));
+      return;
+    }
+    auth.login()
+      .then((res) => auth.fetchUserInfo())
+      .then(() => console.log('[auto login] success, openid=' + auth.getOpenid()))
+      .catch((e) => console.warn('[auto login] failed:', e.message));
   }
 })
