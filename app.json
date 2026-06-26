@@ -15,9 +15,6 @@
   ],
   "usingComponents": {},
   "__usePrivacyCheck__": true,
-  "requiredPrivateInfos": [
-    "chooseAvatar"
-  ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom",
