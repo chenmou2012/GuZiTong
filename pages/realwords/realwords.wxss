@@ -1,0 +1,73 @@
+/* realwords.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+  padding: 0 20rpx;
+}
+
+.back-btn {
+  position: fixed;
+  top: calc(20rpx + {{statusBarHeight}}px);
+  left: 20rpx;
+  z-index: 100;
+}
+
+.back-text {
+  font-size: 28rpx;
+  color: #bc262e;
+}
+
+.header {
+  padding: 40rpx 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 44rpx;
+  color: #bc262e;
+  font-weight: bold;
+  display: block;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.search-section {
+  padding: 20rpx 0;
+}
+
+.search-input {
+  width: 100%;
+  height: 80rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.word-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 20rpx;
+}
+
+.word-item {
+  width: 20%;
+  padding: 12rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.word-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  font-size: 32rpx;
+  color: #2C3E50;
+  background-color: #fff;
+  border-radius: 12rpx;
+  border: 1rpx solid #eee;
+}

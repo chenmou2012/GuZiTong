@@ -90,7 +90,7 @@ Page({
 
   goToRealWords: function() {
     wx.navigateTo({
-      url: '/realwords'
+      url: '/pages/realwords/realwords'
     });
   },
 
