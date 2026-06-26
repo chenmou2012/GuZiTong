@@ -1,4 +1,6 @@
 // app.js
+const sm2 = require('./utils/services/sm2.js');
+
 App({
   globalData: {
     apiBaseUrl: 'https://api.domain.com',
@@ -9,6 +11,14 @@ App({
   onLaunch: function() {
     // 小程序启动时执行的逻辑
     console.log('古字通已启动');
+
+    // SM-2 数据迁移（幂等）
+    try {
+      const result = sm2.migrateLegacyData();
+      console.log('SM-2 迁移:', result);
+    } catch (e) {
+      console.warn('SM-2 迁移失败', e);
+    }
 
     // 自定义导航栏：读取状态栏高度，供各页面顶部留白使用
     try {

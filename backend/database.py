@@ -16,6 +16,7 @@ ALLOWED_DATA_TYPES = {'learn', 'settings', 'progress'}
 ALLOWED_DATA_KEYS = {
     'collections', 'history', 'translations',
     'learned_words', 'learnedWords', 'review_records',
+    'reviewStats', 'wordStates',
     'learnOrder', 'preferences', 'theme'
 }
 

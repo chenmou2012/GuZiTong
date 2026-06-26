@@ -1,5 +1,5 @@
 <!-- pages/learn/learn.wxml -->
-<view class="container" style="padding-top: calc(48rpx + {{statusBarHeight}}px)">
+<view class="container" style="padding-top: {{statusBarHeight}}px">
   <!-- BEGIN: MainHeader -->
   <header wx:if="{{!learning}}" class="main-header">
     <h1 class="header-title">文言文学习</h1>
@@ -45,11 +45,9 @@
 
     <!-- BEGIN: ActionButtons -->
     <nav class="action-buttons">
-      <!-- Start Button: Solid Scholarly Red -->
       <button class="action-btn start-btn" bindtap="startLearn">
         <text class="action-btn-text">开始学习</text>
       </button>
-      <!-- Review Button: Outlined Scholarly Style -->
       <button class="action-btn review-btn" bindtap="startReview">
         <text class="action-btn-text">温故复习{{reviewCount > 0 ? '(' + reviewCount + ')' : ''}}</text>
       </button>
@@ -68,7 +66,7 @@
   <!-- 学习中 -->
   <view wx:else>
     <!-- 退出按钮 -->
-    <view class="exit-btn" style="top: calc(20rpx + {{statusBarHeight}}px)" bindtap="exitLearn">
+    <view class="exit-btn" bindtap="exitLearn">
       <text class="exit-btn-text">✕ 退出</text>
     </view>
 
@@ -96,7 +94,9 @@
         <button class="btn-next" bindtap="nextIntro" wx:if="{{introIndex < groupSize - 1}}">下一个</button>
       </view>
 
-      <button class="start-btn" bindtap="startPractice" wx:if="{{introIndex === groupSize - 1}}">开始练习</button>
+      <button class="action-btn start-btn" bindtap="startPractice" wx:if="{{introIndex === groupSize - 1}}" style="width: 100%;">
+        <text class="action-btn-text">开始练习</text>
+      </button>
     </view>
 
     <!-- 练习环节 -->
@@ -179,7 +179,7 @@
         </view>
         <!-- 单选时：已提交显示灰色看答案 -->
         <view wx:if="{{quizType === 'sentence_meaning' && showResult}}" class="result-btns">
-          <button class="answer-btn disabled" style="background:#ccc;color:#888">看答案</button>
+          <button class="answer-btn disabled">看答案</button>
           <button class="next-btn" bindtap="nextQuestion">下一题</button>
         </view>
         <!-- 多选时：未选择时 -->
@@ -189,7 +189,7 @@
         </view>
         <!-- 多选时：已选择(未提交或已提交) -->
         <view wx:if="{{quizType === 'select_meanings' && selectedIndexes.length > 0}}" class="result-btns">
-          <button class="answer-btn {{showResult ? 'disabled' : ''}}" style="{{showResult ? 'background:#ccc;color:#888' : ''}}">看答案</button>
+          <button class="answer-btn disabled">看答案</button>
           <button class="next-btn" bindtap="nextQuestion">下一题</button>
         </view>
       </view>

@@ -4,17 +4,53 @@
   background-color: #FDFBF7;
 }
 
+/* 重置原生 button 默认样式（避免粗细不一致） */
+button {
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+  font-size: inherit;
+  font-weight: inherit;
+  background: transparent;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+button::after {
+  border: none;
+}
+
+/* 顶部退出按钮 */
+.exit-btn {
+  position: fixed;
+  top: 30rpx;
+  left: 30rpx;
+  z-index: 100;
+  padding: 12rpx 24rpx;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 30rpx;
+}
+
+.exit-btn:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.exit-btn-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
 .review-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 32rpx;
+  padding-top: 100rpx; /* 给顶部退出按钮留位 */
 }
 
 .progress-bar {
   width: 100%;
   height: 8rpx;
-  background: #eee;
+  background: #f0f0f0;
   border-radius: 4rpx;
   margin-bottom: 16rpx;
   overflow: hidden;
@@ -45,7 +81,7 @@
   background: #fff;
   border-radius: 16rpx;
   padding: 64rpx 32rpx;
-  margin-bottom: 48rpx;
+  margin-bottom: 32rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
   display: flex;
   justify-content: center;
@@ -55,7 +91,7 @@
 .word {
   font-size: 72rpx;
   font-weight: bold;
-  color: #333;
+  color: #2C3E50;
 }
 
 .meaning-area {
@@ -63,7 +99,7 @@
   background: #fff;
   border-radius: 16rpx;
   padding: 32rpx;
-  margin-bottom: 48rpx;
+  margin-bottom: 32rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
@@ -76,7 +112,7 @@
 .meaning-item {
   display: flex;
   font-size: 32rpx;
-  color: #333;
+  color: #2C3E50;
   line-height: 1.6;
 }
 
@@ -94,39 +130,61 @@
   display: flex;
   gap: 24rpx;
   width: 100%;
-  padding: 24rpx 32rpx;
+  padding: 24rpx 30rpx;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   background: #FDFBF7;
   z-index: 100;
+  box-sizing: border-box;
 }
 
-.btn-known,
-.btn-unknown,
-.btn-next {
+.btns button {
   flex: 1;
-  padding: 28rpx 0;
-  border-radius: 24rpx;
-  font-size: 32rpx;
+  padding: 24rpx 0;
+  border-radius: 16rpx;
+  font-size: 30rpx;
   font-weight: 600;
   border: none;
+  line-height: 1.4;
 }
 
-.btn-known {
-  background: #bc262e;
-  color: #fff;
-}
-
-.btn-unknown {
+/* 三档按钮统一调色板（主色 + 灰）
+   - 认识（最积极）：主色填充
+   - 模糊（中等）：边框样式
+   - 不认识（最消极）：灰色 */
+.btn-hard {
   background: #f5f5f5;
   color: #666;
 }
 
-.btn-next {
+.btn-hard-confirm {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-good {
+  background: #fff;
+  color: #bc262e;
+  border: 2rpx solid #bc262e;
+}
+
+.btn-easy {
   background: #bc262e;
   color: #fff;
+}
+
+/* 主页面按钮（复习完成） */
+.btn-home {
+  width: 100%;
+  padding: 28rpx 0;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  background: #bc262e;
+  color: #fff;
+  border: none;
 }
 
 /* 复习完成 */
@@ -150,15 +208,4 @@
   font-size: 28rpx;
   color: #666;
   margin-bottom: 64rpx;
-}
-
-.btn-home {
-  width: 100%;
-  padding: 28rpx 0;
-  border-radius: 24rpx;
-  font-size: 32rpx;
-  font-weight: 600;
-  background: #bc262e;
-  color: #fff;
-  border: none;
 }

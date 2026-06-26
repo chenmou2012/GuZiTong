@@ -1,5 +1,10 @@
 <!-- pages/review/review.wxml -->
 <view class="container">
+  <!-- 顶部退出按钮（学习中） -->
+  <view wx:if="{{currentWord}}" class="exit-btn" bindtap="exitReview">
+    <text class="exit-btn-text">✕ 退出</text>
+  </view>
+
   <!-- 复习中 -->
   <view wx:if="{{currentWord}}" class="review-content">
     <!-- 进度 -->
@@ -27,11 +32,19 @@
       </view>
     </view>
 
-    <!-- 底部按钮 -->
+    <!-- 底部按钮：三档评分 -->
     <view class="btns">
-      <button wx:if="{{!showMeaning}}" class="btn-unknown" bindtap="markUnknown">不认识</button>
-      <button wx:if="{{showMeaning}}" class="btn-next" bindtap="nextWord">下一词</button>
-      <button class="btn-known" bindtap="markKnown">认识</button>
+      <!-- 已显示意思（点过不认识）后只剩"下一词/模糊/认识" -->
+      <block wx:if="{{showMeaning}}">
+        <button class="btn-hard-confirm" bindtap="markHard">下一词</button>
+        <button class="btn-good" bindtap="markGood">模糊</button>
+        <button class="btn-easy" bindtap="markEasy">认识</button>
+      </block>
+      <block wx:else>
+        <button class="btn-hard" bindtap="markHard">不认识</button>
+        <button class="btn-good" bindtap="markGood">模糊</button>
+        <button class="btn-easy" bindtap="markEasy">认识</button>
+      </block>
     </view>
   </view>
 

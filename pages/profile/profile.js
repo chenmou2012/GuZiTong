@@ -1,5 +1,6 @@
 // pages/profile/profile.js
 const storage = require('../../utils/services/storage');
+const sm2 = require('../../utils/services/sm2');
 const auth = require('../../utils/services/auth');
 
 Page({
@@ -17,7 +18,9 @@ Page({
       streakDays: 0,
       totalCorrect: 0,
       totalWrong: 0,
-      stageCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      learningCount: 0,
+      reviewCount: 0,
+      graduatedCount: 0
     },
     pieChart: {
       unlearned: 0,
@@ -70,8 +73,8 @@ Page({
     this.checkLogin();
     this.loadSettings();
     this.loadStats();
-    // 尝试从服务器恢复复习统计
-    storage.restoreReviewStatsFromServer();
+    // 尝试从服务器恢复复习统计 + wordStates
+    storage.restoreFromServer().then(() => this.loadStats());
   },
 
   checkLogin: function() {
@@ -85,27 +88,24 @@ Page({
 
   loadStats: function() {
     const stats = storage.getStats();
-    const reviewStats = storage.getEbbinghausStats();
-    const learned = storage.getLearnedWords() || [];
+    const reviewStats = sm2.getEbbinghausStats();
+    const states = sm2.getAllWordStates();
 
     // 计算饼图数据
     const totalWords = 150;
-    const learnedCount = learned.length;
+    const learnedCount = Object.keys(states).length;
 
-    // 根据艾宾浩斯阶段计算复习状态
-    // 阶段: 1, 2, 4, 7, 15, 30 天 (最大阶段为 6)
-    const stage = reviewStats?.ebbinghausStage || {};
+    // 按 SM-2 phase 分组
     let reviewing = 0;
     let reviewed = 0;
-
-    learned.forEach(w => {
-      const wordStage = stage[w.word] || 0;
-      if (wordStage >= 6) {
-        reviewed++; // 阶段6（30天）已完成
+    for (const word in states) {
+      const s = states[word];
+      if (s.phase === sm2.PHASE.GRADUATED) {
+        reviewed++;
       } else {
-        reviewing++; // 未完成复习
+        reviewing++;
       }
-    });
+    }
 
     // 未学习 = 总数 - 已学习
     const unlearned = Math.max(0, totalWords - learnedCount);

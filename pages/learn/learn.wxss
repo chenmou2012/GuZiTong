@@ -1,24 +1,7 @@
 /* pages/learn/learn.wxss */
+/* 与全局视觉统一：米白背景 + 白色卡片 + 学术红 + 宋体（参见 app.wxss） */
 
-/* 字体设置 - EB Garamond */
-page {
-  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
-}
-
-.container {
-  min-height: 100vh;
-  height: 100vh;
-  background: linear-gradient(135deg, #fcf9f8 0%, #f7f3f0 100%);
-  padding: 48rpx;
-  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 统一原生 button 默认样式：去掉默认描边/背景，避免按钮大小粗细不一致 */
+/* 重置原生 button 默认样式，避免粗细不一致 */
 button {
   margin: 0;
   padding: 0;
@@ -33,50 +16,41 @@ button::after {
   border: none;
 }
 
-.header-title,
-.progress-card-title,
-.progress-ring-percent,
-.action-btn-text {
-  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+/* ============ 主界面（非学习态） ============ */
+
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+  padding: 0 30rpx 120rpx;
+  box-sizing: border-box;
 }
 
-/* BEGIN: MainHeader */
+/* 标题 */
 .main-header {
-  width: 100%;
-  margin-top: 32rpx;
-  margin-bottom: 48rpx;
+  padding: 80rpx 0 40rpx;
   text-align: center;
 }
 
 .header-title {
-  font-size: 60rpx;
+  font-size: 44rpx;
   font-weight: bold;
   color: #bc262e;
   letter-spacing: 8rpx;
-  border-bottom: 4rpx solid rgba(188, 38, 46, 0.2);
-  padding-bottom: 24rpx;
-  display: inline-block;
 }
-/* END: MainHeader */
 
-/* BEGIN: ContentArea */
 .content-area {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 48rpx;
+  gap: 30rpx;
 }
-/* END: ContentArea */
 
-/* BEGIN: ProgressCard */
+/* 进度卡片 */
 .progress-card {
-  background: linear-gradient(135deg, #fcf9f8 0%, #f7f3f0 100%);
-  border-radius: 32rpx;
-  padding: 48rpx;
-  box-shadow: 0 4rpx 20rpx -2px rgba(0, 0, 0, 0.05), 0 2rpx 10rpx -2px rgba(0, 0, 0, 0.03);
-  border: 1rpx solid #dcd9d9;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
   position: relative;
-  overflow: hidden;
 }
 
 .progress-card-inner {
@@ -90,14 +64,13 @@ button::after {
 }
 
 .progress-card-status-area {
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .progress-card-status {
-  font-size: 20rpx;
-  color: #6b7280;
-  letter-spacing: 4rpx;
-  text-transform: uppercase;
+  font-size: 24rpx;
+  color: #888;
+  letter-spacing: 2rpx;
 }
 
 .progress-card-title-area {
@@ -105,9 +78,9 @@ button::after {
 }
 
 .progress-card-title {
-  font-size: 48rpx;
+  font-size: 40rpx;
   font-weight: bold;
-  color: #2d2d2d;
+  color: #2C3E50;
 }
 
 .progress-card-info-area {
@@ -119,462 +92,209 @@ button::after {
 .progress-card-current,
 .progress-card-chapter {
   font-size: 28rpx;
-  color: #6b7280;
-  display: block;
+  color: #666;
 }
 
 .divider {
   margin: 0 16rpx;
-  color: #d1d5db;
+  color: #ccc;
 }
 
 .current-word,
 .chapter-count {
-  color: #2d2d2d;
+  color: #2C3E50;
   font-weight: 500;
 }
 
-/* Progress Indicator */
+/* 右侧进度 */
 .progress-card-right {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-left: 24rpx;
 }
 
 .progress-card-right .progress-text {
   font-size: 48rpx;
   font-weight: bold;
   color: #bc262e;
+  line-height: 1;
 }
 
 .progress-card-right .progress-label {
-  font-size: 24rpx;
-  color: #999;
+  font-size: 22rpx;
+  color: #888;
+  margin-top: 8rpx;
 }
 
-.progress-ring-container {
-  position: relative;
-  width: 192rpx;
-  height: 192rpx;
-  border-radius: 96rpx;
-  background: #dcd9d9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-ring-bg {
-  position: absolute;
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  background: linear-gradient(135deg, #fcf9f8 0%, #f7f3f0 100%);
-}
-
-.progress-ring-progress {
-  position: absolute;
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  border: 10rpx solid transparent;
-  border-top-color: #bc262e;
-  border-right-color: #bc262e;
-  box-sizing: border-box;
-  transition: transform 0.5s ease-out;
-}
-
-.progress-ring-progress.half {
-  border-bottom-color: #bc262e;
-  border-left-color: #bc262e;
-}
-
-.progress-ring-center {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-ring-percent {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #2d2d2d;
-}
-
-.progress-ring-label {
-  font-size: 18rpx;
-  color: #6b7280;
-  letter-spacing: 4rpx;
-  text-transform: uppercase;
-  margin-top: 4rpx;
-}
-
-/* Word Count Footer in Card */
+/* 卡片底部 */
 .progress-card-footer {
-  margin-top: 32rpx;
+  margin-top: 24rpx;
   padding-top: 24rpx;
-  border-top: 2rpx dashed #d1d5db;
+  border-top: 1rpx solid #f0f0f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .footer-quote {
-  font-size: 22rpx;
-  color: #6b7280;
+  font-size: 24rpx;
+  color: #888;
   font-style: italic;
 }
 
 .footer-remaining {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 600;
   color: #bc262e;
 }
-/* END: ProgressCard */
 
-/* BEGIN: SessionInfo */
+/* 提示条 */
 .session-info {
   text-align: center;
-  padding: 16rpx 0;
+  padding: 8rpx 0;
 }
 
 .session-tip {
   font-size: 26rpx;
-  color: #6b7280;
-  font-style: italic;
+  color: #888;
 }
-/* END: SessionInfo */
 
-/* BEGIN: ActionButtons */
+/* 主操作按钮 */
 .action-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24rpx;
-  align-items: stretch;
-}
-
-/* 两个按钮共用尺寸，保证宽高完全一致（用 .action-buttons 前缀提高优先级，盖过下方旧的 .start-btn{width:50%}） */
-.action-buttons .action-btn {
-  width: 100%;
-  height: 200rpx;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-radius: 32rpx;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4rpx 20rpx -2px rgba(0, 0, 0, 0.05), 0 2rpx 10rpx -2px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
+  gap: 24rpx;
 }
 
-/* Start Button: Solid Scholarly Red */
+.action-btn {
+  flex: 1;
+  padding: 32rpx 0;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  letter-spacing: 4rpx;
+  transition: all 0.2s ease;
+}
+
 .action-btn.start-btn {
-  background: linear-gradient(135deg, #bc262e 0%, #8a1a1f 100%);
+  background: #bc262e;
   color: #fff;
-  border: 2rpx solid transparent;
 }
 
 .action-btn.start-btn:active {
-  transform: scale(0.95);
+  background: #991b1b;
+  transform: scale(0.98);
 }
 
-/* Review Button: Outlined Scholarly Style */
 .action-btn.review-btn {
   background: #fff;
-  border: 2rpx solid rgba(188, 38, 46, 0.3);
   color: #bc262e;
+  border: 2rpx solid #bc262e;
 }
 
 .action-btn.review-btn:active {
-  border-color: #bc262e;
-  transform: scale(0.95);
+  background: #fef2f2;
+  transform: scale(0.98);
 }
 
 .action-btn-text {
-  font-size: 36rpx;
-  font-weight: bold;
-  letter-spacing: 6rpx;
-  white-space: nowrap;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }
-/* END: ActionButtons */
 
 /* 字音跟读入口 */
 .pronounce-entry {
-  margin-top: 24rpx;
   display: flex;
   align-items: center;
   background: #fff;
-  border: 1rpx solid rgba(188, 38, 46, 0.18);
-  border-radius: 24rpx;
+  border-radius: 16rpx;
   padding: 28rpx 32rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
+
 .pronounce-entry:active {
-  background: #faf5f4;
+  background: #fafafa;
 }
+
 .pronounce-entry-icon {
   font-size: 36rpx;
   margin-right: 16rpx;
 }
+
 .pronounce-entry-text {
   flex: 1;
   font-size: 30rpx;
-  font-weight: 500;
-  color: #1b1c1c;
-  letter-spacing: 2rpx;
+  color: #2C3E50;
 }
+
 .pronounce-entry-arrow {
-  font-size: 40rpx;
-  color: #bc262e;
-}
-
-/* 以下是原有样式保留 */
-
-.progress-card-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.progress-card-info {
-  flex: 1;
-}
-
-.progress-card-status {
-  font-size: 24rpx;
-  color: #717971;
-  display: block;
-  margin-bottom: 8rpx;
-  letter-spacing: 2rpx;
-  text-transform: uppercase;
-}
-
-.progress-card-title {
-  font-size: 36rpx;
-  font-weight: 500;
-  color: #1b1c1c;
-  display: block;
-  margin-bottom: 8rpx;
-}
-
-.progress-card-current {
-  font-size: 28rpx;
-  color: #414942;
-  display: block;
-}
-
-.progress-card-ring {
-  width: 160rpx;
-  height: 160rpx;
-  flex-shrink: 0;
-}
-
-.progress-ring-outer {
-  position: relative;
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  background: #e4e2e1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-ring-bg {
-  position: absolute;
-  width: 128rpx;
-  height: 128rpx;
-  border-radius: 64rpx;
-  background: #f0ebe3;
-}
-
-.progress-ring-progress {
-  position: absolute;
-  width: 128rpx;
-  height: 128rpx;
-  border-radius: 64rpx;
-  border: 8rpx solid transparent;
-  border-top-color: #bc262e;
-  border-right-color: #bc262e;
-  box-sizing: border-box;
-  transition: transform 0.5s ease-out;
-}
-
-.progress-ring-progress.half {
-  border-bottom-color: #bc262e;
-  border-left-color: #bc262e;
-}
-
-.progress-ring-center {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-ring-percent {
   font-size: 32rpx;
-  font-weight: 500;
-  color: #bc262e;
+  color: #ccc;
 }
 
-.progress-card-footer {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 24rpx;
-  margin-top: 24rpx;
-  border-top: 1rpx solid rgba(193, 201, 191, 0.5);
+/* ============ 学习态：退出按钮 ============ */
+
+.exit-btn {
+  position: fixed;
+  top: 30rpx;
+  left: 30rpx;
+  z-index: 100;
+  padding: 12rpx 24rpx;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 30rpx;
 }
 
-.progress-card-chapter {
-  font-size: 24rpx;
-  color: #717971;
+.exit-btn:active {
+  background: rgba(0, 0, 0, 0.1);
 }
 
-.progress-card-remaining {
-  font-size: 24rpx;
-  color: #717971;
-}
-
-.start-card {
-  text-align: center;
-  padding: 48rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(185, 28, 28, 0.1);
-}
-
-.start-card-btns {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
-  margin-top: 32rpx;
-}
-
-.start-card-btns .start-btn {
-  margin-top: 0;
-  width: auto;
-  flex: 1;
-}
-
-.start-title {
-  display: block;
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #bc262e;
-  margin-bottom: 30rpx;
-}
-
-.start-desc {
-  display: block;
-  font-size: 28rpx;
+.exit-btn-text {
+  font-size: 26rpx;
   color: #666;
-  margin-bottom: 10rpx;
 }
 
-.start-btn {
-  margin-top: 32rpx;
-  padding: 20rpx 60rpx;
-  background: linear-gradient(135deg, #bc262e 0%, #8a1a1f 100%);
-  color: #fff;
-  border-radius: 48rpx;
-  font-size: 28rpx;
-  border: none;
-  width: 50%;
-  box-shadow: 0 4rpx 16rpx rgba(171, 51, 52, 0.25);
-  transition: all 0.3s ease;
-}
+/* ============ 学习态：展示环节（intro） ============ */
 
-.start-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 2rpx 10rpx rgba(185, 28, 28, 0.2);
-}
-
-/* 进度条 */
-.progress-bar-container {
-  width: 80%;
-  margin: 30rpx auto;
-  text-align: center;
-}
-
-.progress-bar {
-  height: 16rpx;
-  background: #f0e0e0;
-  border-radius: 8rpx;
-  overflow: hidden;
-  margin-bottom: 10rpx;
-  box-shadow: inset 0 2rpx 4rpx rgba(0,0,0,0.1);
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #bc262e, #e53935);
-  border-radius: 8rpx;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.3);
-}
-
-.progress-text {
-  font-size: 24rpx;
-  color: #bc262e;
-  font-weight: bold;
-}
-
-/* 展示环节 */
 .intro-phase {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20rpx;
-  min-height: 80vh;
-  justify-content: space-between;
+  padding: 100rpx 30rpx 40rpx;
 }
 
 .phase-title {
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 20rpx;
+  color: #2C3E50;
+  margin-bottom: 16rpx;
+  text-align: center;
 }
 
 .group-progress {
-  font-size: 28rpx;
-  color: #666;
-  margin-bottom: 30rpx;
-}
-
-.word-list {
-  width: 100%;
-  max-height: 55vh;
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 40rpx;
 }
 
 .intro-word-item {
-  padding: 40rpx;
-  margin-bottom: 20rpx;
+  width: 100%;
   background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+  border-radius: 16rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 40rpx;
 }
 
 .intro-word {
+  display: block;
   font-size: 96rpx;
   font-weight: bold;
   color: #bc262e;
-  display: block;
-  margin-bottom: 40rpx;
   text-align: center;
   letter-spacing: 8rpx;
-}
-
-.intro-meanings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
+  margin-bottom: 40rpx;
 }
 
 .intro-meanings-list {
@@ -586,9 +306,13 @@ button::after {
   align-items: flex-start;
   padding: 20rpx 28rpx;
   margin-bottom: 16rpx;
-  background: #fafafa;
-  border-radius: 16rpx;
-  border-left: 8rpx solid #bc262e;
+  background: #faf8f5;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #bc262e;
+}
+
+.intro-meaning-item:last-child {
+  margin-bottom: 0;
 }
 
 .meaning-number {
@@ -600,59 +324,53 @@ button::after {
 }
 
 .meaning-text {
-  font-size: 34rpx;
-  color: #333;
+  flex: 1;
+  font-size: 32rpx;
+  color: #2C3E50;
   line-height: 1.7;
 }
 
-.intro-meaning {
-  font-size: 32rpx;
-  color: #333;
-  background: #f5f5f5;
-  padding: 12rpx 20rpx;
-  border-radius: 12rpx;
-  margin: 8rpx;
-}
-
-/* 展示导航按钮 */
 .intro-btns {
   display: flex;
   justify-content: center;
-  gap: 20rpx;
-  margin-top: 30rpx;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
 }
 
-.btn-prev, .btn-next {
-  padding: 20rpx 40rpx;
+.btn-prev,
+.btn-next {
+  padding: 20rpx 56rpx;
   background: #fff;
-  color: #333;
-  border-radius: 40rpx;
+  color: #2C3E50;
+  border-radius: 24rpx;
   font-size: 28rpx;
-  border: 2rpx solid #ddd;
-  transition: all 0.15s ease;
+  border: 2rpx solid #e0e0e0;
+  font-weight: 600;
 }
 
-.btn-prev:active, .btn-next:active {
-  transform: scale(0.95);
-  opacity: 0.8;
+.btn-prev:active,
+.btn-next:active {
+  transform: scale(0.96);
+  opacity: 0.85;
 }
 
 .btn-next {
   background: #bc262e;
   color: #fff;
-  border: none;
+  border-color: #bc262e;
 }
 
-/* 练习环节 */
+/* ============ 学习态：练习环节（practice） ============ */
+
 .practice-phase {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 32rpx;
-  padding-bottom: 20rpx;
+  padding: 0 30rpx;
 }
 
-.practice-phase .header-progress-bar {
+/* 顶部进度条 */
+.header-progress-bar {
   position: fixed;
   top: 0;
   left: 0;
@@ -663,7 +381,7 @@ button::after {
 
 .header-progress-bg {
   height: 4rpx;
-  background: #e4e2e1;
+  background: #f0f0f0;
   width: 100%;
 }
 
@@ -673,12 +391,13 @@ button::after {
   transition: width 0.3s ease;
 }
 
+/* 练习页头部 */
 .header-info {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  padding: 80rpx 0 24rpx;
+  padding: 100rpx 0 24rpx;
 }
 
 .progress-info {
@@ -687,25 +406,25 @@ button::after {
 }
 
 .page-title {
-  font-family: 'EB Garamond', serif;
-  font-size: 28rpx;
-  font-weight: 500;
-  color: #414942;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #bc262e;
+  letter-spacing: 4rpx;
+  margin-bottom: 8rpx;
 }
 
 .progress-label {
-  font-size: 24rpx;
+  font-size: 22rpx;
+  color: #888;
+  letter-spacing: 2rpx;
   text-transform: uppercase;
-  letter-spacing: 4rpx;
-  color: #717971;
-  font-weight: 500;
 }
 
-.progress-text {
-  font-family: 'EB Garamond', serif;
-  font-size: 36rpx;
-  font-weight: 500;
-  color: #1b1c1c;
+.header-info .progress-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-top: 4rpx;
 }
 
 .group-info {
@@ -715,10 +434,11 @@ button::after {
 }
 
 .group-label {
-  font-size: 20rpx;
-  color: #717971;
+  font-size: 24rpx;
+  color: #888;
 }
 
+/* 题目卡片 */
 .quiz-area {
   width: 100%;
   flex-shrink: 0;
@@ -727,34 +447,31 @@ button::after {
 .main-card {
   background: #fff;
   border-radius: 16rpx;
-  padding: 24rpx 16rpx;
+  padding: 48rpx 32rpx;
   text-align: center;
-  border: 1rpx solid rgba(193, 201, 191, 0.4);
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
-  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 24rpx;
 }
 
 .quote-text {
-  font-family: 'EB Garamond', serif;
-  font-size: 40rpx;
-  color: #1b1c1c;
+  font-size: 38rpx;
+  color: #2C3E50;
   line-height: 1.8;
 }
 
 .quote-source {
   display: block;
   font-size: 24rpx;
-  color: #999;
+  color: #888;
   text-align: right;
-  margin-top: 8rpx;
+  margin-top: 16rpx;
 }
 
 .question-text {
   text-align: center;
-  font-family: 'EB Garamond', serif;
   font-size: 28rpx;
-  color: #1b1c1c;
-  padding: 12rpx 0 16rpx;
+  color: #666;
+  padding: 16rpx 0 24rpx;
 }
 
 .bold-word {
@@ -762,284 +479,119 @@ button::after {
   color: #bc262e;
 }
 
+/* 选项 */
 .options-area {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 24rpx;
 }
 
 .option-btn {
-  padding: 24rpx 32rpx;
+  padding: 28rpx 32rpx;
   background: #fff;
   border-radius: 16rpx;
   font-size: 30rpx;
   text-align: center;
-  border: 1rpx solid rgba(193, 201, 191, 0.4);
+  color: #2C3E50;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
 .option-btn:active {
-  background: #f0eded;
+  background: #fafafa;
 }
 
 .option-btn.correct {
   background: #E8F5E9 !important;
-  border-color: #4CAF50 !important;
-  color: #4CAF50 !important;
+  color: #2E7D32 !important;
 }
 
 .option-btn.wrong {
   background: #FFEBEE !important;
-  border-color: #F44336 !important;
-  color: #F44336 !important;
+  color: #C62828 !important;
 }
 
 .option-btn.selected {
   background: #E3F2FD !important;
-  border-color: #1976D2 !important;
-  color: #1976D2 !important;
+  color: #1565C0 !important;
 }
 
-@keyframes correctPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-@keyframes wrongShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5rpx); }
-  75% { transform: translateX(5rpx); }
-}
-
-/* 结果 */
+/* 结果提示 */
 .result-area {
   text-align: center;
-  padding: 32rpx 0;
-  font-size: 32rpx;
-  font-weight: 500;
+  padding: 24rpx 0;
 }
 
 .result-correct {
-  color: #316342;
+  color: #2E7D32;
+  font-size: 32rpx;
+  font-weight: 600;
   display: block;
 }
 
 .result-wrong {
-  color: #bc262e;
+  color: #C62828;
+  font-size: 32rpx;
+  font-weight: 600;
   display: block;
 }
 
-/* 看答案按钮 */
-.answer-btn-area {
-  display: flex;
-  justify-content: center;
-  padding: 32rpx 0;
+.correct-answers {
+  margin-top: 16rpx;
+  padding: 24rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #666;
+  text-align: left;
+  line-height: 1.8;
 }
 
-.answer-btn {
-  font-family: 'EB Garamond', serif;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #bc262e;
-  background: #fff;
-  border: 2rpx solid #bc262e;
-  border-radius: 24rpx;
-  padding: 24rpx 56rpx;
-}
-
-/* 下一题按钮 */
-.next-btn-area {
-  display: flex;
-  justify-content: center;
-  padding: 24rpx 0;
-}
-
-.next-btn {
-  font-size: 32rpx;
-  font-weight: 600;
-  padding: 24rpx 56rpx;
-  background: #bc262e;
-  color: #fff;
-  border-radius: 24rpx;
-}
-
-/* 结果页面左右按钮 */
+/* 底部结果按钮组 */
 .result-btns {
   display: flex;
-  justify-content: space-between;
   gap: 24rpx;
-  padding: 24rpx 32rpx;
+  padding: 24rpx 30rpx;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   background: #FDFBF7;
   z-index: 100;
+  box-sizing: border-box;
 }
 
-.result-btns .answer-btn {
+.answer-btn {
   flex: 1;
-  background: #f5f5f5;
-  color: #666;
-}
-
-.result-btns .next-btn {
-  flex: 1;
-  background: #bc262e;
-  color: #fff;
-}
-
-.result-btns .next-btn.disabled {
-  flex: 1;
-  background: #ccc;
-  color: #888;
-}
-
-.result-btns .next-btn:only-child {
-  margin: 0 auto;
-}
-
-.action-btns .btn.next {
-  padding: 20rpx 60rpx;
-  background: #bc262e;
-  color: #fff;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  border: none;
-}
-
-.btn-give-up {
-  padding: 20rpx 40rpx;
-  background: #FF9800;
-  color: #fff;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  border: none;
-}
-
-/* 统计 */
-.stats {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 40rpx;
-  padding: 32rpx;
+  padding: 24rpx 0;
   background: #fff;
-  border-radius: 20rpx;
-  width: 90%;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-num {
-  display: block;
-  font-size: 44rpx;
-  font-weight: bold;
-  color: #bc262e;
-  text-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.2);
-}
-
-.stat-label {
-  font-size: 22rpx;
-  color: #999;
-}
-
-/* 复习阶段 */
-.review-phase {
-  padding: 20rpx;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30rpx;
-}
-
-.review-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.btn-back {
-  padding: 16rpx 32rpx;
-  background: #f5f5f5;
   color: #666;
-  border-radius: 30rpx;
-  font-size: 26rpx;
-  border: none;
-}
-
-.exit-btn {
-  position: fixed;
-  top: 20rpx;
-  left: 20rpx;
-  z-index: 100;
-  padding: 12rpx 24rpx;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 30rpx;
-}
-
-.exit-btn-text {
-  font-size: 26rpx;
-  color: #666;
-}
-
-.review-tip {
-  text-align: center;
-  font-size: 28rpx;
-  color: #666;
-  margin-bottom: 20rpx;
-}
-
-.review-list {
-  max-height: 60vh;
-  padding: 10rpx;
-}
-
-.review-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 28rpx;
-  margin-bottom: 20rpx;
-  background: #fff;
   border-radius: 16rpx;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
+  font-size: 30rpx;
+  font-weight: 600;
+  border: 2rpx solid #e0e0e0;
 }
 
-.review-word {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
+.answer-btn:active {
+  background: #fafafa;
 }
 
-.review-btns {
-  display: flex;
-  gap: 16rpx;
+.next-btn {
+  flex: 1;
+  padding: 24rpx 0;
+  background: #bc262e;
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 600;
 }
 
-.btn-know {
-  background: #4CAF50 !important;
-  color: #fff !important;
-  border: none !important;
+.next-btn:active {
+  background: #991b1b;
 }
 
-.btn-forget {
-  background: #dc3545 !important;
-  color: #fff !important;
-  border: none !important;
-}
-
-.no-review {
-  text-align: center;
-  padding: 60rpx;
-  color: #4CAF50;
-  font-size: 32rpx;
+.next-btn.disabled {
+  background: #e0e0e0;
+  color: #999;
 }
