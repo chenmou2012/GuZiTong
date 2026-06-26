@@ -182,15 +182,17 @@ QUERY_SYSTEM_PROMPT = """你是一位专业的文言文教育专家，专门帮�
 5. 义项按常见程度排序，【本义】优先于【引申义】。
 6. 释义要准确、简洁、适合初中生理解；严格区分本义和引申义。
 7. **如对某个义项存在疑虑，宁可不列，也不要补全**。
+8. **若有「常见误用避坑」段**，其中列出的误用理解必须**显式纠正**，不得采纳为正确释义。
 
-以下是古诗文数据库中包含该字的例句，直接选用，不需要自己编造：
+以下是古诗文数据库中包含该字的例句（含「常见误用避坑」段，如有），直接选用，不需要自己编造：
 {rag_examples}
 
 注意：
 1. 严格使用上面提供的例句，每个义项都要用对应的例句
 2. 如果提供的例句不够，宁可少列义项，也不要用未提供的例句
 3. 如果是多音字，在读音部分列出所有读音
-4. 返回纯 Markdown 内容，不要有额外解释"""
+4. **若存在「常见误用避坑」段**，请在对应义项下用"⚠️ 易误为：..."显式提示学生避开该错误理解
+5. 返回纯 Markdown 内容，不要有额外解释"""
 
 TRANSLATE_SYSTEM_PROMPT = """你是一位专业的文言文翻译专家，专门帮助初中生学习文言文翻译。
 
@@ -265,7 +267,12 @@ async def ws_query(ws: WebSocket, token: str = None):
 
         # RAG 检索例句
         rag_examples = rag.query(word)
-        log_info(f"[RAG] '{word}': {len(rag_examples)} 条")
+        # 查询常见误用反例（避坑提示）
+        misuses = rag.query_misuses(word)
+        # 拼成完整上下文
+        if misuses:
+            rag_examples = misuses + "\n\n" + rag_examples
+        log_info(f"[RAG] '{word}': 例句 {len(rag_examples)} 字")
 
         # 构建 prompt
         prompt = QUERY_SYSTEM_PROMPT.replace("{rag_examples}", rag_examples)
