@@ -66,24 +66,23 @@
   border-radius: 50%;
 }
 
-/* 昵称行：横向排布「昵称 + 编辑图标」 */
+/* 昵称行：横向排布「昵称 + 编辑提示」，整行可点击进入编辑 */
 .nickname-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
-.edit-icon {
+.nickname-row:active {
+  opacity: 0.55;
+}
+
+.edit-arrow {
   font-size: 32rpx;
-  color: #B91C1C;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
-  background-color: #fef2f2;
+  color: #ccc;
+  font-weight: 300;
   line-height: 1;
-}
-
-.edit-icon:active {
-  background-color: #fde2e2;
+  margin-top: -6rpx;
 }
 
 /* 昵称编辑态：输入框 */

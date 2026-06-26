@@ -13,13 +13,12 @@
         <text class="user-level user-level-hint">未登录</text>
       </view>
 
-      <!-- 已登录 + 查看态：昵称 + 编辑图标 -->
+      <!-- 已登录 + 查看态：昵称 + 细线箭头提示可点，整行可点进入编辑 -->
       <view wx:elif="{{!editingNickname}}" class="user-info">
-        <view class="nickname-row">
+        <view class="nickname-row" bindtap="onNicknameEdit">
           <text class="username">{{getDisplayNickname()}}</text>
-          <text class="edit-icon" bindtap="onNicknameEdit">✎</text>
+          <text class="edit-arrow">›</text>
         </view>
-        <text class="user-level">已登录</text>
       </view>
 
       <!-- 已登录 + 编辑态：输入框 + 保存/取消 -->

@@ -125,14 +125,26 @@ async function fetchUserInfo() {
 }
 
 /**
- * 根据 openid 生成默认昵称（取后 4 位数字/字母）
- * 没有 openid 时回退到「古字通用户」
+ * 把字符串哈希成 8 位十六进制字符串（无符号 32-bit）。
+ * 用于把任意长度的 openid 收敛成稳定可读的短标识。
+ */
+function _hashToHex8(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0; // 收敛到 32 位有符号
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
+ * 根据 openid 生成默认昵称：「文言学者」+ 4 位十六进制字符。
+ * 没有 openid 时回退到「古字通用户」。
  */
 function getDefaultNickname() {
   const openid = getOpenid();
   if (!openid) return '古字通用户';
-  const tail = openid.slice(-4);
-  return '用户' + tail;
+  return '文言学者' + _hashToHex8(openid).slice(0, 4);
 }
 
 /**

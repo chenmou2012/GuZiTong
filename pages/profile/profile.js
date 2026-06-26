@@ -117,10 +117,12 @@ Page({
     this.setData({ stats, reviewStats, pieChart });
   },
 
-  // 头像/未登录昵称点击：仅触发登录（已登录时头像不再承担编辑入口，由昵称旁的铅笔按钮进入编辑）
+  // 头像/未登录昵称点击：未登录 → 登录；已登录 → 进入昵称编辑
   onAvatarTap: function() {
     if (!this.data.loggedIn) {
       this.doLogin();
+    } else {
+      this.onNicknameEdit();
     }
   },
 
