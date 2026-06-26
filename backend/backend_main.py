@@ -251,19 +251,25 @@ async def ws_query(ws: WebSocket):
         stream = await call_ai_stream_async(MODEL, messages, MAX_TOKENS)
 
         first_token = True
+        full_result = ''  # 累积完整结果用于缓存
         try:
             for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
                     if first_token:
                         log_info(f"[查词] 首token: {(time.time()-start_time)*1000:.0f}ms")
                         first_token = False
-                    await send_streaming(ws, chunk.choices[0].delta.content)
+                    full_result += content  # 累积
+                    await send_streaming(ws, content)
         except Exception as e:
             log_error(f"[查词] {e}")
 
         log_success(f"[查词] 完成")
         try:
-            # 缓存结果（需要累积，这里简单处理：下次相同词直接返回）
+            # 写入缓存（仅当结果非空）
+            if full_result:
+                set_cache(word, full_result)
+                log_info(f"[缓存] 写入: {word} ({len(full_result)} 字符)")
             await manager.send({'type': 'done'}, ws)
         except Exception:
             pass
