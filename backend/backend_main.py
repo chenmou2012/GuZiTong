@@ -6,6 +6,7 @@ import random
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Any
 from openai import OpenAI
 import uvicorn
 from concurrent.futures import ThreadPoolExecutor
@@ -381,7 +382,9 @@ class LoginRequest(BaseModel):
 class SyncRequest(BaseModel):
     data_type: str
     data_key: str
-    data_value: str
+    # 接受任意类型：前端 wx.request 把整个 body JSON 序列化后，data_value
+    # 仍是原生 list/dict/str，不是字符串；端点里统一 json.dumps 再存储
+    data_value: Any = None
 
 
 @app.post("/api/login")
@@ -515,15 +518,18 @@ async def save_user_data_api(
         dk = data_key
         dv = data_value
 
-    print(f"[SAVE] data_type={dt}, data_key={dk}")
+    print(f"[SAVE] data_type={dt}, data_key={dk}, dv_type={type(dv).__name__}")
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         print(f"[SAVE] 无效token")
         return {"error": "无效的 token"}
 
-    # wx.request 会将 data 对象自动 JSON 序列化，所以 dv 此时已是 JSON 字符串
-    # 直接存储，不再重复 json.dumps（避免双重序列化）
+    # 旧逻辑（426c0dc）假设 wx.request 序列化后 dv 是字符串，这是错的：
+    # wx.request 只序列化 body 整体，dv 本身仍是原生 list/dict。
+    # 这里统一转字符串再交给数据库层（database.save_user_data 会再 json.loads 校验合法性）
+    if dv is not None and not isinstance(dv, str):
+        dv = json.dumps(dv, ensure_ascii=False)
     save_user_data(openid, dt, dk, dv)
     print(f"[SAVE] 成功: openid={openid}, key={dk}")
     return {"success": True}
