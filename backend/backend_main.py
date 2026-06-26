@@ -55,12 +55,14 @@ MAX_QUERY_LENGTH = _config["service"]["max_query_length"]
 app = FastAPI(title="古字通 API")
 
 # 添加 CORS 中间件
+# 微信小程序的固定 origin 是 https://servicewechat.com，关闭 allow_credentials 避免
+# 与 allow_origins=["*"] 组合的浏览器拒绝/服务器全开放问题
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_credentials=True,
+    allow_origins=["https://servicewechat.com"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    allow_credentials=False,
 )
 
 # 初始化客户端 (智谱 GLM)
