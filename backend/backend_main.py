@@ -101,23 +101,26 @@ def set_cache(key: str, result: str):
 
 
 # --- 辅助函数 ---
-def sync_create_chat_stream(model: str, messages: list, max_tokens: int):
+def sync_create_chat_stream(model: str, messages: list, max_tokens: int, temperature: float = None):
     """在线程池中同步调用 AI"""
-    return client.chat.completions.create(
-        model=model,
-        messages=messages,
-        max_tokens=max_tokens,
-        stream=True
-    )
+    kwargs = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "stream": True
+    }
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    return client.chat.completions.create(**kwargs)
 
 
-async def call_ai_stream_async(model: str, messages: list, max_tokens: int):
+async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temperature: float = None):
     """异步调用 AI"""
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
         executor,
         sync_create_chat_stream,
-        model, messages, max_tokens
+        model, messages, max_tokens, temperature
     )
 
 
@@ -264,9 +267,9 @@ async def ws_query(ws: WebSocket, token: str = None):
             {"role": "user", "content": f"请解析以下字词：{word}"}
         ]
 
-        # 调用 AI
+        # 调用 AI（temperature=0.1 减少幻觉，提升查词精确度）
         await manager.send({'type': 'start', 'word': word}, ws)
-        stream = await call_ai_stream_async(MODEL, messages, MAX_TOKENS)
+        stream = await call_ai_stream_async(MODEL, messages, MAX_TOKENS, temperature=0.1)
 
         first_token = True
         full_result = ''  # 累积完整结果用于缓存
