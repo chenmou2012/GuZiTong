@@ -483,6 +483,33 @@ function getEbbinghausStats() {
   };
 }
 
+// 计算需要复习的词（艾宾浩斯遗忘曲线）
+function calculateReview(learned) {
+  const now = Date.now();
+  const result = [];
+  const intervals = REVIEW_INTERVALS;
+  const learnList = getLearnList() || [];
+
+  const learnedWords = new Set((learned || []).map(l => l.word));
+
+  learnList.forEach(w => {
+    if (!learnedWords.has(w.word)) return;
+
+    const lastReview = getLastReviewTime(w.word) || w.learnedTime || 0;
+    const errorCount = getErrorCount(w.word) || 0;
+    const reviewCount = w.reviewCount || 0;
+
+    const baseInterval = intervals[Math.min(reviewCount, intervals.length - 1)];
+    const interval = baseInterval * 24 * 60 * 60 * 1000 * (errorCount > 2 ? 0.5 : 1);
+
+    if (now - lastReview >= interval) {
+      result.push({ word: w.word, times: reviewCount, errors: errorCount });
+    }
+  });
+
+  return result;
+}
+
 // ==================== 用户设置 ====================
 const DEFAULT_GROUP_SIZE = 3;
 const SETTING_KEYS = {
@@ -539,6 +566,7 @@ module.exports = {
   getReviewStats,
   updateReviewStats,
   getEbbinghausStats,
+  calculateReview,
   restoreReviewStatsFromServer,
   // 云端同步
   enableCloudSync,

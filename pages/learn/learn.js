@@ -176,7 +176,7 @@ Page({
     const totalGroups = Math.ceil(learnList.length / (this.data.groupSize || GROUP_SIZE || 5));
 
     // 计算需要复习的词
-    const reviewWords = this.calculateReview(learned);
+    const reviewWords = storage.calculateReview(learned);
 
     this.setData({
       totalCount: words.length,
@@ -191,35 +191,6 @@ Page({
       // 当前正在学习的词（下一个待学习的词）
       currentLearningWord: toLearn.length > 0 ? toLearn[0].word : ''
     });
-  },
-
-  // 计算需要复习的词（根据艾宾浩斯遗忘曲线）
-  calculateReview: function(learned) {
-    const now = Date.now();
-    const result = [];
-    const intervals = [1, 2, 4, 7, 15, 30];  // 天数
-    const learnList = storage.getLearnList() || [];
-
-    // 只复习 learnList 中学过的词
-    const learnedWords = new Set(learned.map(l => l.word));
-
-    learnList.forEach(w => {
-      if (!learnedWords.has(w.word)) return;
-
-      const lastReview = storage.getLastReviewTime(w.word) || w.learnedTime || 0;
-      const errorCount = storage.getErrorCount(w.word) || 0;
-      const reviewCount = w.reviewCount || 0;
-
-      // 根据错误次数增加复习频率
-      const baseInterval = intervals[Math.min(reviewCount, intervals.length - 1)];
-      const interval = baseInterval * 24 * 60 * 60 * 1000 * (errorCount > 2 ? 0.5 : 1);
-
-      if (now - lastReview >= interval) {
-        result.push({ word: w.word, times: reviewCount, errors: errorCount });
-      }
-    });
-
-    return result;
   },
 
   shuffleArray: function(arr) {
