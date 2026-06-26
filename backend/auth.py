@@ -7,6 +7,8 @@ import httpx
 import secrets
 from datetime import datetime, timedelta
 
+from logger import log_warning
+
 _config_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(_config_path, "r", encoding="utf-8") as f:
     _config = json.load(f)
@@ -44,10 +46,13 @@ async def code2session(code: str) -> dict:
                 "session_key": data.get("session_key", "")
             }
         else:
+            errcode = data.get("errcode", -1)
+            errmsg = data.get("errmsg", "未知错误")
+            log_warning(f"[auth.code2session] errcode={errcode}, errmsg={errmsg}")
             return {
                 "success": False,
-                "errcode": data.get("errcode", -1),
-                "errmsg": data.get("errmsg", "未知错误")
+                "errcode": errcode,
+                "errmsg": errmsg
             }
 
 

@@ -1,6 +1,9 @@
 // 云端存储服务
 // 使用微信云开发存储学习数据
 
+const logger = require('./logger.js');
+const log = logger.for('cloud');
+
 let cloudDb = null;
 let isInitialized = false;
 
@@ -14,7 +17,7 @@ function init() {
     });
     cloudDb = wx.cloud.database();
     isInitialized = true;
-    console.log('云存储已初始化');
+    log.debug('云存储已初始化');
   }
 }
 
@@ -91,7 +94,7 @@ function getCloudLearnedWords(openId) {
         resolve(res.data.length > 0 ? res.data[0].words : []);
       })
       .catch(err => {
-        console.error('获取云端学习数据失败', err);
+        log.error('getCloudLearnedWords failed:', err);
         resolve(null);
       });
   });
@@ -144,7 +147,7 @@ function saveCloudLearnedWords(openId, words) {
 // 同步本地和云端数据
 async function syncLearnedWords() {
   if (!wx.cloud) {
-    console.log('云开发未启用');
+    log.debug('云开发未启用');
     return;
   }
 
@@ -161,13 +164,13 @@ async function syncLearnedWords() {
   if (cloudWords === null) {
     // 云端无数据，上传本地数据
     await saveCloudLearnedWords(openId, localWords);
-    console.log('已上传本地学习数据到云端');
+    log.info('已上传本地学习数据到云端');
   } else {
     // 合并数据（取最新）
     const merged = mergeWordData(localWords, cloudWords);
     wx.setStorageSync('learnedWords', merged);
     await saveCloudLearnedWords(openId, merged);
-    console.log('已合并本地和云端数据');
+    log.info('已合并本地和云端数据');
   }
 }
 

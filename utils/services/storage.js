@@ -2,6 +2,9 @@
 // 学习进度/复习相关统一由 sm2.js 负责，本文件只保留检索记录、收藏、翻译、学习列表等
 const cloudStorage = require('./cloudStorage.js');
 const sm2 = require('./sm2.js');
+const logger = require('./logger.js');
+const log = logger.for('storage');
+const fullSyncLog = logger.for('fullSync');
 
 const STORAGE_KEYS = {
   SEARCH_HISTORY: 'searchHistory',
@@ -61,6 +64,7 @@ function addCollection(word, result) {
   let collections = getCollections();
   collections.push({ word: word, result: result, time: Date.now() });
   wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
+  syncDataToServer('learn', 'collections', collections);
   return collections;
 }
 
@@ -71,6 +75,7 @@ function removeCollection(word) {
     collections.splice(index, 1);
   }
   wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
+  syncDataToServer('learn', 'collections', collections);
   return collections;
 }
 
@@ -85,13 +90,12 @@ function toggleCollection(word, result) {
 
   if (index > -1) {
     collections.splice(index, 1);
-    wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
-    return { collected: false, collections };
   } else {
     collections.push({ word: word, result: result, time: Date.now() });
-    wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
-    return { collected: true, collections };
   }
+  wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
+  syncDataToServer('learn', 'collections', collections);
+  return { collected: index === -1, collections };
 }
 
 // ==================== 翻译记录 ====================
@@ -184,13 +188,6 @@ function initLearnList(words) {
   return list;
 }
 
-function enableCloudSync() {
-  // 登录后才允许触发云函数：未登录时 wx.cloud.callFunction 会触发隐私检查 errno:4
-  const auth = require('./auth.js');
-  if (wx.cloud && auth.getToken()) {
-    cloudStorage.syncLearnedWords();
-  }
-}
 
 async function syncLearnList(words) {
   const localList = getLearnList();
@@ -211,7 +208,7 @@ async function syncLearnList(words) {
           }
         }
       } catch (e) {
-        console.log('获取服务器学习列表失败', e);
+        log.warn('syncLearnList 获取服务器学习列表失败:', e);
       }
     }
 
@@ -226,7 +223,7 @@ async function syncLearnList(words) {
           }
         }
       } catch (e) {
-        console.log('获取云端学习列表失败', e);
+        log.warn('syncLearnList 获取云端学习列表失败:', e);
       }
     }
 
@@ -293,7 +290,7 @@ async function fullSync() {
     await auth.saveUserData('search', 'history', getHistory());
   } catch (e) {
     pushed = false;
-    console.warn('[fullSync] push failed:', e.message);
+    fullSyncLog.warn('push failed:', e.message);
   }
 
   // 2) 拉取 learnList + sm2 数据
@@ -302,7 +299,7 @@ async function fullSync() {
     await restoreFromServer();
   } catch (e) {
     pulled = false;
-    console.warn('[fullSync] restore learnList/sm2 failed:', e.message);
+    fullSyncLog.warn('restore learnList/sm2 failed:', e.message);
   }
 
   // 3) 拉取并合并 collections（云端可能有多设备新增的）
@@ -320,7 +317,7 @@ async function fullSync() {
     }
   } catch (e) {
     pulled = false;
-    console.warn('[fullSync] merge collections failed:', e.message);
+    fullSyncLog.warn('merge collections failed:', e.message);
   }
 
   return { pushed, pulled };
@@ -348,7 +345,7 @@ async function restoreFromServer() {
       }
     }
   } catch (e) {
-    console.log('恢复学习列表失败', e);
+    log.warn('restoreFromServer 恢复学习列表失败:', e);
   }
 
   // wordStates + reviewStats
@@ -406,7 +403,6 @@ module.exports = {
   // 学习列表
   getLearnList,
   initLearnList,
-  enableCloudSync,
   syncLearnList,
   // 学习进度
   getLearnProgress,

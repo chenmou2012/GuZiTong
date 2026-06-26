@@ -1,10 +1,8 @@
 import os
 import json
 import re
-from rich.console import Console
 
-# Rich 控制台
-console = Console()
+from logger import log_info, log_warning, log_error
 
 # 加载配置
 _config_path = os.path.join(os.path.dirname(__file__), "config.json")
@@ -33,11 +31,11 @@ class ChineseRAG:
             try:
                 with open(self.path, "r", encoding="utf-8") as f:
                     self.db = json.load(f)
-                console.log(f"[green]RAG: 加载 {len(self.db)} 条数据[/green]")
+                log_info(f"[RAG] 加载 {len(self.db)} 条数据")
             except Exception as e:
-                console.log(f"[red]RAG: 加载错误 {e}[/red]")
+                log_error(f"[RAG] 加载错误 {e}")
         else:
-            console.log(f"[yellow]RAG: 文件不存在 {self.path}[/yellow]")
+            log_warning(f"[RAG] 文件不存在 {self.path}")
 
     def _load_misuses(self):
         """加载常见误用反例库"""
@@ -48,11 +46,11 @@ class ChineseRAG:
                     data = json.load(f)
                 # 剥离注释字段
                 self.misuses = {k: v for k, v in data.items() if not k.startswith("_")}
-                console.log(f"[green]RAG: 加载 {len(self.misuses)} 条反例[/green]")
+                log_info(f"[RAG] 加载 {len(self.misuses)} 条反例")
             except Exception as e:
-                console.log(f"[red]RAG: 反例库加载错误 {e}[/red]")
+                log_error(f"[RAG] 反例库加载错误 {e}")
         else:
-            console.log(f"[yellow]RAG: 反例库不存在 {misuses_path}[/yellow]")
+            log_warning(f"[RAG] 反例库不存在 {misuses_path}")
 
     def query_misuses(self, word: str) -> str:
         """查询常见误用反例

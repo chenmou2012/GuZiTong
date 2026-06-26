@@ -10,33 +10,10 @@ from typing import Any
 from openai import OpenAI
 import uvicorn
 from concurrent.futures import ThreadPoolExecutor
-from rich.console import Console
-from rich.theme import Theme
-from rich.logging import RichHandler
+
+from logger import log_info, log_success, log_warning, log_debug, log_error, DEBUG_ENABLED
 
 from ragService import rag
-
-# ==================== 初始化 Rich 控制台 ====================
-custom_theme = Theme({
-    "info": "cyan",
-    "success": "green",
-    "warning": "yellow",
-    "error": "red bold",
-    "time": "dim",
-})
-console = Console(theme=custom_theme)
-
-def log_time():
-    return time.strftime('%H:%M:%S')
-
-def log_info(msg):
-    console.log(f"[time]{log_time()}[/time] [info]{msg}[/info]")
-
-def log_success(msg):
-    console.log(f"[time]{log_time()}[/time] [success]{msg}[/success]")
-
-def log_error(msg):
-    console.log(f"[time]{log_time()}[/time] [error]{msg}[/error]")
 
 # ==================== 加载配置 ====================
 _config_path = os.path.join(os.path.dirname(__file__), "config.json")
@@ -229,8 +206,8 @@ async def send_streaming(ws: WebSocket, content: str):
     """流式发送一个 chunk（不再逐字符拆分，避免包数暴增和 UI 卡顿）"""
     try:
         await manager.send({'type': 'content', 'content': content}, ws)
-    except Exception:
-        pass
+    except Exception as e:
+        log_debug(f"[WS] send 失败: {e}")
 
 
 @app.websocket("/ws/query")
@@ -307,8 +284,8 @@ async def ws_query(ws: WebSocket, token: str = None):
                 set_cache(word, full_result)
                 log_info(f"[缓存] 写入: {word} ({len(full_result)} 字符)")
             await manager.send({'type': 'done'}, ws)
-        except Exception:
-            pass
+        except Exception as e:
+            log_debug(f"[WS] send 失败: {e}")
     finally:
         manager.disconnect(ws)
 
@@ -349,8 +326,8 @@ async def ws_translate(ws: WebSocket, token: str = None):
         log_success(f"[翻译] 完成")
         try:
             await manager.send({'type': 'done'}, ws)
-        except Exception:
-            pass
+        except Exception as e:
+            log_debug(f"[WS] send 失败: {e}")
     except Exception as e:
         log_error(f"[翻译] {e}")
     finally:
@@ -379,6 +356,14 @@ class LoginRequest(BaseModel):
     code: str
 
 
+class UpdateProfileRequest(BaseModel):
+    """更新用户资料的请求体（昵称/头像）。
+    头像 URL 较长（微信返回的临时链接可达数百字符），必须用 body 不能用 query。
+    """
+    nickname: str = None
+    avatar: str = None
+
+
 class SyncRequest(BaseModel):
     data_type: str
     data_key: str
@@ -393,6 +378,7 @@ async def login(req: LoginRequest):
     # 用 code 换 openid
     result = await code2session(req.code)
     if not result["success"]:
+        log_warning(f"[login] code2session 失败: {result['errmsg']}")
         return {"error": result["errmsg"]}
 
     openid = result["openid"]
@@ -457,6 +443,7 @@ async def get_user_info(authorization: str = Header(None)):
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
+        log_warning('[user] 无效 token')
         return {"error": "无效的 token"}
 
     user = get_user_by_openid(openid)
@@ -474,15 +461,19 @@ async def get_user_info(authorization: str = Header(None)):
 @app.put("/api/user")
 async def update_user(
     authorization: str = Header(None),
-    nickname: str = None,
-    avatar: str = None,
+    req: UpdateProfileRequest = None,
 ):
-    """更新用户信息"""
+    """更新用户信息（昵称 / 头像）
+    使用 body 而不是 query：头像 URL 长度可达数百字符，query 容易触发 URL 长度限制。
+    """
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
+        log_warning('[user] 无效 token')
         return {"error": "无效的 token"}
 
+    nickname = req.nickname if req else None
+    avatar = req.avatar if req else None
     update_user_info(openid, nickname, avatar)
     return {"success": True}
 
@@ -493,6 +484,7 @@ async def get_user_data_api(authorization: str = Header(None), data_type: str = 
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
+        log_warning('[user] 无效 token')
         return {"error": "无效的 token"}
 
     data = get_user_data(openid, data_type)
@@ -518,12 +510,13 @@ async def save_user_data_api(
         dk = data_key
         dv = data_value
 
-    print(f"[SAVE] data_type={dt}, data_key={dk}, dv_type={type(dv).__name__}")
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
-        print(f"[SAVE] 无效token")
+        log_warning('[save_user_data] 无效 token')
         return {"error": "无效的 token"}
+
+    log_debug(f"[save_user_data] data_type={dt}, data_key={dk}, dv_type={type(dv).__name__}")
 
     # 旧逻辑（426c0dc）假设 wx.request 序列化后 dv 是字符串，这是错的：
     # wx.request 只序列化 body 整体，dv 本身仍是原生 list/dict。
@@ -531,10 +524,10 @@ async def save_user_data_api(
     if dv is not None and not isinstance(dv, str):
         dv = json.dumps(dv, ensure_ascii=False)
     save_user_data(openid, dt, dk, dv)
-    print(f"[SAVE] 成功: openid={openid}, key={dk}")
     return {"success": True}
 
 
 # --- 启动 ---
 if __name__ == "__main__":
+    log_success(f"[startup] guzi listening on {HOST}:{PORT}, model={MODEL}, debug={DEBUG_ENABLED}")
     uvicorn.run(app, host=HOST, port=PORT)

@@ -1,5 +1,7 @@
 // pages/pronounce/pronounce.js — 字音跟读（按例句定音播放）
 const PRON = require('../../utils/data/pronunciationData.js');
+const logger = require('../../utils/services/logger.js');
+const log = logger.for('pronounce');
 
 // ============ 音频地址配置 ============
 // 文件名规律： {3位id}_{字}_{mi}_{角色}.wav ，分目录存放两种声音。
@@ -133,7 +135,7 @@ Page({
     this.audio.onEnded(() => this.setData({ playingKey: '' }));
     this.audio.onStop(() => this.setData({ playingKey: '' }));
     this.audio.onError((err) => {
-      console.log('音频播放失败', err);
+      log.warn('audio failed:', err);
       this.setData({ playingKey: '' });
       wx.showToast({ title: '音频加载失败，可能尚未生成', icon: 'none' });
     });

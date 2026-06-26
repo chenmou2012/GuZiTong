@@ -1,6 +1,8 @@
 // WebSocket 服务
 
 const constants = require('./constants');
+const logger = require('./logger.js');
+const log = logger.for('WS');
 
 let socketTask = null;
 let currentHandlers = null;
@@ -19,7 +21,7 @@ function scheduleReconnect() {
   if (manualClosed || reconnectAttempts >= MAX_RECONNECT || reconnectTimer) return;
   reconnectAttempts++;
   const delay = getReconnectDelay();
-  console.log('[WS] 重连第', reconnectAttempts, '/', MAX_RECONNECT, '次，', delay, 'ms 后');
+  log.info('重连第', reconnectAttempts, '/', MAX_RECONNECT, '次，', delay, 'ms 后');
   reconnectTimer = setTimeout(function() {
     reconnectTimer = null;
     if (manualClosed || !currentHandlers || !currentEndpoint) return;
@@ -75,7 +77,7 @@ function doConnect(endpoint, handlers) {
         handlers.onMessage(data);
       }
     } catch (e) {
-      console.error('WebSocket 消息解析失败:', e);
+      log.error('onMessage 消息解析失败:', e);
     }
   });
 
@@ -175,7 +177,7 @@ function query(word, onContent, onDone, onError) {
         return;
       }
     } catch (e) {
-      console.error('解析失败:', e);
+      log.error('query 消息解析失败:', e);
     }
   });
 
@@ -245,7 +247,7 @@ function translate(text, onContent, onDone, onError) {
         return;
       }
     } catch (e) {
-      console.error('解析失败:', e);
+      log.error('translate 消息解析失败:', e);
     }
   });
 

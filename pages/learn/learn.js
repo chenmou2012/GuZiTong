@@ -2,6 +2,8 @@
 const { REAL_WORDS_DATA } = require('../../utils/services/realWords.js');
 const storage = require('../../utils/services/storage.js');
 const sm2 = require('../../utils/services/sm2.js');
+const logger = require('../../utils/services/logger.js');
+const log = logger.for('learn');
 const QUIZ_DATA = require('../../utils/data/quiz_questions.js');
 
 // 加载 EB Garamond 字体（小程序无法用相对路径加载包内字体，必须用网络地址或 base64 data URI）
@@ -34,11 +36,11 @@ function loadFont() {
       source: 'url("' + EB_GARAMOND_FONT + '")',
       success: () => {
         fontLoaded = true;
-        console.log('字体加载成功');
+        log.debug('字体加载成功');
         resolve();
       },
       fail: (err) => {
-        console.log('字体加载失败', err);
+        log.warn('loadFont failed:', err);
         resolve(); // 不阻塞
       }
     });
@@ -142,8 +144,9 @@ Page({
               if (res.confirm) {
                 this.setData({ learning: true });
                 this.startPractice();
+                wx.removeStorageSync(STORAGE_KEY);
               }
-              wx.removeStorageSync(STORAGE_KEY);
+              // 取消时保留进度，下次进入仍可恢复
             }
           });
         }
@@ -173,11 +176,6 @@ Page({
       if (serverData) {
         learned = getLearnedWordList();
       }
-    }
-
-    // 尝试从云端同步数据
-    if (wx.cloud) {
-      storage.enableCloudSync();
     }
 
     // 同步学习列表（优先云端，本地兜底）
@@ -521,7 +519,6 @@ Page({
     if (showResult) return;
 
     const index = Number(e.currentTarget.dataset.index);
-    console.log('selectAnswer:', { index, selectedIndex, correctIndex, quizType });
     const { quiz, currentWord } = this.data;
 
     let newSelectedIndexes;

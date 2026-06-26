@@ -4,6 +4,8 @@ const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
+const logger = require('../../utils/services/logger.js');
+const log = logger.for('query');
 
 const { API_BASE_URL, REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 
@@ -119,7 +121,7 @@ Page({
 
   searchWord: function() {
     let query = this.data.inputText.trim();
-    console.log('query:', query);
+    log.debug('query:', query);
 
     if (!query) {
       wx.showToast({
@@ -162,7 +164,7 @@ Page({
     wx.showLoading({ title: '正在查询...', mask: true });
 
     const that = this;
-    console.log('发送数据: text=' + query);
+    log.debug('发送数据: text=' + query);
 
     // WebSocket 协议不支持自定义 header，token 只能通过 URL query 传递
     const token = auth.getToken() || '';
@@ -171,8 +173,6 @@ Page({
         wsClient.send({ text: query });
       },
       onMessage: function(data) {
-        console.log('收到:', data);
-
         if (data.error) {
           wx.hideLoading();
           that.showErrorMessage(data.error);
@@ -195,12 +195,12 @@ Page({
         }
       },
       onError: function(res) {
-        console.error('[WS /ws/query] 连接错误:', res);
+        log.error('连接错误:', res);
         wx.hideLoading();
         that.showErrorMessage('网络错误，请稍后重试');
       },
       onClose: function(res) {
-        console.log('[WS /ws/query] 连接关闭:', res);
+        log.info('连接关闭:', res);
         // 由 wsClient 处理重连
       }
     });

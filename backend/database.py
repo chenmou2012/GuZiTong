@@ -8,6 +8,8 @@ import re
 from datetime import datetime
 from contextlib import contextmanager
 
+from logger import log_warning, log_error
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 
 # 允许的 data_type 值
@@ -87,7 +89,7 @@ def validate_data_key(data_key: str) -> bool:
 def create_user(openid: str, token: str, expire_time: str) -> bool:
     """创建新用户"""
     if not validate_openid(openid):
-        print("无效的 openid")
+        log_warning("[database] 无效的 openid")
         return False
 
     try:
@@ -101,7 +103,7 @@ def create_user(openid: str, token: str, expire_time: str) -> bool:
             conn.commit()
             return True
     except Exception as e:
-        print(f"创建用户失败: {e}")
+        log_error(f"[database] 创建用户失败: {e}")
         return False
 
 
@@ -145,7 +147,7 @@ def update_user_token(openid: str, token: str, expire_time: str) -> bool:
             conn.commit()
             return True
     except Exception as e:
-        print(f"更新token失败: {e}")
+        log_error(f"[database] 更新token失败: {e}")
         return False
 
 
@@ -176,7 +178,7 @@ def update_user_info(openid: str, nickname: str = None, avatar: str = None) -> b
             conn.commit()
             return True
     except Exception as e:
-        print(f"更新用户信息失败: {e}")
+        log_error(f"[database] 更新用户信息失败: {e}")
         return False
 
 
@@ -186,22 +188,22 @@ def save_user_data(openid: str, data_type: str, data_key: str, data_value: str) 
     if not validate_openid(openid):
         return False
     if not validate_data_type(data_type):
-        print(f"无效的 data_type: {data_type}")
+        log_warning(f"[database] 无效的 data_type: {data_type}")
         return False
     if not validate_data_key(data_key):
-        print(f"无效的 data_key: {data_key}")
+        log_warning(f"[database] 无效的 data_key: {data_key}")
         return False
 
     # 验证 data_value 是有效的 JSON
     try:
         json.loads(data_value)
     except json.JSONDecodeError:
-        print("无效的 JSON 数据")
+        log_warning("[database] 无效的 JSON 数据")
         return False
 
     # 限制数据大小（最大 1MB）
     if len(data_value) > 1024 * 1024:
-        print("数据过大")
+        log_warning("[database] 数据过大")
         return False
 
     try:
@@ -217,7 +219,7 @@ def save_user_data(openid: str, data_type: str, data_key: str, data_value: str) 
             conn.commit()
             return True
     except Exception as e:
-        print(f"保存用户数据失败: {e}")
+        log_error(f"[database] 保存用户数据失败: {e}")
         return False
 
 
@@ -294,7 +296,7 @@ def delete_user_data(openid: str, data_type: str = None, data_key: str = None) -
             conn.commit()
             return True
     except Exception as e:
-        print(f"删除用户数据失败: {e}")
+        log_error(f"[database] 删除用户数据失败: {e}")
         return False
 
 

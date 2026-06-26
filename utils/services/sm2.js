@@ -1,6 +1,9 @@
 // SM-2 改良版艾宾浩斯算法（参考 Anki 早期实现）
 // 数据结构统一为 wordStates: { word: WordState }
 
+const logger = require('./logger.js');
+const log = logger.for('sm2');
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const QUALITY = {
@@ -288,7 +291,7 @@ async function restoreFromServer() {
 
     return { wordStates: getStates(), reviewStats: getStats() };
   } catch (e) {
-    console.log('恢复 SM-2 数据失败', e);
+    log.warn('restoreFromServer failed:', e);
     return null;
   }
 }
@@ -348,7 +351,6 @@ function migrateLegacyData(now = Date.now()) {
  */
 function getEbbinghausStats() {
   const states = getStates();
-  const learningCount = 0, reviewCount = 0, graduatedCount = 0;
   let learningN = 0, reviewN = 0, graduatedN = 0;
 
   for (const word in states) {

@@ -5,6 +5,8 @@ const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
 const errorUi = require('../../utils/services/error.js');
+const logger = require('../../utils/services/logger.js');
+const log = logger.for('translate');
 
 const { API_BASE_URL } = constants;
 
@@ -108,13 +110,11 @@ Page({
     const token = auth.getToken() || '';
     wsClient.connect('/ws/translate?token=' + encodeURIComponent(token), {
       onOpen: function() {
-        console.log('WebSocket 连接 open');
+        log.debug('连接 open');
         // 发送翻译请求
         wsClient.send({ text: text });
       },
       onMessage: function(data) {
-        console.log('收到消息:', data);
-
         if (data.error) {
           wx.hideLoading();
           wsClient.close();
@@ -148,13 +148,13 @@ Page({
         }
       },
       onError: function(res) {
-        console.error('[WS /ws/translate] 连接错误:', res);
+        log.error('连接错误:', res);
         wx.hideLoading();
         wsClient.close();
         errorUi.showRetryError('网络错误，请稍后重试', () => that.translateText());
       },
       onClose: function(res) {
-        console.log('[WS /ws/translate] 连接关闭:', res);
+        log.info('连接关闭:', res);
         // 由 wsClient 处理重连
       }
     });

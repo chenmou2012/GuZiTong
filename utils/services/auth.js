@@ -1,5 +1,7 @@
 // 登录认证服务
 const app = getApp();
+const logger = require('./logger.js');
+const log = logger.for('auth');
 const API_BASE_URL = 'https://share.sng-oj.cn';
 
 const STORAGE_KEYS = {
@@ -197,7 +199,6 @@ async function getUserData(dataType) {
  */
 async function saveUserData(dataType, dataKey, dataValue) {
   const token = getToken();
-  console.log('saveUserData token:', token ? 'exists' : 'null');
   if (!token) return false;
 
   try {
@@ -210,10 +211,9 @@ async function saveUserData(dataType, dataKey, dataValue) {
       },
       header: { 'Authorization': 'Bearer ' + token }
     });
-    console.log('saveUserData response:', response);
     return response.success;
   } catch (e) {
-    console.log('saveUserData error:', e);
+    log.error('saveUserData failed:', e);
     return false;
   }
 }
