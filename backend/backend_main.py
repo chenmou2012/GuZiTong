@@ -221,7 +221,13 @@ async def send_streaming(ws: WebSocket, content: str):
 
 
 @app.websocket("/ws/query")
-async def ws_query(ws: WebSocket):
+async def ws_query(ws: WebSocket, token: str = None):
+    # WebSocket 协议不支持自定义 header，token 必须通过 query string 传递（这是协议限制）
+    openid, valid = verify_token(token) if token else (None, False)
+    if not valid:
+        await ws.close(code=1008, reason="未授权")
+        log_error(f"[WS /ws/query] 拒绝未授权连接")
+        return
     await manager.connect(ws)
     try:
         data = await ws.receive_text()
@@ -290,7 +296,12 @@ async def ws_query(ws: WebSocket):
 
 
 @app.websocket("/ws/translate")
-async def ws_translate(ws: WebSocket):
+async def ws_translate(ws: WebSocket, token: str = None):
+    openid, valid = verify_token(token) if token else (None, False)
+    if not valid:
+        await ws.close(code=1008, reason="未授权")
+        log_error(f"[WS /ws/translate] 拒绝未授权连接")
+        return
     await manager.connect(ws)
     try:
         data = await ws.receive_text()
