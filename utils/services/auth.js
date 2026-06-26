@@ -125,6 +125,17 @@ async function fetchUserInfo() {
 }
 
 /**
+ * 根据 openid 生成默认昵称（取后 4 位数字/字母）
+ * 没有 openid 时回退到「古字通用户」
+ */
+function getDefaultNickname() {
+  const openid = getOpenid();
+  if (!openid) return '古字通用户';
+  const tail = openid.slice(-4);
+  return '用户' + tail;
+}
+
+/**
  * 更新用户资料
  */
 async function updateUserInfo(nickname, avatar) {
@@ -132,6 +143,7 @@ async function updateUserInfo(nickname, avatar) {
   if (!token) return false;
 
   try {
+    // 用 body 而非 query：头像 URL 长度可达数百字符，query 容易超 URL 长度限制
     const response = await request('/api/user', {
       method: 'PUT',
       data: { nickname, avatar },
@@ -244,6 +256,7 @@ module.exports = {
   getOpenid,
   getUserInfo,
   fetchUserInfo,
+  getDefaultNickname,
   updateUserInfo,
   getUserData,
   saveUserData,

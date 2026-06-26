@@ -7,6 +7,8 @@ Page({
   data: {
     loggedIn: false,
     userInfo: null,
+    editingNickname: false,
+    nicknameDraft: '',
     stats: {
       words: 0,
       collections: 0,
@@ -115,12 +117,10 @@ Page({
     this.setData({ stats, reviewStats, pieChart });
   },
 
-  // 头像点击：未登录 → 登录；已登录 → 编辑资料
+  // 头像/未登录昵称点击：仅触发登录（已登录时头像不再承担编辑入口，由昵称旁的铅笔按钮进入编辑）
   onAvatarTap: function() {
     if (!this.data.loggedIn) {
       this.doLogin();
-    } else {
-      this.authorizeProfile();
     }
   },
 
@@ -132,9 +132,6 @@ Page({
         this.checkLogin();
         wx.hideLoading();
         wx.showToast({ title: '登录成功', icon: 'success' });
-        if (info && !info.nickname) {
-          this.authorizeProfile();
-        }
       })
       .catch((err) => {
         wx.hideLoading();
@@ -142,19 +139,61 @@ Page({
       });
   },
 
-  // 引导用户授权微信昵称/头像
-  authorizeProfile: async function() {
-    const result = await auth.requestAndSaveProfile();
-    if (result) {
-      const info = Object.assign({}, this.data.userInfo || {}, {
-        nickname: result.nickname,
-        avatar: result.avatar
-      });
-      this.setData({ userInfo: info });
-      wx.showToast({ title: '已更新资料', icon: 'success' });
-    } else {
-      wx.showToast({ title: '已取消', icon: 'none' });
+  // 昵称编辑：进入编辑态
+  onNicknameEdit: function() {
+    if (!this.data.loggedIn) return;
+    const current = this.data.userInfo && this.data.userInfo.nickname
+      ? this.data.userInfo.nickname
+      : auth.getDefaultNickname();
+    this.setData({ editingNickname: true, nicknameDraft: current });
+  },
+
+  // 昵称输入实时同步到 draft
+  onNicknameInput: function(e) {
+    this.setData({ nicknameDraft: e.detail.value });
+  },
+
+  // 保存昵称
+  onNicknameSave: async function() {
+    const name = (this.data.nicknameDraft || '').trim();
+    if (!name) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
     }
+    if (name.length > 16) {
+      wx.showToast({ title: '昵称最多 16 个字符', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '保存中...' });
+    const ok = await auth.updateUserInfo(name, null);
+    wx.hideLoading();
+    if (!ok) {
+      wx.showToast({ title: '保存失败', icon: 'none' });
+      return;
+    }
+
+    // updateUserInfo 内部已更新本地缓存，重新读取再 setData 让 UI 立即刷新
+    const info = auth.getUserInfo() || {};
+    this.setData({
+      userInfo: info,
+      editingNickname: false,
+      nicknameDraft: ''
+    });
+    wx.showToast({ title: '已保存', icon: 'success' });
+  },
+
+  // 取消编辑
+  onNicknameCancel: function() {
+    this.setData({ editingNickname: false, nicknameDraft: '' });
+  },
+
+  // 显示用的昵称：未设置时回退到默认（基于 openid）
+  getDisplayNickname: function() {
+    const ui = this.data.userInfo;
+    if (ui && ui.nickname) return ui.nickname;
+    if (!this.data.loggedIn) return '点击登录';
+    return auth.getDefaultNickname();
   },
 
   // 退出登录

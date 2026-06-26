@@ -4,13 +4,40 @@
   <view class="profile-header">
     <view class="avatar-section" bindtap="onAvatarTap">
       <view class="avatar">
-        <image wx:if="{{userInfo.avatar}}" class="avatar-img" src="{{userInfo.avatar}}" mode="aspectFill"/>
-        <text wx:else class="avatar-text">古</text>
+        <text class="avatar-text">古</text>
       </view>
-      <view class="user-info">
-        <text class="username">{{userInfo.nickname || '点击登录'}}</text>
-        <text wx:if="{{loggedIn && !userInfo.nickname}}" class="user-level">未授权</text>
-        <text wx:elif="{{loggedIn}}" class="user-level">已登录</text>
+
+      <!-- 未登录：昵称文本直接触发登录 -->
+      <view wx:if="{{!loggedIn}}" class="user-info" bindtap="onAvatarTap">
+        <text class="username">点击登录</text>
+        <text class="user-level user-level-hint">未登录</text>
+      </view>
+
+      <!-- 已登录 + 查看态：昵称 + 编辑图标 -->
+      <view wx:elif="{{!editingNickname}}" class="user-info">
+        <view class="nickname-row">
+          <text class="username">{{getDisplayNickname()}}</text>
+          <text class="edit-icon" bindtap="onNicknameEdit">✎</text>
+        </view>
+        <text class="user-level">已登录</text>
+      </view>
+
+      <!-- 已登录 + 编辑态：输入框 + 保存/取消 -->
+      <view wx:else class="user-info">
+        <view class="nickname-edit-row">
+          <input
+            class="nickname-input"
+            value="{{nicknameDraft}}"
+            maxlength="16"
+            focus="{{editingNickname}}"
+            placeholder="请输入昵称"
+            bindinput="onNicknameInput"
+          />
+        </view>
+        <view class="nickname-edit-btns">
+          <text class="edit-btn edit-btn-cancel" bindtap="onNicknameCancel">取消</text>
+          <text class="edit-btn edit-btn-save" bindtap="onNicknameSave">保存</text>
+        </view>
       </view>
     </view>
 

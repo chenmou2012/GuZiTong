@@ -66,6 +66,76 @@
   border-radius: 50%;
 }
 
+/* 昵称行：横向排布「昵称 + 编辑图标」 */
+.nickname-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.edit-icon {
+  font-size: 32rpx;
+  color: #B91C1C;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background-color: #fef2f2;
+  line-height: 1;
+}
+
+.edit-icon:active {
+  background-color: #fde2e2;
+}
+
+/* 昵称编辑态：输入框 */
+.nickname-edit-row {
+  width: 360rpx;
+}
+
+.nickname-input {
+  width: 100%;
+  font-size: 32rpx;
+  color: #2C3E50;
+  border-bottom: 2rpx solid #B91C1C;
+  padding: 8rpx 0;
+  box-sizing: border-box;
+}
+
+.nickname-edit-btns {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+
+.edit-btn {
+  font-size: 26rpx;
+  padding: 6rpx 22rpx;
+  border-radius: 8rpx;
+  line-height: 1.6;
+}
+
+.edit-btn-cancel {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.edit-btn-save {
+  background-color: #B91C1C;
+  color: #fff;
+}
+
+.edit-btn-cancel:active {
+  background-color: #e8e8e8;
+}
+
+.edit-btn-save:active {
+  background-color: #991b1b;
+}
+
+.user-level-hint {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
 /* 统计数据 */
 .stats-section {
   display: flex;
