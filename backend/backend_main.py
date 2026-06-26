@@ -44,7 +44,7 @@ with open(_config_path, "r", encoding="utf-8") as f:
 
 API_KEY = os.getenv("API_KEY", _config["api"]["key"])
 BASE_URL = _config["api"]["base_url"]
-MODEL = os.getenv("MODEL", _config["api"]["model"])
+MODEL = _config["api"]["model"]
 HOST = _config["server"]["host"]
 PORT = _config["server"]["port"]
 MAX_WORKERS = _config["service"]["max_workers"]
