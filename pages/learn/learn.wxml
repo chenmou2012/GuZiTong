@@ -106,7 +106,7 @@
         <view class="progress-info">
           <text class="page-title">文言文学习</text>
           <text class="progress-label">词进度</text>
-          <text class="progress-text">{{currentWordIndex + 1}}/{{groupSize}} · 第 {{practiceCount + 1}}次</text>
+          <text class="progress-text">{{currentWordIndex + 1}}/{{groupSize}} · 第 {{quizIndex + 1}}/{{quizQueue.length}} 题</text>
         </view>
         <view class="group-info">
           <text class="group-label">已学 {{learnedCount}}/{{totalCount}}</text>
@@ -197,7 +197,7 @@
       <!-- 底部进度条 -->
       <view class="header-progress-bar">
         <view class="header-progress-bg">
-          <view class="header-progress-fill" style="width: {{(currentWordIndex * groupSize + practiceCount) / (groupSize * groupSize) * 100}}%"></view>
+          <view class="header-progress-fill" style="width: {{(currentWordIndex * quizQueue.length + quizIndex + 1) / (groupSize * quizQueue.length) * 100}}%"></view>
         </view>
       </view>
     </view>
