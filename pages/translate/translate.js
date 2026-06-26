@@ -25,6 +25,16 @@ Page({
   },
 
   onShow: function() {
+    // 检查是否有待翻译的文本（从收藏/翻译历史跳转过来）
+    const pendingText = storage.getPendingTranslation();
+    if (pendingText) {
+      storage.clearPendingTranslation();
+      this.setData({ inputText: pendingText });
+      // 自动触发翻译
+      this.translateText();
+      return;
+    }
+
     // 每次切换回来时重置到初始界面
     wsClient.close();
     this.setData({

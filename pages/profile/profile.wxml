@@ -1,40 +1,31 @@
+<!-- pages/profile/profile.wxml -->
 <view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
   <!-- 用户信息头部 -->
   <view class="profile-header">
-    <!-- 未登录 -->
-    <view wx:if="{{!loggedIn}}" class="avatar-section" bindtap="handleLogin">
-      <view class="avatar">
-        <text class="avatar-text">👤</text>
-      </view>
-      <view class="user-info">
-        <text class="username">点击登录</text>
-      </view>
-    </view>
-
-    <!-- 已登录 -->
-    <view wx:else class="avatar-section">
+    <view class="avatar-section" bindtap="onAvatarTap">
       <view class="avatar">
         <image wx:if="{{userInfo.avatar}}" class="avatar-img" src="{{userInfo.avatar}}" mode="aspectFill"/>
-        <text wx:else class="avatar-text">👤</text>
+        <text wx:else class="avatar-text">古</text>
       </view>
       <view class="user-info">
-        <text class="username">{{userInfo.nickname || '文言学者'}}</text>
+        <text class="username">{{userInfo.nickname || '点击登录'}}</text>
+        <text wx:if="{{loggedIn && !userInfo.nickname}}" class="user-level">未授权</text>
+        <text wx:elif="{{loggedIn}}" class="user-level">已登录</text>
       </view>
-      <button class="logout-btn" size="mini" bindtap="handleLogin">退出</button>
     </view>
 
     <view class="stats-section">
       <view class="stat-item">
         <text class="stat-number">{{stats.words}}</text>
-        <text class="stat-label">查词数</text>
+        <text class="stat-label">查词</text>
       </view>
       <view class="stat-item">
         <text class="stat-number">{{stats.collections}}</text>
-        <text class="stat-label">收藏数</text>
+        <text class="stat-label">收藏</text>
       </view>
       <view class="stat-item">
         <text class="stat-number">{{stats.translations}}</text>
-        <text class="stat-label">翻译数</text>
+        <text class="stat-label">翻译</text>
       </view>
     </view>
   </view>
@@ -56,7 +47,7 @@
         </view>
         <view class="stats-item">
           <text class="stats-item-number">{{reviewStats.streakDays}}</text>
-          <text class="stats-item-label">连续学习（天）</text>
+          <text class="stats-item-label">连续（天）</text>
         </view>
       </view>
     </view>
@@ -80,7 +71,7 @@
         </view>
         <view class="legend-item">
           <view class="legend-color" style="background:#4CAF50"></view>
-          <text>复习完成 {{pieChart.reviewed}}</text>
+          <text>已掌握 {{pieChart.reviewed}}</text>
         </view>
       </view>
     </view>
@@ -88,68 +79,61 @@
 
   <!-- 功能列表 -->
   <view class="menu-section">
-    <!-- 学习设置 -->
-    <view class="menu-item" bindtap="showSettings">
-      <view class="menu-left">
-        <text class="menu-icon">⚙️</text>
-        <text class="menu-text">学习设置</text>
-      </view>
-      <view class="menu-right">
-        <text class="menu-arrow">></text>
-      </view>
-    </view>
-
-    <!-- 学习记录 -->
-    <view class="menu-item" bindtap="viewHistory">
+    <view class="menu-item" bindtap="goHistory">
       <view class="menu-left">
         <text class="menu-text">学习记录</text>
       </view>
       <view class="menu-right">
-        <text class="menu-arrow">></text>
+        <text class="menu-count">{{stats.words}}</text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
 
-    <!-- 我的收藏 -->
-    <view class="menu-item" bindtap="viewCollections">
+    <view class="menu-item" bindtap="goCollections">
       <view class="menu-left">
-        <text class="menu-icon">❤️</text>
         <text class="menu-text">我的收藏</text>
       </view>
       <view class="menu-right">
         <text class="menu-count">{{stats.collections}}</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
 
-    <!-- 翻译历史 -->
-    <view class="menu-item" bindtap="viewTranslations">
+    <view class="menu-item" bindtap="goTranslations">
       <view class="menu-left">
-        <text class="menu-icon">📝</text>
         <text class="menu-text">翻译历史</text>
       </view>
       <view class="menu-right">
         <text class="menu-count">{{stats.translations}}</text>
-        <text class="menu-arrow">></text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
   </view>
 
-  <!-- 关于 -->
   <view class="menu-section">
-    <view class="menu-item" bindtap="viewAbout">
+    <view class="menu-item" bindtap="showSettings">
       <view class="menu-left">
-        <text class="menu-icon">ℹ️</text>
-        <text class="menu-text">关于</text>
+        <text class="menu-text">学习设置</text>
       </view>
       <view class="menu-right">
-        <text class="menu-arrow">></text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="menu-item" bindtap="viewAbout">
+      <view class="menu-left">
+        <text class="menu-text">关于古字通</text>
+      </view>
+      <view class="menu-right">
+        <text class="version-inline">v1.0.0</text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
   </view>
 
   <!-- 版本信息 -->
   <view class="version-section">
-    <text class="version-text">古字通 v1.0.0</text>
+    <text class="version-text">© 古字通 · 让文言文学习更简单</text>
   </view>
 
   <!-- 设置弹窗 -->
@@ -169,10 +153,15 @@
             <text class="settings-option {{settings.groupSize === 10 ? 'active' : ''}}" bindtap="changeGroupSize" data-size="10">10</text>
           </view>
         </view>
-        <view class="settings-item">
-          <text class="settings-label">同步</text>
-          <button class="settings-sync-btn" bindtap="syncData" wx:if="{{loggedIn}}">同步数据</button>
-          <text class="settings-tip" wx:else>登录后可用</text>
+
+        <view class="settings-item" wx:if="{{loggedIn}}">
+          <text class="settings-label">数据同步</text>
+          <button class="settings-action-btn" bindtap="syncData">立即同步</button>
+        </view>
+
+        <view class="settings-item" wx:if="{{loggedIn}}" bindtap="doLogout">
+          <text class="settings-label settings-label-danger">退出登录</text>
+          <text class="settings-arrow">›</text>
         </view>
       </view>
     </view>

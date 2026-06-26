@@ -1,0 +1,7 @@
+/* pages/collections/collections.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #FDFBF7;
+  padding: 20rpx 30rpx 120rpx;
+  box-sizing: border-box;
+}

@@ -1,0 +1,12 @@
+<!-- pages/translations/translations.wxml -->
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <records-list
+    list="{{translations}}"
+    title-field="original"
+    subtitle-field="translated"
+    empty-text="还没有翻译过文言文"
+    bind:itemtap="onItemTap"
+    bind:itemdelete="onItemDelete"
+    bind:clearall="onClearAll"
+  />
+</view>

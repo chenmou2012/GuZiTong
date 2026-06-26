@@ -1,0 +1,12 @@
+<!-- pages/collections/collections.wxml -->
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <records-list
+    list="{{collections}}"
+    title-field="word"
+    subtitle-field="result"
+    empty-text="还没有收藏，常用字可点击心形收藏"
+    bind:itemtap="onItemTap"
+    bind:itemdelete="onItemDelete"
+    bind:clearall="onClearAll"
+  />
+</view>

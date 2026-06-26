@@ -33,25 +33,26 @@
 }
 
 .avatar-text {
-  font-size: 40rpx;
+  font-size: 44rpx;
   color: #fff;
-  font-weight: bold;
+  font-weight: 500;
+  font-family: 'STSong', 'SimSun', serif;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
+  gap: 8rpx;
 }
 
 .username {
   font-size: 36rpx;
   color: #2C3E50;
   font-weight: bold;
-  margin-bottom: 8rpx;
 }
 
 .user-level {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #B91C1C;
   padding: 4rpx 16rpx;
   background-color: #fef2f2;
@@ -63,34 +64,6 @@
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
-}
-
-.logout-btn {
-  margin-top: 10rpx;
-  background: #f5f5f5 !important;
-  color: #666 !important;
-  font-size: 24rpx;
-}
-
-/* 同步区域 */
-.sync-section {
-  display: flex;
-  justify-content: center;
-  gap: 20rpx;
-  margin-bottom: 30rpx;
-}
-
-.sync-btn {
-  padding: 16rpx 40rpx;
-  background: #B91C1C;
-  color: #fff;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  border: none;
-}
-
-.download-btn {
-  background: #4CAF50;
 }
 
 /* 统计数据 */
@@ -149,11 +122,6 @@
   align-items: center;
 }
 
-.menu-icon {
-  font-size: 32rpx;
-  margin-right: 20rpx;
-}
-
 .menu-text {
   font-size: 30rpx;
   color: #2C3E50;
@@ -171,8 +139,15 @@
 }
 
 .menu-arrow {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #ccc;
+  font-weight: 300;
+}
+
+.version-inline {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-right: 12rpx;
 }
 
 /* 版本信息 */
@@ -183,112 +158,9 @@
   padding: 40rpx 0;
 }
 
-/* 设置弹窗 */
-.settings-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.settings-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.settings-content {
-  position: relative;
-  width: 80%;
-  max-width: 600rpx;
-  background: #fff;
-  border-radius: 24rpx 24rpx 0 0;
-  padding: 32rpx;
-}
-
-.settings-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32rpx;
-}
-
-.settings-title {
-  font-size: 34rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.settings-close {
-  font-size: 48rpx;
-  color: #999;
-}
-
-.settings-body {
-  display: flex;
-  flex-direction: column;
-  gap: 32rpx;
-}
-
-.settings-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.settings-label {
-  font-size: 30rpx;
-  color: #333;
-}
-
-.settings-options {
-  display: flex;
-  gap: 16rpx;
-}
-
-.settings-option {
-  padding: 12rpx 24rpx;
-  border-radius: 8rpx;
-  background: #f5f5f5;
-  color: #666;
-  font-size: 28rpx;
-}
-
-.settings-option.active {
-  background: #1aad19;
-  color: #fff;
-}
-
-.settings-sync-btn {
-  background: #1aad19;
-  color: #fff;
-  font-size: 28rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 8rpx;
-}
-
-.settings-tip {
-  font-size: 28rpx;
-  color: #999;
-}
-
 .version-text {
   font-size: 24rpx;
   color: #bbb;
-  margin-bottom: 8rpx;
-}
-
-.copyright-text {
-  font-size: 22rpx;
-  color: #ddd;
 }
 
 /* 学习统计卡片 */
@@ -339,66 +211,6 @@
   margin-top: 8rpx;
 }
 
-/* 艾宾浩斯进度卡片 */
-.ebbinghaus-card {
-  background-color: #fff;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  margin-bottom: 30rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-
-.ebbinghaus-header {
-  margin-bottom: 20rpx;
-}
-
-.ebbinghaus-title {
-  font-size: 32rpx;
-  color: #2C3E50;
-  font-weight: bold;
-}
-
-.ebbinghaus-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.ebbinghaus-stage {
-  display: flex;
-  align-items: center;
-}
-
-.stage-label {
-  font-size: 24rpx;
-  color: #666;
-  width: 160rpx;
-}
-
-.stage-bar {
-  flex: 1;
-  height: 16rpx;
-  background-color: #f0f0f0;
-  border-radius: 8rpx;
-  margin: 0 16rpx;
-  overflow: hidden;
-}
-
-.stage-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #bc262e, #e53935);
-  border-radius: 8rpx;
-  transition: width 0.3s ease;
-}
-
-.stage-count {
-  font-size: 24rpx;
-  color: #bc262e;
-  font-weight: bold;
-  width: 40rpx;
-  text-align: right;
-}
-
 /* 饼图样式 */
 .chart-card {
   background-color: #fff;
@@ -429,12 +241,14 @@
   height: 200rpx;
   border-radius: 50%;
   background: #eee;
+  flex-shrink: 0;
 }
 
 .chart-legend {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
+  flex: 1;
 }
 
 .legend-item {
@@ -449,4 +263,111 @@
   width: 24rpx;
   height: 24rpx;
   border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+/* 设置弹窗 */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.settings-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.settings-content {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 32rpx;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.settings-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.settings-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  padding: 0 8rpx;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 80rpx;
+}
+
+.settings-label {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.settings-label-danger {
+  color: #B91C1C;
+}
+
+.settings-options {
+  display: flex;
+  gap: 16rpx;
+}
+
+.settings-option {
+  padding: 12rpx 28rpx;
+  border-radius: 8rpx;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.settings-option.active {
+  background: #B91C1C;
+  color: #fff;
+}
+
+.settings-action-btn {
+  background: #B91C1C !important;
+  color: #fff !important;
+  font-size: 26rpx !important;
+  padding: 8rpx 24rpx !important;
+  border-radius: 8rpx !important;
+  border: none !important;
+  line-height: 1.6 !important;
+}
+
+.settings-arrow {
+  font-size: 32rpx;
+  color: #ccc;
 }

@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   COLLECTIONS: 'collections',
   TRANSLATIONS: 'translations',
   PENDING_QUERY: 'pendingQuery',
+  PENDING_TRANSLATION: 'pendingTranslation',
   LEARN_LIST: 'learnList'  // 学习列表（随机排列）
 };
 
@@ -28,7 +29,9 @@ function saveHistory(word, content) {
   }
   wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, history);
 
-  if (wx.cloud) {
+  // 登录后才允许触发云函数
+  const auth = require('./auth.js');
+  if (wx.cloud && auth.getToken()) {
     cloudStorage.saveCloudSearchHistory('auto', history).catch(() => {});
   }
   syncDataToServer('search', 'history', history);
@@ -37,6 +40,15 @@ function saveHistory(word, content) {
 
 function clearHistory() {
   wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, []);
+  syncDataToServer('search', 'history', []);
+}
+
+function removeHistory(word) {
+  let history = getHistory();
+  history = history.filter(item => item.word !== word);
+  wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, history);
+  syncDataToServer('search', 'history', history);
+  return history;
 }
 
 // ==================== 收藏 ====================
@@ -99,6 +111,19 @@ function addTranslation(original, translated) {
   return translations;
 }
 
+function removeTranslation(original) {
+  let translations = getTranslations();
+  translations = translations.filter(item => item.original !== original);
+  wx.setStorageSync(STORAGE_KEYS.TRANSLATIONS, translations);
+  syncDataToServer('search', 'translations', translations);
+  return translations;
+}
+
+function clearTranslations() {
+  wx.setStorageSync(STORAGE_KEYS.TRANSLATIONS, []);
+  syncDataToServer('search', 'translations', []);
+}
+
 // ==================== 待查询 ====================
 
 function getPendingQuery() {
@@ -111,6 +136,18 @@ function setPendingQuery(word) {
 
 function clearPendingQuery() {
   wx.removeStorageSync(STORAGE_KEYS.PENDING_QUERY);
+}
+
+function getPendingTranslation() {
+  return wx.getStorageSync(STORAGE_KEYS.PENDING_TRANSLATION);
+}
+
+function setPendingTranslation(text) {
+  wx.setStorageSync(STORAGE_KEYS.PENDING_TRANSLATION, text);
+}
+
+function clearPendingTranslation() {
+  wx.removeStorageSync(STORAGE_KEYS.PENDING_TRANSLATION);
 }
 
 // ==================== 统计 ====================
@@ -139,14 +176,18 @@ function initLearnList(words) {
     [list[i], list[j]] = [list[j], list[i]];
   }
   wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, list);
-  if (wx.cloud) {
+  // 云端同步仅在登录后调用：未登录时调 wx.cloud.callFunction 会触发隐私检查 errno:4
+  const auth = require('./auth.js');
+  if (wx.cloud && auth.getToken()) {
     cloudStorage.saveCloudLearnList('auto', list).catch(() => {});
   }
   return list;
 }
 
 function enableCloudSync() {
-  if (wx.cloud) {
+  // 登录后才允许触发云函数：未登录时 wx.cloud.callFunction 会触发隐私检查 errno:4
+  const auth = require('./auth.js');
+  if (wx.cloud && auth.getToken()) {
     cloudStorage.syncLearnedWords();
   }
 }
@@ -174,7 +215,7 @@ async function syncLearnList(words) {
       }
     }
 
-    if (wx.cloud) {
+    if (wx.cloud && auth.getToken()) {
       try {
         const openId = await cloudStorage.getOpenId();
         if (openId) {
@@ -272,6 +313,7 @@ module.exports = {
   getHistory,
   saveHistory,
   clearHistory,
+  removeHistory,
   getCollections,
   addCollection,
   removeCollection,
@@ -279,10 +321,15 @@ module.exports = {
   toggleCollection,
   getTranslations,
   addTranslation,
+  removeTranslation,
+  clearTranslations,
   // 待查询
   getPendingQuery,
   setPendingQuery,
   clearPendingQuery,
+  getPendingTranslation,
+  setPendingTranslation,
+  clearPendingTranslation,
   // 统计
   getStats,
   // 学习列表

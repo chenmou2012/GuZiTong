@@ -1,0 +1,36 @@
+<!-- components/records-list/index.wxml -->
+<view class="records-list">
+  <view wx:if="{{list.length === 0}}" class="empty-state">
+    <text class="empty-text">{{emptyText}}</text>
+  </view>
+
+  <view wx:else>
+    <view class="list-header">
+      <text class="list-count">共 {{list.length}} 条</text>
+      <text class="list-clear" bindtap="onClearAll">清空</text>
+    </view>
+
+    <view class="list-body">
+      <view
+        wx:for="{{list}}"
+        wx:key="index"
+        class="list-item"
+        bindtap="onItemTap"
+        data-index="{{index}}"
+      >
+        <view class="item-main">
+          <view class="item-title-row">
+            <text class="item-title">{{item[titleField]}}</text>
+            <text wx:if="{{showTime && item.time}}" class="item-time">{{formatTime(item.time)}}</text>
+          </view>
+          <text wx:if="{{subtitleField && item[subtitleField]}}" class="item-subtitle">
+            {{item[subtitleField]}}
+          </text>
+        </view>
+        <view class="item-delete" catchtap="onItemDelete" data-index="{{index}}">
+          <text class="delete-icon">×</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

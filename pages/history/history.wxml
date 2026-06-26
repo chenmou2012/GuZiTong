@@ -1,0 +1,12 @@
+<!-- pages/history/history.wxml -->
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <records-list
+    list="{{history}}"
+    title-field="word"
+    subtitle-field="content"
+    empty-text="还没有查过词，快去试试吧"
+    bind:itemtap="onItemTap"
+    bind:itemdelete="onItemDelete"
+    bind:clearall="onClearAll"
+  />
+</view>

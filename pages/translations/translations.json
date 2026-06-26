@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "翻译历史",
+  "usingComponents": {
+    "records-list": "/components/records-list/index"
+  }
+}

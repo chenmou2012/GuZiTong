@@ -8,9 +8,16 @@
     "pages/done/done",
     "pages/groupdone/groupdone",
     "pages/review/review",
-    "pages/realwords/realwords"
+    "pages/realwords/realwords",
+    "pages/history/history",
+    "pages/collections/collections",
+    "pages/translations/translations"
   ],
   "usingComponents": {},
+  "__usePrivacyCheck__": true,
+  "requiredPrivateInfos": [
+    "chooseAvatar"
+  ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom",

@@ -1,0 +1,118 @@
+/* components/records-list/index.wxss */
+.records-list {
+  width: 100%;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 列表头部 */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 8rpx;
+}
+
+.list-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.list-clear {
+  font-size: 26rpx;
+  color: #B91C1C;
+  padding: 8rpx 20rpx;
+}
+
+/* 列表项 */
+.list-body {
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.list-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 28rpx 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  position: relative;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item:active {
+  background-color: #fafafa;
+}
+
+.item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.item-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+}
+
+.item-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2C3E50;
+  flex-shrink: 0;
+}
+
+.item-time {
+  font-size: 22rpx;
+  color: #bbb;
+}
+
+.item-subtitle {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-delete {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}
+
+.delete-icon {
+  font-size: 40rpx;
+  color: #ccc;
+  line-height: 1;
+}
+
+.item-delete:active .delete-icon {
+  color: #B91C1C;
+}
