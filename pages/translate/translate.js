@@ -4,6 +4,7 @@ const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
+const errorUi = require('../../utils/services/error.js');
 
 const { API_BASE_URL } = constants;
 
@@ -115,7 +116,9 @@ Page({
         console.log('收到消息:', data);
 
         if (data.error) {
-          that.showErrorMessage(data.error);
+          wx.hideLoading();
+          wsClient.close();
+          errorUi.showRetryError(data.error, () => that.translateText());
           return;
         }
 
@@ -147,7 +150,8 @@ Page({
       onError: function(res) {
         console.error('[WS /ws/translate] 连接错误:', res);
         wx.hideLoading();
-        that.showErrorMessage('网络错误，请稍后重试');
+        wsClient.close();
+        errorUi.showRetryError('网络错误，请稍后重试', () => that.translateText());
       },
       onClose: function(res) {
         console.log('[WS /ws/translate] 连接关闭:', res);
@@ -171,23 +175,6 @@ Page({
       result: { content: content },
       resultAnimation: animation.export(),
       resultHtml: html
-    });
-
-    // 关闭 WebSocket
-    wsClient.close();
-  },
-
-  showErrorMessage: function(message) {
-    wx.hideLoading();
-
-    this.setData({
-      isLoading: false,
-      inputCollapsed: false
-    });
-
-    wx.showToast({
-      title: message,
-      icon: 'none'
     });
 
     // 关闭 WebSocket

@@ -1,6 +1,7 @@
 // app.js
 const sm2 = require('./utils/services/sm2.js');
 const auth = require('./utils/services/auth.js');
+const storage = require('./utils/services/storage.js');
 
 App({
   globalData: {
@@ -35,6 +36,10 @@ App({
     // 失败不阻塞启动（用户仍可在"我的"页手动触发登录）
     this._silentLogin();
 
+    // 自动同步：登录成功后后台跑全量同步（推送本地 + 拉取云端 + 合并）
+    // 失败仅 console.warn，不打扰用户
+    this._autoSync();
+
     // 初始化云开发
     if (wx.cloud) {
       wx.cloud.init({
@@ -57,5 +62,17 @@ App({
       .then((res) => auth.fetchUserInfo())
       .then(() => console.log('[auto login] success, openid=' + auth.getOpenid()))
       .catch((e) => console.warn('[auto login] failed:', e.message));
+  },
+
+  // 自动同步：登录态下后台跑一次全量同步（推送 + 拉取 + 合并）。
+  // 必须在 _silentLogin 完成后调用（依赖 token），故放在微任务末尾串行触发。
+  _autoSync: function() {
+    // 等静默登录先跑完（即便失败也无所谓，不阻塞同步逻辑）
+    Promise.resolve()
+      .then(() => storage.fullSync())
+      .then((r) => {
+        if (r.pushed || r.pulled) console.log('[auto sync] done', r);
+      })
+      .catch((e) => console.warn('[auto sync] failed:', e.message));
   }
 })

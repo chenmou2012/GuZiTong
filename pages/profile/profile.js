@@ -2,6 +2,7 @@
 const storage = require('../../utils/services/storage');
 const sm2 = require('../../utils/services/sm2');
 const auth = require('../../utils/services/auth');
+const errorUi = require('../../utils/services/error.js');
 
 Page({
   data: {
@@ -221,37 +222,27 @@ Page({
     });
   },
 
-  // 同步数据
+  // 同步数据：手动触发全量同步（与启动时的自动同步共用 storage.fullSync）
   syncData: function() {
     if (!this.data.loggedIn) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
+      errorUi.showToast('请先登录');
       return;
     }
 
     wx.showLoading({ title: '同步中...' });
-
-    const collections = storage.getCollections();
-    const history = storage.getHistory();
-
-    auth.saveUserData('learn', 'collections', collections)
-      .then(() => auth.saveUserData('search', 'history', history))
-      .then(() => auth.getUserData('learn'))
-      .then((cloudData) => {
-        if (cloudData && cloudData.collections) {
-          const local = storage.getCollections();
-          const cloud = cloudData.collections;
-          cloud.forEach(item => {
-            if (!local.some(l => l.word === item.word)) {
-              storage.addCollection(item.word, item.result);
-            }
-          });
+    storage.fullSync()
+      .then((r) => {
+        wx.hideLoading();
+        if (r.pushed || r.pulled) {
+          errorUi.showToast('同步成功', 'success');
+          this.loadStats();
+        } else {
+          errorUi.showRetryError('同步失败，请稍后重试', () => this.syncData());
         }
-        wx.hideLoading();
-        wx.showToast({ title: '同步成功', icon: 'success' });
       })
-      .catch((err) => {
+      .catch(() => {
         wx.hideLoading();
-        wx.showToast({ title: '同步失败', icon: 'none' });
+        errorUi.showRetryError('同步失败，请稍后重试', () => this.syncData());
       });
   },
 

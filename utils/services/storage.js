@@ -256,6 +256,77 @@ function syncDataToServer(dataType, dataKey, data) {
 }
 
 /**
+ * 合并两个 collections 数组（按 word 去重，时间戳新的优先）。
+ * - 不同 word：合并保留
+ * - 相同 word：time 较大的胜出（容许多设备各自编辑）
+ * - 都没有 time 的视为相等，按 local 优先
+ */
+function mergeCollectionsByTime(local, cloud) {
+  const map = new Map();
+  for (const item of (local || [])) {
+    map.set(item.word, item);
+  }
+  for (const item of (cloud || [])) {
+    const cur = map.get(item.word);
+    if (!cur || (item.time || 0) >= (cur.time || 0)) {
+      map.set(item.word, item);
+    }
+  }
+  return Array.from(map.values());
+}
+
+/**
+ * 全量同步（推送本地变更 + 拉取云端 + 合并）。
+ * 静默运行：不弹 UI、不抛错给调用方（失败仅 console.warn）。
+ * 适用场景：登录成功后自动同步、"我的"页手动同步按钮。
+ *
+ * @returns {Promise<{pushed: boolean, pulled: boolean}>} 推送和拉取是否都成功
+ */
+async function fullSync() {
+  const auth = require('./auth.js');
+  if (!auth.checkLogin()) return { pushed: false, pulled: false };
+
+  // 1) 推送本地变更（幂等：服务端全量覆盖即可）
+  let pushed = true;
+  try {
+    await auth.saveUserData('learn', 'collections', getCollections());
+    await auth.saveUserData('search', 'history', getHistory());
+  } catch (e) {
+    pushed = false;
+    console.warn('[fullSync] push failed:', e.message);
+  }
+
+  // 2) 拉取 learnList + sm2 数据
+  let pulled = true;
+  try {
+    await restoreFromServer();
+  } catch (e) {
+    pulled = false;
+    console.warn('[fullSync] restore learnList/sm2 failed:', e.message);
+  }
+
+  // 3) 拉取并合并 collections（云端可能有多设备新增的）
+  try {
+    const cloudData = await auth.getUserData('learn');
+    if (cloudData && Array.isArray(cloudData.collections)) {
+      const local = getCollections();
+      const merged = mergeCollectionsByTime(local, cloudData.collections);
+      if (merged.length !== local.length ||
+          merged.some((m, i) => m.word !== (local[i] && local[i].word) || m.time !== (local[i] && local[i].time))) {
+        wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, merged);
+        // 合并后回写云端，保证两边一致
+        await auth.saveUserData('learn', 'collections', merged);
+      }
+    }
+  } catch (e) {
+    pulled = false;
+    console.warn('[fullSync] merge collections failed:', e.message);
+  }
+
+  return { pushed, pulled };
+}
+
+/**
  * 从服务器恢复用户数据（统一入口）。
  * wordStates / reviewStats 由 sm2 处理；learnList 由本文件处理。
  */
@@ -343,6 +414,8 @@ module.exports = {
   // 服务器同步
   restoreFromServer,
   syncDataToServer,
+  fullSync,
+  mergeCollectionsByTime,
   // 设置
   getGroupSize,
   setGroupSize,
