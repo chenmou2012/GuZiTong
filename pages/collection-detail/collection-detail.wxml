@@ -1,0 +1,34 @@
+<!-- pages/collection-detail/collection-detail.wxml -->
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <text class="back-text">‹ 返回</text>
+  </view>
+
+  <!-- 标题：被收藏的字 -->
+  <view class="page-header">
+    <text class="page-title">{{word}}</text>
+    <text class="page-subtitle">收藏内容</text>
+  </view>
+
+  <!-- 结果区：流式中显示新结果，否则显示原收藏 -->
+  <view class="result-area">
+    <view wx:if="{{isShowingNew}}" class="result-label">正在生成新结果...</view>
+    <view wx:else class="result-label">{{isRegenerating ? '查询中...' : '已收藏的释义'}}</view>
+
+    <view class="result-content">
+      <rich-text nodes="{{isShowingNew ? streamingHtml : originalHtml}}"></rich-text>
+    </view>
+  </view>
+
+  <!-- 加载指示 -->
+  <view wx:if="{{isRegenerating}}" class="loading-indicator">
+    <text class="loading-text">{{isShowingNew ? '正在解读...' : '等待响应...'}}</text>
+  </view>
+
+  <!-- 底部按钮组 -->
+  <view class="action-btns">
+    <button class="btn-secondary" bindtap="removeCollect" disabled="{{isRegenerating}}">取消收藏</button>
+    <button class="btn-primary" bindtap="regenerate" disabled="{{isRegenerating}}">{{isRegenerating ? '查询中...' : '重新生成'}}</button>
+  </view>
+</view>

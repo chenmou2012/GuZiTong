@@ -1,6 +1,6 @@
 // Storage 服务
 // 学习进度/复习相关统一由 sm2.js 负责，本文件只保留检索记录、收藏、翻译、学习列表等
-const cloudStorage = require('./cloudStorage.js');
+// 云开发已彻底移除：所有云同步走 FastAPI 后端
 const sm2 = require('./sm2.js');
 const logger = require('./logger.js');
 const log = logger.for('storage');
@@ -32,11 +32,7 @@ function saveHistory(word, content) {
   }
   wx.setStorageSync(STORAGE_KEYS.SEARCH_HISTORY, history);
 
-  // 登录后才允许触发云函数
-  const auth = require('./auth.js');
-  if (wx.cloud && auth.getToken()) {
-    cloudStorage.saveCloudSearchHistory('auto', history).catch(() => {});
-  }
+  // 云开发已移除：历史记录只存本地，需要时由后端接口统一拉取
   syncDataToServer('search', 'history', history);
   return history;
 }
@@ -82,6 +78,17 @@ function removeCollection(word) {
 function isCollected(word) {
   let collections = getCollections();
   return collections.some(item => item.word === word);
+}
+
+// 更新已收藏字的 result（保留原 time），用于「重新生成」功能
+function updateCollection(word, result) {
+  let collections = getCollections();
+  const index = collections.findIndex(item => item.word === word);
+  if (index === -1) return null;
+  collections[index] = { ...collections[index], result: result };
+  wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
+  syncDataToServer('learn', 'collections', collections);
+  return collections[index];
 }
 
 function toggleCollection(word, result) {
@@ -180,11 +187,7 @@ function initLearnList(words) {
     [list[i], list[j]] = [list[j], list[i]];
   }
   wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, list);
-  // 云端同步仅在登录后调用：未登录时调 wx.cloud.callFunction 会触发隐私检查 errno:4
-  const auth = require('./auth.js');
-  if (wx.cloud && auth.getToken()) {
-    cloudStorage.saveCloudLearnList('auto', list).catch(() => {});
-  }
+  // 云开发已移除：学习列表只存本地，通过 FastAPI 后端 syncLearnList 同步
   return list;
 }
 
@@ -193,6 +196,7 @@ async function syncLearnList(words) {
   const localList = getLearnList();
 
   if (!localList || localList.length === 0) {
+    // 云开发已移除：只从 FastAPI 后端同步学习列表
     const auth = require('./auth.js');
     const token = auth.getToken();
     if (token) {
@@ -209,21 +213,6 @@ async function syncLearnList(words) {
         }
       } catch (e) {
         log.warn('syncLearnList 获取服务器学习列表失败:', e);
-      }
-    }
-
-    if (wx.cloud && auth.getToken()) {
-      try {
-        const openId = await cloudStorage.getOpenId();
-        if (openId) {
-          const cloudList = await cloudStorage.getCloudLearnList(openId);
-          if (cloudList && cloudList.length > 0) {
-            wx.setStorageSync(STORAGE_KEYS.LEARN_LIST, cloudList);
-            return cloudList;
-          }
-        }
-      } catch (e) {
-        log.warn('syncLearnList 获取云端学习列表失败:', e);
       }
     }
 
@@ -257,6 +246,8 @@ function syncDataToServer(dataType, dataKey, data) {
  * - 不同 word：合并保留
  * - 相同 word：time 较大的胜出（容许多设备各自编辑）
  * - 都没有 time 的视为相等，按 local 优先
+ *
+ * P1-11: 用 Number.isFinite 显式判断时间戳有效性，避免 undefined 被误判。
  */
 function mergeCollectionsByTime(local, cloud) {
   const map = new Map();
@@ -265,9 +256,20 @@ function mergeCollectionsByTime(local, cloud) {
   }
   for (const item of (cloud || [])) {
     const cur = map.get(item.word);
-    if (!cur || (item.time || 0) >= (cur.time || 0)) {
+    if (!cur) {
+      map.set(item.word, item);
+      continue;
+    }
+    // 仅当 cloud.time 是有效数字且 >= local.time 时覆盖
+    // local 无 time / cloud 无 time → 保留 local
+    const curTimeValid = Number.isFinite(cur.time);
+    const itemTimeValid = Number.isFinite(item.time);
+    if (!curTimeValid && itemTimeValid) {
+      map.set(item.word, item);
+    } else if (curTimeValid && itemTimeValid && item.time >= cur.time) {
       map.set(item.word, item);
     }
+    // 否则保留 cur（local 优先）
   }
   return Array.from(map.values());
 }
@@ -277,6 +279,8 @@ function mergeCollectionsByTime(local, cloud) {
  * 静默运行：不弹 UI、不抛错给调用方（失败仅 console.warn）。
  * 适用场景：登录成功后自动同步、"我的"页手动同步按钮。
  *
+ * P1-10: 推送阶段用 Promise.all 并发，节省 ~50% 网络时间。
+ *
  * @returns {Promise<{pushed: boolean, pulled: boolean}>} 推送和拉取是否都成功
  */
 async function fullSync() {
@@ -284,10 +288,21 @@ async function fullSync() {
   if (!auth.checkLogin()) return { pushed: false, pulled: false };
 
   // 1) 推送本地变更（幂等：服务端全量覆盖即可）
+  //    collections 和 history 互相独立，并发推送；任一失败不影响另一个的结果记录
   let pushed = true;
   try {
-    await auth.saveUserData('learn', 'collections', getCollections());
-    await auth.saveUserData('search', 'history', getHistory());
+    const results = await Promise.allSettled([
+      auth.saveUserData('learn', 'collections', getCollections()),
+      auth.saveUserData('search', 'history', getHistory()),
+    ]);
+    if (results.some(r => r.status === 'rejected' || r.value === false)) {
+      pushed = false;
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          fullSyncLog.warn(`push[${i}] failed:`, r.reason && r.reason.message);
+        }
+      });
+    }
   } catch (e) {
     pushed = false;
     fullSyncLog.warn('push failed:', e.message);
@@ -308,8 +323,12 @@ async function fullSync() {
     if (cloudData && Array.isArray(cloudData.collections)) {
       const local = getCollections();
       const merged = mergeCollectionsByTime(local, cloudData.collections);
-      if (merged.length !== local.length ||
-          merged.some((m, i) => m.word !== (local[i] && local[i].word) || m.time !== (local[i] && local[i].time))) {
+      const isDiff = merged.length !== local.length ||
+        merged.some((m, i) => {
+          const l = local[i];
+          return !l || m.word !== l.word || m.time !== l.time;
+        });
+      if (isDiff) {
         wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, merged);
         // 合并后回写云端，保证两边一致
         await auth.saveUserData('learn', 'collections', merged);
@@ -386,6 +405,7 @@ module.exports = {
   addCollection,
   removeCollection,
   isCollected,
+  updateCollection,
   toggleCollection,
   getTranslations,
   addTranslation,

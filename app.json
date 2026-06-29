@@ -11,6 +11,7 @@
     "pages/realwords/realwords",
     "pages/history/history",
     "pages/collections/collections",
+    "pages/collection-detail/collection-detail",
     "pages/translations/translations"
   ],
   "usingComponents": {},

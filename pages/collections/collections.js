@@ -25,8 +25,9 @@ Page({
 
   onItemTap(e) {
     const { item } = e.detail;
-    storage.setPendingQuery(item.word);
-    wx.switchTab({ url: '/pages/index/index' });
+    wx.navigateTo({
+      url: '/pages/collection-detail/collection-detail?word=' + encodeURIComponent(item.word)
+    });
   },
 
   onItemDelete(e) {
