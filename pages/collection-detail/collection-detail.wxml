@@ -28,7 +28,8 @@
 
   <!-- 底部按钮组 -->
   <view class="action-btns">
-    <button class="btn-secondary" bindtap="removeCollect" disabled="{{isRegenerating}}">取消收藏</button>
+    <button class="btn-secondary" bindtap="copyContent" disabled="{{!originalResult && !streamingText}}">复制</button>
+    <button class="btn-tertiary" bindtap="removeCollect">取消收藏</button>
     <button class="btn-primary" bindtap="regenerate" disabled="{{isRegenerating}}">{{isRegenerating ? '查询中...' : '重新生成'}}</button>
   </view>
 </view>

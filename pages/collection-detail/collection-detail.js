@@ -52,11 +52,27 @@ Page({
       content: '取消收藏「' + this.data.word + '」？',
       success: (res) => {
         if (res.confirm) {
+          // 取消收藏时如果还在流式查询，先关掉 WS 避免泄露
+          if (that.data.isRegenerating) {
+            wsClient.close();
+          }
           storage.removeCollection(that.data.word);
           wx.showToast({ title: '已取消收藏', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 600);
         }
       }
+    });
+  },
+
+  copyContent: function() {
+    const text = this.data.isShowingNew ? this.data.streamingText : this.data.originalResult;
+    if (!text) {
+      wx.showToast({ title: '暂无可复制内容', icon: 'none' });
+      return;
+    }
+    wx.setClipboardData({
+      data: text,
+      success: () => wx.showToast({ title: '已复制到剪贴板', icon: 'success' })
     });
   },
 

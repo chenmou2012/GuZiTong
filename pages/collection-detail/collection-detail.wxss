@@ -80,7 +80,7 @@
   left: 0;
   right: 0;
   display: flex;
-  gap: 20rpx;
+  gap: 16rpx;
   padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
   background: #FDFBF7;
   z-index: 100;
@@ -89,11 +89,12 @@
 }
 
 .btn-secondary,
+.btn-tertiary,
 .btn-primary {
   flex: 1;
   margin: 0;
   padding: 20rpx 0;
-  font-size: 30rpx;
+  font-size: 28rpx;
   border-radius: 16rpx;
   line-height: 1.4;
 }
@@ -107,6 +108,12 @@
 .btn-secondary[disabled] {
   background: #f5f5f5;
   color: #ccc;
+}
+
+.btn-tertiary {
+  background: #fff;
+  color: #B91C1C;
+  border: 1rpx solid #B91C1C;
 }
 
 .btn-primary {
