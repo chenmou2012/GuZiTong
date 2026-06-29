@@ -57,15 +57,43 @@ function setStats(stats) {
 function syncWordStatesToServer(states) {
   const auth = require('./auth.js');
   const token = auth.getToken();
-  if (!token) return;
-  auth.saveUserData('learn', 'wordStates', states).catch(() => {});
+  if (!token) return Promise.resolve();
+  return auth.saveUserData('learn', 'wordStates', states).catch(() => {});
 }
 
 function syncStatsToServer(stats) {
   const auth = require('./auth.js');
   const token = auth.getToken();
-  if (!token) return;
-  auth.saveUserData('learn', 'reviewStats', stats).catch(() => {});
+  if (!token) return Promise.resolve();
+  return auth.saveUserData('learn', 'reviewStats', stats).catch(() => {});
+}
+
+// ==================== 串行写队列 (P1-9) ====================
+//
+// 并发问题：用户在 learn 页快速答题时，recordReview 会被连续调用。
+// setStates 是同步的（最后赢），但 syncWordStatesToServer 是 async fire-and-forget。
+// 网络往返时间不可控 → 后发请求可能先到服务端 → 服务端 last-write-wins 误判。
+//
+// 解决方案：所有"写本地 + 同步服务端"打包成任务，串行执行。
+// 同时 syncWordStatesToServer 和 syncStatsToServer 之间也需保证顺序：
+// states 必须先于 stats（否则 stats 引用了尚未写盘的 states）。
+
+let _writeChain = Promise.resolve();
+
+function _enqueue(task) {
+  _writeChain = _writeChain.then(task, task);  // 第二个 task 处理前一个失败
+  // 不 catch：失败要冒泡给 _writeChain 下游，便于诊断
+  return _writeChain;
+}
+
+function _writeWordStates(states) {
+  setStates(states);
+  return syncWordStatesToServer(states);  // Promise（catch 已在内部）
+}
+
+function _writeStats(stats) {
+  setStats(stats);
+  return syncStatsToServer(stats);
 }
 
 function todayStr() {
@@ -97,6 +125,8 @@ function clampEf(ef) {
  * 创建/获取某字的状态对象。
  * 已存在则返回现有状态；不存在则按"刚学完"初始化（rep=0, interval=0,
  * nextReviewAt=now，意味着立即可复习）。
+ *
+ * P1-9: 改用串行写队列，避免连续调用时 sync 乱序。
  */
 function getOrCreateState(word, now = Date.now()) {
   const states = getStates();
@@ -116,13 +146,15 @@ function getOrCreateState(word, now = Date.now()) {
     wrongCount: 0
   };
   states[word] = state;
-  setStates(states);
-  syncWordStatesToServer(states);
+  _enqueue(() => _writeWordStates(states));
   return state;
 }
 
 /**
  * 标记字为已学（初始化 SM-2 状态）。幂等。
+ *
+ * P1-9: states 和 stats 必须严格按顺序串行写入，否则服务端可能先收到 stats
+ * （它读本地 stats 快照）后收到 states，破坏数据一致性。
  */
 function markWordLearned(word, now = Date.now()) {
   const states = getStates();
@@ -142,15 +174,12 @@ function markWordLearned(word, now = Date.now()) {
     wrongCount: 0
   };
   states[word] = state;
-  setStates(states);
-  syncWordStatesToServer(states);
 
-  // 同步复习统计：今日学习数
   const stats = rollDailyStats(getStats());
   stats.todayLearn = (stats.todayLearn || 0) + 1;
   stats.lastReviewDate = todayStr();
-  setStats(stats);
-  syncStatsToServer(stats);
+
+  _enqueue(() => _writeWordStates(states).then(() => _writeStats(stats)));
 
   return state;
 }
@@ -199,8 +228,6 @@ function recordReview(word, quality, now = Date.now()) {
   state.totalReviews += 1;
 
   states[word] = state;
-  setStates(states);
-  syncWordStatesToServer(states);
 
   // 同步复习统计
   const stats = rollDailyStats(getStats());
@@ -212,8 +239,9 @@ function recordReview(word, quality, now = Date.now()) {
     stats.todayDone += 1;
     stats.totalCorrect += 1;
   }
-  setStats(stats);
-  syncStatsToServer(stats);
+
+  // P1-9: states 先于 stats 串行写入（即便服务端读到中间态也不会数据错位）
+  _enqueue(() => _writeWordStates(states).then(() => _writeStats(stats)));
 
   return state;
 }
@@ -333,6 +361,7 @@ function migrateLegacyData(now = Date.now()) {
 
   if (migrated > 0) {
     setStates(states);
+    // 迁移是冷启动一次性操作，直接 fire-and-forget 即可，无需入队列
     syncWordStatesToServer(states);
   }
 

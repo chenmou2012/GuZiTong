@@ -4,14 +4,16 @@ const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
+const errorUi = require('../../utils/services/error.js');
 const logger = require('../../utils/services/logger.js');
 const log = logger.for('query');
 
-const { API_BASE_URL, REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
+const { REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 
 Page({
   data: {
     inputText: '',
+    contextText: '',     // 多音字消歧：原句/出处（可选）
     currentQuery: '',
     quickWords: ['之', '其', '而', '以', '何', '于'],
     showResult: false,
@@ -46,6 +48,7 @@ Page({
 
     this.setData({
       inputText: '',
+      contextText: '',
       showResult: false,
       result: {},
       resultHtml: '',
@@ -72,9 +75,17 @@ Page({
     });
   },
 
+  // 多音字消歧：原句/出处输入
+  onContextChange: function(e) {
+    this.setData({
+      contextText: e.detail.value
+    });
+  },
+
   clearInput: function() {
     this.setData({
       inputText: '',
+      contextText: '',
       showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
@@ -121,7 +132,9 @@ Page({
 
   searchWord: function() {
     let query = this.data.inputText.trim();
-    log.debug('query:', query);
+    // 多音字消歧：原句/出处（可选，长度上限 200 字防止滥用）
+    const context = (this.data.contextText || '').trim().slice(0, 200);
+    log.debug('query:', query, 'context:', context);
 
     if (!query) {
       wx.showToast({
@@ -157,29 +170,47 @@ Page({
       showError: false,
       inputCollapsed: true,
       showQuickWords: false,
-      streamingText: '',
-      resultParsed: null
+      streamingText: ''
     });
 
     wx.showLoading({ title: '正在查询...', mask: true });
 
     const that = this;
     log.debug('发送数据: text=' + query);
+    let wsStartTime = null;
+    let wsFirstTokenAt = null;
 
-    // WebSocket 协议不支持自定义 header，token 只能通过 URL query 传递
-    const token = auth.getToken() || '';
-    wsClient.connect('/ws/query?token=' + encodeURIComponent(token), {
+    // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
+    auth.fetchWsTicket().then((ticket) => {
+      if (!ticket) {
+        wx.hideLoading();
+        errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
+        return;
+      }
+      const queryStr = '?ticket=' + encodeURIComponent(ticket);
+      wsClient.connect('/ws/query' + queryStr, {
       onOpen: function() {
-        wsClient.send({ text: query });
+        // 计时起点：WebSocket 已建立，真正发出请求这一刻
+        wsStartTime = Date.now();
+        log.info('[query] WS 已连接 t=0');
+        // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
+        wsClient.send({ text: query, context: context });
+        log.info('[query] 请求已发送');
       },
       onMessage: function(data) {
+        const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
+        log.info(`[query] 收到 ${data.type} (${elapsed}ms)`);
         if (data.error) {
           wx.hideLoading();
-          that.showErrorMessage(data.error);
+          errorUi.showRetryError(data.error, () => that.searchWord());
           return;
         }
 
         if (data.type === 'content') {
+          if (wsFirstTokenAt === null) {
+            wsFirstTokenAt = Date.now();
+            log.info(`首token: ${wsFirstTokenAt - wsStartTime}ms`);
+          }
           wx.hideLoading();
           const newText = that.data.streamingText + data.content;
           that.setData({
@@ -191,19 +222,21 @@ Page({
         }
 
         if (data.type === 'done') {
+          log.info(`完成: ${Date.now() - wsStartTime}ms`);
           that.handleQueryResult(that.data.streamingText);
         }
       },
       onError: function(res) {
         log.error('连接错误:', res);
         wx.hideLoading();
-        that.showErrorMessage('网络错误，请稍后重试');
+        errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
       },
       onClose: function(res) {
         log.info('连接关闭:', res);
         // 由 wsClient 处理重连
       }
     });
+    });  // P0-3: 闭合 fetchWsTicket().then
   },
 
   handleQueryResult: function(content) {
@@ -245,10 +278,6 @@ Page({
     setTimeout(() => {
       this.setData({ showError: false });
     }, 5000);
-  },
-
-  playAudio: function() {
-    wx.showToast({ title: '音频功能开发中', icon: 'none' });
   },
 
   toggleCollect: function() {

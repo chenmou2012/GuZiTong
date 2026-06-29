@@ -219,9 +219,46 @@ async function saveUserData(dataType, dataKey, dataValue) {
 }
 
 /**
- * 登出
+ * 换取一次性 WS ticket（P0-3）
+ * 30s 有效，一次性消费。让 token 不出现在 URL/Nginx 日志。
+ *
+ * @returns {Promise<string|null>} ticket 或 null（失败/未登录）
  */
-function logout() {
+async function fetchWsTicket() {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const response = await request('/api/ws-ticket', {
+      method: 'POST',
+      header: { 'Authorization': 'Bearer ' + token }
+    });
+    if (response && response.ticket) return response.ticket;
+    log.warn('fetchWsTicket: 响应无 ticket', response);
+    return null;
+  } catch (e) {
+    log.warn('fetchWsTicket failed:', e.message);
+    return null;
+  }
+}
+
+/**
+ * 登出（服务端撤销 token + 本地清缓存）
+ */
+async function logout() {
+  const token = getToken();
+  // 先调服务端撤销 token（P0-4），失败也继续清本地（登出幂等）
+  if (token) {
+    try {
+      await request('/api/logout', {
+        method: 'POST',
+        header: { 'Authorization': 'Bearer ' + token }
+      });
+    } catch (e) {
+      // 网络失败也无所谓：登出动作不能卡住用户
+      log.warn('logout: 服务端撤销失败（已忽略）:', e.message);
+    }
+  }
   wx.removeStorageSync(STORAGE_KEYS.TOKEN);
   wx.removeStorageSync(STORAGE_KEYS.OPENID);
   wx.removeStorageSync(STORAGE_KEYS.USER_INFO);
@@ -265,12 +302,16 @@ module.exports = {
   login,
   checkLogin,
   getToken,
+  setToken,
   getOpenid,
+  setOpenid,
   getUserInfo,
+  setUserInfo,
   fetchUserInfo,
   getDefaultNickname,
   updateUserInfo,
   getUserData,
   saveUserData,
+  fetchWsTicket,
   logout
 };

@@ -74,7 +74,14 @@ Page({
     this.checkLogin();
     this.loadSettings();
     this.loadStats();
-    storage.restoreFromServer().then(() => this.loadStats());
+    // 防并发：连续 tab 切换可能产生多个并发的 restoreFromServer，
+    // 用序号拒绝陈旧回调，避免后发请求覆盖前者造成"旧数据刷新 UI"。
+    if (this._onShowSeq === undefined) this._onShowSeq = 0;
+    const seq = ++this._onShowSeq;
+    storage.restoreFromServer().then(() => {
+      if (seq !== this._onShowSeq) return;
+      this.loadStats();
+    });
   },
 
   checkLogin: function() {
@@ -210,9 +217,10 @@ Page({
     wx.showModal({
       title: '提示',
       content: '确定要退出登录吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          auth.logout();
+          // P0-4: logout 现在是 async，会调服务端撤销 token
+          await auth.logout();
           this.hideSettings();
           this.setData({ loggedIn: false, userInfo: null });
           this._refreshDisplayNickname();

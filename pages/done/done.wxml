@@ -4,7 +4,7 @@
     <text class="header-title">学习完成</text>
   </view>
 
-  <main class="content">
+  <view class="content">
     <text class="subtitle">本轮已学完所有词</text>
 
     <view class="stats-card">
@@ -16,5 +16,5 @@
       <button class="btn secondary" bindtap="goHome">返回主界面</button>
       <button class="btn primary" bindtap="continueLearn">继续学习</button>
     </view>
-  </main>
+  </view>
 </view>

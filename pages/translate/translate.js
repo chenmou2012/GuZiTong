@@ -1,5 +1,4 @@
 // pages/translate/translate.js
-const constants = require('../../utils/services/constants');
 const storage = require('../../utils/services/storage');
 const markdown = require('../../utils/services/markdown');
 const wsClient = require('../../utils/services/websocket.js');
@@ -7,8 +6,6 @@ const auth = require('../../utils/services/auth.js');
 const errorUi = require('../../utils/services/error.js');
 const logger = require('../../utils/services/logger.js');
 const log = logger.for('translate');
-
-const { API_BASE_URL } = constants;
 
 Page({
   data: {
@@ -105,16 +102,29 @@ Page({
     });
 
     const that = this;
+    let wsStartTime = null;
+    let wsFirstTokenAt = null;
 
-    // WebSocket 协议不支持自定义 header，token 只能通过 URL query 传递
-    const token = auth.getToken() || '';
-    wsClient.connect('/ws/translate?token=' + encodeURIComponent(token), {
+    // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
+    auth.fetchWsTicket().then((ticket) => {
+      if (!ticket) {
+        wx.hideLoading();
+        errorUi.showRetryError('网络错误，请稍后重试', () => that.translateText());
+        return;
+      }
+      const queryStr = '?ticket=' + encodeURIComponent(ticket);
+      wsClient.connect('/ws/translate' + queryStr, {
       onOpen: function() {
-        log.debug('连接 open');
+        // 计时起点：WebSocket 已建立，真正发出请求这一刻
+        wsStartTime = Date.now();
+        log.info('[translate] WS 已连接 t=0');
         // 发送翻译请求
         wsClient.send({ text: text });
+        log.info('[translate] 请求已发送');
       },
       onMessage: function(data) {
+        const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
+        log.info(`[translate] 收到 ${data.type} (${elapsed}ms)`);
         if (data.error) {
           wx.hideLoading();
           wsClient.close();
@@ -130,6 +140,10 @@ Page({
         }
 
         if (data.type === 'content') {
+          if (wsFirstTokenAt === null) {
+            wsFirstTokenAt = Date.now();
+            log.info(`首token: ${wsFirstTokenAt - wsStartTime}ms`);
+          }
           // 实时更新流式文本并渲染 Markdown
           const newText = that.data.streamingText + data.content;
           const html = markdown.markdownToHtml(newText);
@@ -141,6 +155,7 @@ Page({
         }
 
         if (data.type === 'done') {
+          log.info(`完成: ${Date.now() - wsStartTime}ms`);
           // 完成
           wx.hideLoading();
           that.handleTranslateResult(that.data.streamingText);
@@ -158,6 +173,7 @@ Page({
         // 由 wsClient 处理重连
       }
     });
+    });  // P0-3: 闭合 fetchWsTicket().then
   },
 
   handleTranslateResult: function(content) {

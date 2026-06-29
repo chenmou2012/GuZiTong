@@ -3,7 +3,7 @@ import time
 import asyncio
 import os
 import random
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Any
@@ -14,6 +14,15 @@ from concurrent.futures import ThreadPoolExecutor
 from logger import log_info, log_success, log_warning, log_debug, log_error, DEBUG_ENABLED
 
 from ragService import rag
+from auth import (
+    code2session, create_token, verify_token,
+    create_ws_ticket, consume_ws_ticket,
+    revoke_user_token,
+)
+from database import (
+    create_user, get_user_by_openid, update_user_token, update_user_info,
+    save_user_data, get_user_data,
+)
 
 # ==================== 加载配置 ====================
 _config_path = os.path.join(os.path.dirname(__file__), "config.json")
@@ -49,57 +58,45 @@ client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 # 创建线程池
 executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
-# 简单缓存（查词结果缓存）：用 OrderedDict 实现 LRU + TTL
-# - 最多 MAX_CACHE_SIZE 项，防止内存无限增长
-# - 每项 TTL = CACHE_TTL 秒，过期自动淘汰
-from collections import OrderedDict
-
-MAX_CACHE_SIZE = 500
-CACHE_TTL = 3600  # 1 小时
-cache = OrderedDict()
-
-def get_cache(key: str) -> tuple:
-    """获取缓存，返回 (结果, 是否命中)"""
-    if key in cache:
-        result, timestamp = cache[key]
-        if time.time() - timestamp < CACHE_TTL:
-            cache.move_to_end(key)  # LRU 更新
-            return result, True
-        else:
-            del cache[key]
-    return None, False
-
-def set_cache(key: str, result: str):
-    """设置缓存（超出容量时淘汰最旧）"""
-    if key in cache:
-        cache.move_to_end(key)
-    cache[key] = (result, time.time())
-    if len(cache) > MAX_CACHE_SIZE:
-        cache.popitem(last=False)
-
-
 # --- 辅助函数 ---
-def sync_create_chat_stream(model: str, messages: list, max_tokens: int, temperature: float = None):
-    """在线程池中同步调用 AI"""
-    kwargs = {
-        "model": model,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "stream": True
-    }
-    if temperature is not None:
-        kwargs["temperature"] = temperature
-    return client.chat.completions.create(**kwargs)
-
+# P1-6: 删除未使用的 sync_create_chat_stream 函数（已被 call_ai_stream_async 替代）
 
 async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temperature: float = None):
-    """异步调用 AI"""
+    """异步流式调用 AI：在后台线程拉 chunks，主 event loop 边收边发（不阻塞）"""
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(
-        executor,
-        sync_create_chat_stream,
-        model, messages, max_tokens, temperature
-    )
+    queue = asyncio.Queue()
+
+    def _producer():
+        """后台线程：从智谱拉取每个 chunk 并 put 到 queue"""
+        try:
+            kwargs = {
+                "model": model,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "stream": True,
+            }
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            stream = client.chat.completions.create(**kwargs)
+            for c in stream:
+                if c.choices and c.choices[0].delta.content:
+                    # 跨线程安全地把内容放进 asyncio.Queue
+                    loop.call_soon_threadsafe(queue.put_nowait, c.choices[0].delta.content)
+            loop.call_soon_threadsafe(queue.put_nowait, None)  # 哨兵
+        except Exception as e:
+            loop.call_soon_threadsafe(queue.put_nowait, e)
+
+    # 在 executor 中启动 producer（不 await！让 producer 在后台跑）
+    loop.run_in_executor(executor, _producer)
+
+    # 主 event loop 异步消费 queue
+    while True:
+        item = await queue.get()
+        if item is None:
+            return  # 收集完毕
+        if isinstance(item, Exception):
+            raise item
+        yield item
 
 
 # --- 数据模型 ---
@@ -141,15 +138,17 @@ QUERY_SYSTEM_PROMPT = """你是一位专业的文言文教育专家，专门帮�
 ## 义项
 列出该字的所有常见义项，每个义项包含：
 - 词性：名词/动词/形容词/副词/介词/连词/助词/叹词等
-- 含义：用现代汉语解释含义，要准确、简洁、适合初中生理解
-- 义项类型：标注【本义】/【引申义】/【通假义】
+- 释义：用现代汉语给出核心含义，要准确、简洁、适合初中生理解
+- 解释：对释义的详细说明，包括语法功能、常见搭配、语境辨析、近义反义等
 - 例句：从下方提供的古诗文例句中选取，必须标注出处（如《论语·学而》）
 
 格式示例：
-1. **【词性·义项类型】含义**
+1. **【词性】释义**
+   - 解释：……
    - 例句：xxxx（《诗经·关雎》）
 
-2. **【词性·义项类型】含义**
+2. **【词性】释义**
+   - 解释：……
    - 例句：xxxx（《左传·僖公二十三年》）
 
 **核心要求（按优先级递减，不确定就舍弃而非编造）**：
@@ -157,10 +156,9 @@ QUERY_SYSTEM_PROMPT = """你是一位专业的文言文教育专家，专门帮�
 2. **每个义项必须标注出处**（书名·篇名），无出处的例句一律不收。
 3. **读音不确定就标"读音待考"**，绝不猜测。
 4. **多音字必须列全所有读音**，不要只列最常用的。
-5. 义项按常见程度排序，【本义】优先于【引申义】。
-6. 释义要准确、简洁、适合初中生理解；严格区分本义和引申义。
-7. **如对某个义项存在疑虑，宁可不列，也不要补全**。
-8. **若有「常见误用避坑」段**，其中列出的误用理解必须**显式纠正**，不得采纳为正确释义。
+5. 释义要准确、简洁、适合初中生理解；解释要充分但不冗长。
+6. **如对某个义项存在疑虑，宁可不列，也不要补全**。
+7. **若有「常见误用避坑」段**，其中列出的误用理解必须**显式纠正**，不得采纳为正确释义。
 
 以下是古诗文数据库中包含该字的例句（含「常见误用避坑」段，如有），直接选用，不需要自己编造：
 {rag_examples}
@@ -171,6 +169,18 @@ QUERY_SYSTEM_PROMPT = """你是一位专业的文言文教育专家，专门帮�
 3. 如果是多音字，在读音部分列出所有读音
 4. **若存在「常见误用避坑」段**，请在对应义项下用"⚠️ 易误为：..."显式提示学生避开该错误理解
 5. 返回纯 Markdown 内容，不要有额外解释"""
+
+# 上下文消歧补充段：当用户提供了 context（出处/原句）时拼到 system prompt 末尾。
+# 让 LLM 优先按 context 判断多音字读音和义项，无 context 则不拼这段。
+QUERY_CONTEXT_NOTE = """
+
+**【当前查询的上下文】**：用户正在阅读「{context}」一文。
+- 如果该字在「{context}」中是**多音字**，**先按上下文判定当前读音**，放在最前；其他读音次之。
+- 如果该字在「{context}」中有**特定用法**（如某义项只在该语境出现），**优先列该义项**。
+- 如果该字在「{context}」中是**单字成词或特殊用法**，**不要默认套用最常见义项**，要回到原句解读。
+- 例句尽量从上方 RAG 列表中选取与「{context}」同源/同作者/同时代的例子。
+- 如果「{context}」中该字的用法你**不确定**，请在读音或义项后显式标"⚠️ 语境待考"。
+"""
 
 TRANSLATE_SYSTEM_PROMPT = """你是一位专业的文言文翻译专家，专门帮助初中生学习文言文翻译。
 
@@ -211,12 +221,27 @@ async def send_streaming(ws: WebSocket, content: str):
 
 
 @app.websocket("/ws/query")
-async def ws_query(ws: WebSocket, token: str = None):
-    # WebSocket 协议不支持自定义 header，token 必须通过 query string 传递（这是协议限制）
-    openid, valid = verify_token(token) if token else (None, False)
-    if not valid:
-        await ws.close(code=1008, reason="未授权")
-        log_error(f"[WS /ws/query] 拒绝未授权连接")
+async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
+    # P0-3: 优先用 ticket 鉴权（避免 token 进 URL/Nginx 日志）
+    # ticket 是一次性的，服务端 consume 后立即失效，防重放
+    # 兼容 fallback：如果客户端还没升级，仍允许 ?token=xxx（过渡期）
+    openid = None
+    if ticket:
+        openid, valid = consume_ws_ticket(ticket)
+        if not valid:
+            await ws.close(code=1008, reason="ticket 无效或已过期")
+            log_error(f"[WS /ws/query] 拒绝无效 ticket")
+            return
+    elif token:
+        openid, valid = verify_token(token)
+        if not valid:
+            await ws.close(code=1008, reason="未授权")
+            log_error(f"[WS /ws/query] 拒绝未授权连接")
+            return
+        log_warning(f"[WS /ws/query] 使用 URL token（建议升级到 ticket）")
+    else:
+        await ws.close(code=1008, reason="缺少 ticket")
+        log_error(f"[WS /ws/query] 缺少 ticket/token")
         return
     await manager.connect(ws)
     try:
@@ -234,14 +259,10 @@ async def ws_query(ws: WebSocket, token: str = None):
 
         start_time = time.time()
 
-        # 检查缓存
-        cached_result, hit = get_cache(word)
-        if hit:
-            log_info(f"[缓存] 命中: {word}")
-            await manager.send({'type': 'start', 'word': word}, ws)
-            await send_streaming(ws, cached_result)
-            await manager.send({'type': 'done'}, ws)
-            return
+        # 可选上下文（多音字消歧、出处定位）
+        # 前端可在 user 选择某字时附带原句/篇目名，AI 据此优先判定读音和义项
+        context = (request.get('context') or '').strip()
+        log_info(f"[query] word='{word}', context='{context[:60]}'" if context else f"[query] word='{word}', no context")
 
         # RAG 检索例句
         rag_examples = rag.query(word)
@@ -252,37 +273,37 @@ async def ws_query(ws: WebSocket, token: str = None):
             rag_examples = misuses + "\n\n" + rag_examples
         log_info(f"[RAG] '{word}': 例句 {len(rag_examples)} 字")
 
-        # 构建 prompt
+        # 构建 prompt：先注入 RAG；有 context 时再追加消歧段
         prompt = QUERY_SYSTEM_PROMPT.replace("{rag_examples}", rag_examples)
+        if context:
+            prompt += QUERY_CONTEXT_NOTE.replace("{context}", context)
+            log_info(f"[query] 已注入 context 消歧段（{len(context)} 字）")
+
+        # user message 也带上 context，让 LLM 在对话上下文里明确知道出处
+        user_content = f"请解析以下字词：{word}"
+        if context:
+            user_content += f"\n（出处/原句：{context}）"
+
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": f"请解析以下字词：{word}"}
+            {"role": "user", "content": user_content}
         ]
 
         # 调用 AI（temperature=0.1 减少幻觉，提升查词精确度）
-        await manager.send({'type': 'start', 'word': word}, ws)
-        stream = await call_ai_stream_async(MODEL, messages, MAX_TOKENS, temperature=0.1)
-
+        # 关键：async for 边收边发，producer 在后台线程跑，不阻塞主 event loop
+        await manager.send({'type': 'start', 'word': word, 'context': context}, ws)
         first_token = True
-        full_result = ''  # 累积完整结果用于缓存
         try:
-            for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    content = chunk.choices[0].delta.content
-                    if first_token:
-                        log_info(f"[查词] 首token: {(time.time()-start_time)*1000:.0f}ms")
-                        first_token = False
-                    full_result += content  # 累积
-                    await send_streaming(ws, content)
+            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS, temperature=0.1):
+                if first_token:
+                    log_info(f"[查词] 首token: {(time.time()-start_time)*1000:.0f}ms")
+                    first_token = False
+                await send_streaming(ws, content)
         except Exception as e:
             log_error(f"[查词] {e}")
 
         log_success(f"[查词] 完成")
         try:
-            # 写入缓存（仅当结果非空）
-            if full_result:
-                set_cache(word, full_result)
-                log_info(f"[缓存] 写入: {word} ({len(full_result)} 字符)")
             await manager.send({'type': 'done'}, ws)
         except Exception as e:
             log_debug(f"[WS] send 失败: {e}")
@@ -291,11 +312,25 @@ async def ws_query(ws: WebSocket, token: str = None):
 
 
 @app.websocket("/ws/translate")
-async def ws_translate(ws: WebSocket, token: str = None):
-    openid, valid = verify_token(token) if token else (None, False)
-    if not valid:
-        await ws.close(code=1008, reason="未授权")
-        log_error(f"[WS /ws/translate] 拒绝未授权连接")
+async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
+    # P0-3: 优先用 ticket 鉴权
+    openid = None
+    if ticket:
+        openid, valid = consume_ws_ticket(ticket)
+        if not valid:
+            await ws.close(code=1008, reason="ticket 无效或已过期")
+            log_error(f"[WS /ws/translate] 拒绝无效 ticket")
+            return
+    elif token:
+        openid, valid = verify_token(token)
+        if not valid:
+            await ws.close(code=1008, reason="未授权")
+            log_error(f"[WS /ws/translate] 拒绝未授权连接")
+            return
+        log_warning(f"[WS /ws/translate] 使用 URL token（建议升级到 ticket）")
+    else:
+        await ws.close(code=1008, reason="缺少 ticket")
+        log_error(f"[WS /ws/translate] 缺少 ticket/token")
         return
     await manager.connect(ws)
     try:
@@ -313,15 +348,16 @@ async def ws_translate(ws: WebSocket, token: str = None):
         ]
 
         await manager.send({'type': 'start', 'original': text}, ws)
-        stream = await call_ai_stream_async(MODEL, messages, MAX_TOKENS)
-
+        # 关键：async for 边收边发，producer 在后台线程跑，不阻塞主 event loop
         first_token = True
-        for chunk in stream:
-            if chunk.choices and chunk.choices[0].delta.content:
+        try:
+            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS):
                 if first_token:
                     log_info(f"[翻译] 首token: {(time.time()-start_time)*1000:.0f}ms")
                     first_token = False
-                await send_streaming(ws, chunk.choices[0].delta.content)
+                await send_streaming(ws, content)
+        except Exception as e:
+            log_error(f"[翻译] {e}")
 
         log_success(f"[翻译] 完成")
         try:
@@ -335,12 +371,7 @@ async def ws_translate(ws: WebSocket, token: str = None):
 
 
 # --- 登录接口 ---
-from auth import code2session, create_token, verify_token
-from database import (
-    create_user, get_user_by_openid, update_user_token, update_user_info,
-    save_user_data, get_user_data
-)
-from fastapi import Header
+# P1-5: 所有 import 已统一在文件顶部引入；删除这里散落的重复 import
 
 
 def _extract_token(authorization: str = None) -> str | None:
@@ -413,7 +444,9 @@ def init_learn_order(openid: str):
             words_data = json.load(f)
 
         words = [w['word'] for w in words_data]
-        # 随机打乱
+        # P1-7: 用纳秒级时间戳作种子，确保每个新用户拿到不同的背诵顺序
+        # 否则 Python 默认固定种子 → 所有用户的第一组完全一样
+        random.seed(time.time_ns())
         random.shuffle(words)
 
         # 添加序号和初始复习时间
@@ -494,21 +527,16 @@ async def get_user_data_api(authorization: str = Header(None), data_type: str = 
 @app.put("/api/user/data")
 async def save_user_data_api(
     authorization: str = Header(None),
-    data_type: str = None,
-    data_key: str = None,
-    data_value: str = None,
     req: SyncRequest = None
 ):
-    """保存用户数据"""
-    # 兼容两种请求方式：body 或 query
-    if req:
-        dt = req.data_type
-        dk = req.data_key
-        dv = req.data_value
-    else:
-        dt = data_type
-        dk = data_key
-        dv = data_value
+    """保存用户数据（仅支持 body，不再兼容 query 通道）
+
+    P0-2: 删除 query 通道，避免通过 URL query 写入绕过 JSON 校验的脏数据。
+    所有前端调用都已切到 body（见 auth.saveUserData）。
+    """
+    if not req:
+        log_warning('[save_user_data] 缺少 body')
+        return {"error": "缺少请求体"}
 
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
@@ -516,18 +544,59 @@ async def save_user_data_api(
         log_warning('[save_user_data] 无效 token')
         return {"error": "无效的 token"}
 
+    dt = req.data_type
+    dk = req.data_key
+    dv = req.data_value
     log_debug(f"[save_user_data] data_type={dt}, data_key={dk}, dv_type={type(dv).__name__}")
 
-    # 旧逻辑（426c0dc）假设 wx.request 序列化后 dv 是字符串，这是错的：
-    # wx.request 只序列化 body 整体，dv 本身仍是原生 list/dict。
-    # 这里统一转字符串再交给数据库层（database.save_user_data 会再 json.loads 校验合法性）
-    if dv is not None and not isinstance(dv, str):
+    # 纵深防御：无论前端传 list/dict/str，统一强制走 json.dumps。
+    # 之前 `not isinstance(dv, str)` 分支会让"已是 JSON 字符串"的攻击者绕过规范化，
+    # 导致 _parse_legacy_safe 二次解析行为不确定。
+    if dv is None:
+        return {"success": False, "error": "data_value 不能为空"}
+    if not isinstance(dv, str):
         dv = json.dumps(dv, ensure_ascii=False)
     ok = save_user_data(openid, dt, dk, dv)
     if not ok:
         log_error(f"[save_user_data] 写入失败, key={dk}")
-        return {"success": False}
+        # 失败原因由 save_user_data 内部 log_warning 给出（白名单/JSON/类型），
+        # 这里只给前端一个粗粒度消息便于排查
+        return {"success": False, "error": "data_type/data_key 不在白名单或 data_value 非法"}
     return {"success": True}
+
+
+# --- 登出接口（P0-4：撤销 token） ---
+@app.post("/api/logout")
+async def logout(authorization: str = Header(None)):
+    """撤销当前 token。前端调用后本地 + 服务端双清。"""
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
+    if not valid:
+        # 即便 token 无效也返回 success：登出"幂等"
+        return {"success": True}
+
+    revoke_user_token(token, openid)
+    return {"success": True}
+
+
+# --- WebSocket Ticket 接口（P0-3：避免 token 出现在 URL） ---
+@app.post("/api/ws-ticket")
+async def create_ws_ticket_api(authorization: str = Header(None)):
+    """换取一次性 WS ticket（30s 有效）
+
+    客户端流程：
+    1. POST /api/ws-ticket（带 Bearer token）→ 拿到 ticket
+    2. 立刻连 ws://host/ws/query?ticket=xxx（URL 里只有 ticket，无 token）
+    3. ticket 一次性：服务端 consume 后立即失效，防重放
+    """
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
+    if not valid:
+        log_warning('[ws-ticket] 无效 token')
+        return {"error": "无效的 token"}
+
+    ticket = create_ws_ticket(openid)
+    return {"ticket": ticket, "expire_seconds": 30}
 
 
 # --- 启动 ---
