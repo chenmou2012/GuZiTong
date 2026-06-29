@@ -33,7 +33,6 @@ Page({
     showRealWordsPicker: false,
     pickerIndex: -1,
     streamingText: '',
-    elapsedTime: 0,
     statusBarHeight: 20
   },
 
@@ -199,15 +198,6 @@ Page({
         errorUi.showRetryError('查询超时，请重试', () => that.searchWord());
       }, 15000);
     }
-    // 实时 elapsed timer：onOpen 后每 200ms 刷新一次右上角耗时
-    function stopElapsedTimer() {
-      if (that._elapsedTimer) {
-        clearInterval(that._elapsedTimer);
-        that._elapsedTimer = null;
-      }
-    }
-    // 进入 searchWord 先清掉旧的（防止用户反复点查询导致 timer 堆积）
-    stopElapsedTimer();
 
     // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
     auth.fetchWsTicket().then((ticket) => {
@@ -225,22 +215,14 @@ Page({
         // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
         wsClient.send({ text: query, context: context });
         log.info('[query] 请求已发送');
-        // 启动实时耗时显示
-        that.setData({ elapsedTime: 0 });
-        stopElapsedTimer();
-        that._elapsedTimer = setInterval(() => {
-          if (!wsStartTime) return;
-          that.setData({ elapsedTime: Date.now() - wsStartTime });
-        }, 200);
         // P0-6：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
         // 视为后端握手后异常，强制收尾
         clearWatchdog();
         watchdog = setTimeout(() => {
           log.warn('[query] connect-wait watchdog 触发，强制收尾');
           if (!that.data.isLoading) return;
-          stopElapsedTimer();
           wsClient.close();
-          that.setData({ isLoading: false, elapsedTime: 0 });
+          that.setData({ isLoading: false });
           wx.hideLoading();
           errorUi.showRetryError('查询无响应，请重试', () => that.searchWord());
         }, 10000);
@@ -250,10 +232,9 @@ Page({
         log.info(`[query] 收到 ${data.type} (${elapsed}ms)`);
         if (data.error) {
           wx.hideLoading();
-          stopElapsedTimer();
           clearWatchdog();
           wsClient.close();
-          that.setData({ isLoading: false, elapsedTime: 0 });
+          that.setData({ isLoading: false });
           errorUi.showRetryError(data.error, () => that.searchWord());
           return;
         }
@@ -277,9 +258,6 @@ Page({
 
         if (data.type === 'done') {
           log.info(`完成: ${Date.now() - wsStartTime}ms`);
-          // 保留最终耗时显示，停止 timer
-          that.setData({ elapsedTime: Date.now() - wsStartTime });
-          stopElapsedTimer();
           clearWatchdog();
           that.handleQueryResult(that.data.streamingText);
         }
@@ -287,10 +265,9 @@ Page({
       onError: function(res) {
         log.error('连接错误:', res);
         wx.hideLoading();
-        stopElapsedTimer();
         clearWatchdog();
         wsClient.close();
-        that.setData({ isLoading: false, elapsedTime: 0 });
+        that.setData({ isLoading: false });
         errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
       },
       onClose: function(res) {
@@ -379,13 +356,11 @@ Page({
     if (this.data.isLoading) {
       // 停止输出
       wsClient.close();
-      if (this._elapsedTimer) { clearInterval(this._elapsedTimer); this._elapsedTimer = null; }
       wx.hideLoading();
       this.setData({
         isLoading: false,
         showResult: false,
         streamingText: '',
-        elapsedTime: 0,
         inputCollapsed: false,
         showQuickWords: true
       });
@@ -409,14 +384,12 @@ Page({
 
   onPullDownRefresh: function() {
     wsClient.close();
-    if (this._elapsedTimer) { clearInterval(this._elapsedTimer); this._elapsedTimer = null; }
     this.setData({
       inputText: '',
       showResult: false,
       result: {},
       resultHtml: '',
       streamingText: '',
-      elapsedTime: 0,
       showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
@@ -428,17 +401,5 @@ Page({
 
   onUnload: function() {
     wsClient.close();
-    if (this._elapsedTimer) { clearInterval(this._elapsedTimer); this._elapsedTimer = null; }
-  },
-
-  // 格式化耗时显示：< 1s 显示 ms，< 60s 显示 X.Ys，>= 60s 显示 M:SS
-  formatElapsed: function(ms) {
-    if (!ms || ms < 0) return '';
-    if (ms < 1000) return ms + 'ms';
-    const s = ms / 1000;
-    if (s < 60) return s.toFixed(1) + 's';
-    const m = Math.floor(s / 60);
-    const rs = Math.floor(s % 60);
-    return m + ':' + (rs < 10 ? '0' : '') + rs;
   }
 });
