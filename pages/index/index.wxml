@@ -74,12 +74,18 @@
   </view>
 
   <!-- 查词结果区域 -->
-  <view class="result-section" wx:if="{{showResult || streamingText}}">
+  <view class="result-section" wx:if="{{isLoading || showResult || streamingText}}">
     <view class="result-card" animation="{{resultAnimation}}">
       <!-- 查询的字词 -->
       <view class="result-header">
         <text class="result-word">{{inputText}}</text>
         <text class="result-elapsed" wx:if="{{elapsedTime > 0}}">{{formatElapsed(elapsedTime)}}</text>
+      </view>
+
+      <!-- 加载中提示（流式开始到第一条 content 之间） -->
+      <view wx:if="{{isLoading && !streamingText}}" class="loading-inline">
+        <view class="loading-spinner small"></view>
+        <text class="loading-text">正在查询...</text>
       </view>
 
       <!-- 使用 rich-text 渲染 Markdown -->
@@ -101,14 +107,6 @@
       <view class="stop-btn" bindtap="stopOrClear">
         <text class="stop-btn-text">{{isLoading ? '停止输出' : '清空'}}</text>
       </view>
-    </view>
-  </view>
-
-  <!-- 加载状态 -->
-  <view class="loading-section" wx:if="{{isLoading && !streamingText}}">
-    <view class="loading-card">
-      <view class="loading-spinner"></view>
-      <text class="loading-text">正在查询...</text>
     </view>
   </view>
 

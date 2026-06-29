@@ -464,6 +464,13 @@
 }
 
 /* 加载状态 */
+.loading-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx 0;
+}
+
 .loading-section {
   display: flex;
   justify-content: center;
@@ -484,6 +491,13 @@
   border-top-color: #B91C1C;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.loading-spinner.small {
+  width: 32rpx;
+  height: 32rpx;
+  border-width: 3rpx;
+  margin-right: 16rpx;
 }
 
 @keyframes spin {
