@@ -678,6 +678,9 @@ Page({
       const nextGroupIndex = groupIndex + 1;
       if (nextGroupIndex >= totalGroups) {
         // 没有更多组了，跳转到完成页面
+        // 先重置 learning 状态，否则 done 页 navigateBack 回 learn 时
+        // data.learning 仍为 true，会阻止 loadData 刷新数据
+        this.setData({ learning: false });
         wx.navigateTo({
           url: '/pages/done/done?count=' + this.data.learnedCount
         });

@@ -179,6 +179,25 @@ Page({
     log.debug('发送数据: text=' + query);
     let wsStartTime = null;
     let wsFirstTokenAt = null;
+    // P0-6 兜底 watchdog：WS 异常断开（onError 后只派发 onClose 但不发 done）
+    // 会导致 isLoading 永远 true，loading 转圈不停。
+    // - 收到第一条 content 时启动（idle 15s 无新内容视为卡死）
+    // - 收到 done / error / 手动停止时清除
+    let watchdog = null;
+    function clearWatchdog() {
+      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+    }
+    function armIdleWatchdog() {
+      clearWatchdog();
+      watchdog = setTimeout(() => {
+        log.warn('[query] idle watchdog 触发，强制收尾');
+        if (!that.data.isLoading) return;
+        wsClient.close();
+        that.setData({ isLoading: false });
+        wx.hideLoading();
+        errorUi.showRetryError('查询超时，请重试', () => that.searchWord());
+      }, 15000);
+    }
 
     // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
     auth.fetchWsTicket().then((ticket) => {
@@ -196,12 +215,26 @@ Page({
         // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
         wsClient.send({ text: query, context: context });
         log.info('[query] 请求已发送');
+        // P0-6：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
+        // 视为后端握手后异常，强制收尾
+        clearWatchdog();
+        watchdog = setTimeout(() => {
+          log.warn('[query] connect-wait watchdog 触发，强制收尾');
+          if (!that.data.isLoading) return;
+          wsClient.close();
+          that.setData({ isLoading: false });
+          wx.hideLoading();
+          errorUi.showRetryError('查询无响应，请重试', () => that.searchWord());
+        }, 10000);
       },
       onMessage: function(data) {
         const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
         log.info(`[query] 收到 ${data.type} (${elapsed}ms)`);
         if (data.error) {
           wx.hideLoading();
+          clearWatchdog();
+          wsClient.close();
+          that.setData({ isLoading: false });
           errorUi.showRetryError(data.error, () => that.searchWord());
           return;
         }
@@ -219,16 +252,22 @@ Page({
             showResult: true,
             isLoading: false
           });
+          // P0-6：收到 content，重置 idle watchdog
+          armIdleWatchdog();
         }
 
         if (data.type === 'done') {
           log.info(`完成: ${Date.now() - wsStartTime}ms`);
+          clearWatchdog();
           that.handleQueryResult(that.data.streamingText);
         }
       },
       onError: function(res) {
         log.error('连接错误:', res);
         wx.hideLoading();
+        clearWatchdog();
+        wsClient.close();
+        that.setData({ isLoading: false });
         errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
       },
       onClose: function(res) {

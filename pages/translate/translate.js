@@ -104,6 +104,23 @@ Page({
     const that = this;
     let wsStartTime = null;
     let wsFirstTokenAt = null;
+    // P0-7 兜底 watchdog：WS 异常断开（onError 后只派发 onClose 但不发 done）
+    // 会导致 isLoading 永远 true，loading 转圈不停。
+    let watchdog = null;
+    function clearWatchdog() {
+      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+    }
+    function armIdleWatchdog() {
+      clearWatchdog();
+      watchdog = setTimeout(() => {
+        log.warn('[translate] idle watchdog 触发，强制收尾');
+        if (!that.data.isLoading) return;
+        wsClient.close();
+        that.setData({ isLoading: false });
+        wx.hideLoading();
+        errorUi.showRetryError('翻译超时，请重试', () => that.translateText());
+      }, 15000);
+    }
 
     // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
     auth.fetchWsTicket().then((ticket) => {
@@ -121,13 +138,26 @@ Page({
         // 发送翻译请求
         wsClient.send({ text: text });
         log.info('[translate] 请求已发送');
+        // P0-7：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
+        // 视为后端握手后异常，强制收尾
+        clearWatchdog();
+        watchdog = setTimeout(() => {
+          log.warn('[translate] connect-wait watchdog 触发，强制收尾');
+          if (!that.data.isLoading) return;
+          wsClient.close();
+          that.setData({ isLoading: false });
+          wx.hideLoading();
+          errorUi.showRetryError('翻译无响应，请重试', () => that.translateText());
+        }, 10000);
       },
       onMessage: function(data) {
         const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
         log.info(`[translate] 收到 ${data.type} (${elapsed}ms)`);
         if (data.error) {
           wx.hideLoading();
+          clearWatchdog();
           wsClient.close();
+          that.setData({ isLoading: false });
           errorUi.showRetryError(data.error, () => that.translateText());
           return;
         }
@@ -151,6 +181,8 @@ Page({
             streamingText: newText,
             resultHtml: html
           });
+          // P0-7：收到 content，重置 idle watchdog
+          armIdleWatchdog();
           return;
         }
 
@@ -158,6 +190,7 @@ Page({
           log.info(`完成: ${Date.now() - wsStartTime}ms`);
           // 完成
           wx.hideLoading();
+          clearWatchdog();
           that.handleTranslateResult(that.data.streamingText);
           return;
         }
