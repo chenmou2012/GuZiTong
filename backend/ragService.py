@@ -16,15 +16,26 @@ MISUSES_FILE = "common_misuses.json"
 
 
 class ChineseRAG:
+    """
+    古诗文 RAG 检索
+
+    P1-8: 启动时一次性建倒排索引 {字: [例句列表]}，查询走 O(1) 字典查找。
+    原实现每次 query() 都全量扫描 6 万+ 条数据，150 词 × 多次查词 = 巨大 CPU 浪费。
+    """
+
     def __init__(self, file_name: str = None):
         self.db = []
         self.misuses = {}  # 反例库：{字: [{wrong, correct, note}]}
+        # 倒排索引：{字: [(line, title, author, type), ...]}
+        # 与 db 分离，避免修改 db 影响其它调用方
+        self._index = {}
         if file_name:
             self.path = os.path.join(os.path.dirname(__file__), file_name)
         else:
             self.path = os.path.join(os.path.dirname(__file__), POEMS_FILE)
         self._load()
         self._load_misuses()
+        self._build_index()
 
     def _load(self):
         if os.path.exists(self.path):
@@ -52,6 +63,41 @@ class ChineseRAG:
         else:
             log_warning(f"[RAG] 反例库不存在 {misuses_path}")
 
+    def _build_index(self):
+        """构建倒排索引：{字: [(line, title, author, type), ...]}
+
+        对 db 中每条 content 用 [，。？！；、\n\r] 拆句，对每个非空短句
+        按单字写入索引。同一字在同一例句中只记一次（避免重复占桶位）。
+        """
+        self._index = {}
+        if not self.db:
+            return
+
+        for item in self.db:
+            content = item.get("content", "")
+            lines = re.split(r"[，。？！；、\n\r]", content)
+            type_ = item.get("type", "其他")
+            title = item.get("title", "未知")
+            author = item.get("author", "佚名")
+
+            for raw in lines:
+                line = raw.strip()
+                if not line or len(line) > MAX_LINE_LENGTH:
+                    continue
+                # 同一句去重加入每个单字的索引
+                seen_chars = set(line)
+                for ch in seen_chars:
+                    # 仅索引中文字符（避免英文标点、数字、emoji 入索引）
+                    if '一' <= ch <= '鿿':
+                        bucket = self._index.get(ch)
+                        if bucket is None:
+                            bucket = []
+                            self._index[ch] = bucket
+                        bucket.append((line, title, author, type_))
+
+        total = sum(len(v) for v in self._index.values())
+        log_info(f"[RAG] 倒排索引建立：{len(self._index)} 个字，共 {total} 条例句映射")
+
     def query_misuses(self, word: str) -> str:
         """查询常见误用反例
 
@@ -72,35 +118,30 @@ class ChineseRAG:
     def query(self, word: str, limit: int = None) -> str:
         """检索包含指定字词的例句
 
-        多样性策略：
+        多样性策略（不变）：
         1. 先按 type（诗/词/曲/文言文）分桶，保证类型覆盖
         2. 每桶均匀轮转采样，避免同义项扎堆
         3. 桶内按 entry 顺序遍历取前 N 条
+
+        P1-8: 数据源从 self.db 全量扫描改为 self._index[word] O(1) 查找。
         """
-        if not word or not self.db:
+        if not word:
             return "暂无例句"
 
         limit = limit or RAG_LIMIT
 
-        # 第一遍：按 type 分桶收集候选
-        buckets = {}  # type -> [(line, title, author)]
-        for item in self.db:
-            content = item.get("content", "")
-            lines = re.split(r"[，。？！；、\n\r]", content)
-            type_ = item.get("type", "其他")
-            title = item.get("title", "未知")
-            author = item.get("author", "佚名")
-
-            for line in lines:
-                line = line.strip()
-                if word in line and 0 < len(line) <= MAX_LINE_LENGTH:
-                    info = f"{line}（《{title}》{author}）"
-                    buckets.setdefault(type_, []).append(info)
-
-        if not buckets:
+        # 倒排索引查找：O(1)
+        candidates = self._index.get(word)
+        if not candidates:
             return "暂无例句"
 
-        # 第二遍：桶间轮转采样，保证多样性
+        # 按 type 分桶
+        buckets = {}
+        for line, title, author, type_ in candidates:
+            info = f"{line}（《{title}》{author}）"
+            buckets.setdefault(type_, []).append(info)
+
+        # 桶间轮转采样
         res = []
         types = list(buckets.keys())
         idx_per_type = {t: 0 for t in types}
@@ -118,7 +159,6 @@ class ChineseRAG:
                     idx_per_type[t] = idx + 1
                     if len(res) >= limit:
                         break
-            # 所有桶都遍历完都没新内容，退出
             if not progress:
                 break
 
