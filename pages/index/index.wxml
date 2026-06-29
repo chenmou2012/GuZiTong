@@ -15,6 +15,16 @@
       value="{{inputText}}"
       maxlength="100"
     />
+    <!-- 多音字消歧：可选的"原句/出处"输入（仅多音字查词时填，单字无歧义可留空） -->
+    <textarea
+      class="context-input {{inputCollapsed ? 'collapsed' : ''}}"
+      placeholder="原句/出处（可选）：多音字查词时填，如「知之为知之」"
+      placeholder-class="placeholder"
+      bindinput="onContextChange"
+      value="{{contextText}}"
+      maxlength="200"
+      wx:if="{{!inputCollapsed}}"
+    />
     <view class="input-actions" wx:if="{{!inputCollapsed}}">
       <text class="char-count">{{inputText.length}}/100</text>
       <view class="clear-btn" bindtap="clearInput" wx:if="{{inputText.length > 0}}">
@@ -69,6 +79,7 @@
       <!-- 查询的字词 -->
       <view class="result-header">
         <text class="result-word">{{inputText}}</text>
+        <text class="result-elapsed" wx:if="{{elapsedTime > 0}}">{{formatElapsed(elapsedTime)}}</text>
       </view>
 
       <!-- 使用 rich-text 渲染 Markdown -->

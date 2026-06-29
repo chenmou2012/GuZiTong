@@ -63,6 +63,28 @@
   font-size: 28rpx;
 }
 
+/* 多音字消歧的"原句/出处"输入框，比主输入框小、字体细 */
+.context-input {
+  width: 100%;
+  height: 80rpx;
+  font-size: 26rpx;
+  color: #2C3E50;
+  line-height: 1.6;
+  text-align: left;
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed #e8e8e8;
+  transition: height 0.3s ease;
+}
+
+.context-input.collapsed {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+}
+
 .placeholder {
   color: #aaa;
   font-size: 28rpx;
@@ -186,6 +208,14 @@
   font-size: 48rpx;
   color: #2C3E50;
   font-weight: bold;
+}
+
+.result-elapsed {
+  font-size: 24rpx;
+  color: #999;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-weight: normal;
+  letter-spacing: 1rpx;
 }
 
 .result-audio {
@@ -599,18 +629,18 @@
 
 /* rich-text 渲染 Markdown 样式 */
 rich-text {
-  line-height: 1.4;
+  line-height: 1.6;
 }
 
 rich-text h1 {
-  font-size: 36rpx;
+  font-size: 44rpx;
   font-weight: bold;
   color: #1a1a1a;
   margin: 0;
 }
 
 rich-text h2 {
-  font-size: 32rpx;
+  font-size: 40rpx;
   font-weight: bold;
   color: #1a1a1a;
   margin: 0;
@@ -619,7 +649,7 @@ rich-text h2 {
 rich-text strong {
   color: #B91C1C;
   font-weight: bold;
-  font-size: 32rpx;
+  font-size: 36rpx;
 }
 
 rich-text strong.keyword {
@@ -628,17 +658,19 @@ rich-text strong.keyword {
 }
 
 rich-text li {
-  font-size: 28rpx;
+  font-size: 34rpx;
   color: #2C3E50;
-  line-height: 1.4;
+  line-height: 1.6;
   margin: 0;
   padding-left: 8rpx;
 }
 
 rich-text p {
+  font-size: 34rpx;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.6;
   display: block;
+  color: #1b1c1c;
 }
 
 rich-text br {
@@ -648,16 +680,18 @@ rich-text br {
 
 rich-text p.indent {
   padding-left: 24rpx;
-  color: #666;
+  color: #444;
+  font-size: 32rpx;
 }
 
 rich-text .example {
-  font-size: 26rpx;
-  color: #666;
+  font-size: 32rpx;
+  color: #444;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.6;
 }
 
 rich-text .source {
-  color: #888;
+  color: #777;
+  font-size: 30rpx;
 }
