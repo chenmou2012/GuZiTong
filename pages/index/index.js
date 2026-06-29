@@ -320,6 +320,11 @@ Page({
   },
 
   toggleCollect: function() {
+    // P0-8：流式过程中 streamingText 是残缺文本，禁止收藏
+    if (this.data.isLoading) {
+      wx.showToast({ title: '查询完成后再收藏', icon: 'none' });
+      return;
+    }
     const word = this.data.inputText;
     const result = storage.toggleCollection(word, this.data.streamingText);
     this.setData({ isCollected: result.collected });
