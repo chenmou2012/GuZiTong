@@ -13,8 +13,7 @@ const { REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 Page({
   data: {
     inputText: '',
-    exampleText: '',     // 例句（可选）：填了优先按例句释义
-    contextText: '',     // 多音字消歧：原句/出处（可选）
+    contextText: '',     // 上下文（可选）：短文本当例句、长文本当原句/出处
     currentQuery: '',
     quickWords: ['之', '其', '而', '以', '何', '于'],
     showResult: false,
@@ -49,7 +48,6 @@ Page({
 
     this.setData({
       inputText: '',
-      exampleText: '',
       contextText: '',
       showResult: false,
       result: {},
@@ -77,14 +75,7 @@ Page({
     });
   },
 
-  // 例句输入：填了优先按例句释义
-  onExampleChange: function(e) {
-    this.setData({
-      exampleText: e.detail.value
-    });
-  },
-
-  // 多音字消歧：原句/出处输入
+  // 上下文输入：短文本当例句（优先按此释义），长文本当原句/出处（多音字消歧）
   onContextChange: function(e) {
     this.setData({
       contextText: e.detail.value
@@ -94,7 +85,6 @@ Page({
   clearInput: function() {
     this.setData({
       inputText: '',
-      exampleText: '',
       contextText: '',
       showQuickWords: true,
       inputCollapsed: false,
@@ -142,11 +132,14 @@ Page({
 
   searchWord: function() {
     let query = this.data.inputText.trim();
-    // 例句（可选，maxlength 100）：填了优先按例句释义
-    const example = (this.data.exampleText || '').trim().slice(0, 100);
-    // 多音字消歧：原句/出处（可选，长度上限 200 字防止滥用）
-    const context = (this.data.contextText || '').trim().slice(0, 200);
-    log.debug('query:', query, 'example:', example, 'context:', context);
+    // 上下文（可选，maxlength 200）：自动按长度归类
+    // - 短文本（≤ 50 字）：当例句，发 example 字段，AI 优先按此释义
+    // - 长文本（> 50 字）：当原句/出处，发 context 字段，AI 用于多音字消歧 + 出处定位
+    const rawContext = (this.data.contextText || '').trim().slice(0, 200);
+    const isShort = rawContext.length > 0 && rawContext.length <= 50;
+    const example = isShort ? rawContext : '';
+    const context = isShort ? '' : rawContext;
+    log.debug('query:', query, 'rawContext:', rawContext, 'classified as:', isShort ? 'example' : 'context');
 
     if (!query) {
       wx.showToast({

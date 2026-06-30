@@ -15,21 +15,11 @@
       value="{{inputText}}"
       maxlength="100"
     />
-    <!-- 例句（可选）：填了优先按例句解释字义 -->
-    <textarea
-      wx:if="{{!inputCollapsed}}"
-      class="example-input {{inputCollapsed ? 'collapsed' : ''}}"
-      placeholder="例句（可选）：输入包含要查字的例句，如「学而时习之」"
-      placeholder-class="placeholder"
-      bindinput="onExampleChange"
-      value="{{exampleText}}"
-      maxlength="100"
-    />
-    <!-- 原句/出处（可选）：长文本上下文，用于多音字消歧 -->
+    <!-- 上下文（可选）：短文本当例句（优先按此释义），长文本当原句/出处（多音字消歧） -->
     <textarea
       wx:if="{{!inputCollapsed}}"
       class="context-input {{inputCollapsed ? 'collapsed' : ''}}"
-      placeholder="原句/出处（可选）：多音字查词时填，如「知之为知之」"
+      placeholder="上下文（可选）：短句当例句（如「学而时习之」），长文当出处"
       placeholder-class="placeholder"
       bindinput="onContextChange"
       value="{{contextText}}"

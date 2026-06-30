@@ -63,8 +63,7 @@
   font-size: 28rpx;
 }
 
-/* 例句 / 原句出处输入框（小一号） */
-.example-input,
+/* 上下文输入框（合并：短文本当例句、长文本当原句/出处） */
 .context-input {
   width: 100%;
   margin-top: 16rpx;
@@ -79,7 +78,6 @@
   min-height: 72rpx;
 }
 
-.example-input.collapsed,
 .context-input.collapsed {
   display: none;
 }
