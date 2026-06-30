@@ -132,7 +132,8 @@ QUERY_SYSTEM_PROMPT = """你是一位专业的文言文教育专家，专门帮�
 当用户查询一个文言文字词时，请用 Markdown 格式返回该字的所有常见义项，包含以下内容：
 
 ## 读音
-用汉语拼音标注正确读音（如果是多音字，全部列出）。
+**只输出拼音本身，不要重复字**（如查"道"输出 `dào`，不要输出"道dào"）。
+如果是多音字，用 ` / ` 分隔全部读音（如 `dào / dǎo`）。
 **不确定的读音请标注"读音待考"，不要猜测。**
 
 ## 义项
@@ -180,6 +181,18 @@ QUERY_CONTEXT_NOTE = """
 - 如果该字在「{context}」中是**单字成词或特殊用法**，**不要默认套用最常见义项**，要回到原句解读。
 - 例句尽量从上方 RAG 列表中选取与「{context}」同源/同作者/同时代的例子。
 - 如果「{context}」中该字的用法你**不确定**，请在读音或义项后显式标"⚠️ 语境待考"。
+"""
+
+# 例句优先释义段：当用户提供了 example（自己输入的例句）时拼到 system prompt 末尾。
+# 让 LLM 优先按 example 推断该字在例句中的义项并排在最前，其他义项次之。
+QUERY_EXAMPLE_NOTE = """
+
+**【用户提供的例句】**：用户已经知道这个字出现在「{example}」这句中，希望优先了解该字在这句里的用法。
+- **首要任务**：判断「{word}」在「{example}」中的具体义项/读音，并**放在最前、用方框高亮**（如「📍 在本例句中的意思：...」）。
+- **次要任务**：列出该字的其他常见义项（按常用度倒序）。
+- 如果「{example}」中该字是**多音字**，先按例句判定当前读音，其他读音放后。
+- 如果「{example}」的语义你**不确定**，请在判断后显式标"⚠️ 语境待考"。
+- **不要套用最常见义项**：用户主动提供例句说明他想确认非默认义项的可能性。
 """
 
 TRANSLATE_SYSTEM_PROMPT = """你是一位专业的文言文翻译专家，专门帮助初中生学习文言文翻译。
@@ -262,7 +275,14 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
         # 可选上下文（多音字消歧、出处定位）
         # 前端可在 user 选择某字时附带原句/篇目名，AI 据此优先判定读音和义项
         context = (request.get('context') or '').strip()
-        log_info(f"[query] word='{word}', context='{context[:60]}'" if context else f"[query] word='{word}', no context")
+        # 可选例句：用户输入的例句，AI 据此优先释义
+        example = (request.get('example') or '').strip()
+        if example:
+            log_info(f"[query] word='{word}', example='{example[:60]}'")
+        elif context:
+            log_info(f"[query] word='{word}', context='{context[:60]}'")
+        else:
+            log_info(f"[query] word='{word}', no context/example")
 
         # RAG 检索例句
         rag_examples = rag.query(word)
@@ -273,14 +293,20 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
             rag_examples = misuses + "\n\n" + rag_examples
         log_info(f"[RAG] '{word}': 例句 {len(rag_examples)} 字")
 
-        # 构建 prompt：先注入 RAG；有 context 时再追加消歧段
+        # 构建 prompt：先注入 RAG；有 example 时先追加例句优先释义段，再追加 context 消歧段
         prompt = QUERY_SYSTEM_PROMPT.replace("{rag_examples}", rag_examples)
+        if example:
+            example_note = QUERY_EXAMPLE_NOTE.replace("{word}", word).replace("{example}", example)
+            prompt += example_note
+            log_info(f"[query] 已注入 example 优先释义段（{len(example)} 字）")
         if context:
             prompt += QUERY_CONTEXT_NOTE.replace("{context}", context)
             log_info(f"[query] 已注入 context 消歧段（{len(context)} 字）")
 
-        # user message 也带上 context，让 LLM 在对话上下文里明确知道出处
+        # user message 也带上 example / context，让 LLM 在对话上下文里明确知道
         user_content = f"请解析以下字词：{word}"
+        if example:
+            user_content += f"\n（用户提供的例句：{example}）"
         if context:
             user_content += f"\n（出处/原句：{context}）"
 
