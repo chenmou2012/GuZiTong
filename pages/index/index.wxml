@@ -97,6 +97,11 @@
       <!-- fallback：AI 输出不符合结构化模板时用 markdownToHtml -->
       <rich-text wx:else nodes="{{resultHtml}}"></rich-text>
 
+      <!-- 缓存标记：显示在收藏按钮旁 -->
+      <view wx:if="{{showResult && fromCache}}" class="cache-badge">
+        <text>已缓存（点击[重新生成]刷新）</text>
+      </view>
+
       <!-- 收藏按钮 -->
       <view class="result-actions" wx:if="{{showResult}}">
         <view class="action-btn" bindtap="copyContent">

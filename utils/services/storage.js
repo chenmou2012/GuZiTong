@@ -12,7 +12,8 @@ const STORAGE_KEYS = {
   TRANSLATIONS: 'translations',
   PENDING_QUERY: 'pendingQuery',
   PENDING_TRANSLATION: 'pendingTranslation',
-  LEARN_LIST: 'learnList'  // 学习列表（随机排列）
+  LEARN_LIST: 'learnList',  // 学习列表（随机排列）
+  WORD_CACHE: 'wordCache'   // 查词结果缓存（避免重复调 AI）
 };
 
 const MAX_ITEMS = 50;
@@ -103,6 +104,36 @@ function toggleCollection(word, result) {
   wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, collections);
   syncDataToServer('learn', 'collections', collections);
   return { collected: index === -1, collections };
+}
+
+// ==================== 查词结果缓存 ====================
+//
+// 缓存结构：{ word: { result, time } }
+// - 命中：searchWord 直接展示缓存，不调 AI
+// - 写：handleQueryResult（done 时）写入
+
+function getWordCache() {
+  return wx.getStorageSync(STORAGE_KEYS.WORD_CACHE) || {};
+}
+
+function getCachedWord(word) {
+  const cache = getWordCache();
+  return cache[word] || null;
+}
+
+function setCachedWord(word, result) {
+  const cache = getWordCache();
+  cache[word] = { result: result, time: Date.now() };
+  wx.setStorageSync(STORAGE_KEYS.WORD_CACHE, cache);
+  // 异步推云端（fire-and-forget，失败不阻塞）
+  syncDataToServer('learn', 'wordCache', cache);
+  return cache[word];
+}
+
+function getWordCacheMeta(word) {
+  const cached = getCachedWord(word);
+  if (!cached) return null;
+  return { hasCache: true, time: cached.time, ageMs: Date.now() - (cached.time || 0) };
 }
 
 // ==================== 翻译记录 ====================
@@ -407,6 +438,11 @@ module.exports = {
   isCollected,
   updateCollection,
   toggleCollection,
+  // 查词缓存
+  getWordCache,
+  getCachedWord,
+  setCachedWord,
+  getWordCacheMeta,
   getTranslations,
   addTranslation,
   removeTranslation,

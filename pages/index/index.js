@@ -24,6 +24,7 @@ Page({
     parsedResult: null,     // 结构化解析结果：{ pinyin, meanings: [{pos, meaning, example, source}] }
     isCollected: false,
     loadingTip: '正在查询...',  // loading 文案，10s 后切换为「AI 思考中...」
+    fromCache: false,       // 当前结果是否来自缓存
     hasHistory: false,
     inputCollapsed: false,
     resultAnimation: {},
@@ -203,6 +204,23 @@ Page({
       }
     }, 5000);
 
+    // 查缓存：命中 → 直接展示（不调 AI，秒级响应）
+    // 缓存键：word（不含 example/context，因为缓存的 result 是普通解释，例句/上下文场景需要重新生成）
+    const cached = storage.getCachedWord(query);
+    if (cached) {
+      log.info('[query] 命中缓存，跳过 AI 生成', { word: query, cacheTime: cached.time });
+      const ageStr = this._formatCacheAge(Date.now() - cached.time);
+      this.setData({
+        loadingTip: '已缓存（' + ageStr + '前查过）'
+      });
+      // 短暂显示缓存提示，再展示结果
+      setTimeout(() => {
+        this.setData({ loadingTip: '已缓存 · ' + ageStr });
+        this.handleQueryResult(cached.result, { fromCache: true });
+      }, 400);
+      return;
+    }
+
     wx.showLoading({ title: '正在查询...', mask: true });
 
     const that = this;
@@ -319,7 +337,7 @@ Page({
     });  // P0-3: 闭合 fetchWsTicket().then
   },
 
-  handleQueryResult: function(content) {
+  handleQueryResult: function(content, options) {
     const animation = wx.createAnimation({
       duration: 400,
       timingFunction: 'ease-out'
@@ -330,6 +348,13 @@ Page({
     const parsed = markdown.parseMarkdown(content) || { pinyin: '', meanings: [], raw: content };
     const html = markdown.markdownToHtml(content);
 
+    // 写缓存（只有非缓存来源、AI 真实生成时才写；缓存命中时跳过）
+    const fromCache = options && options.fromCache;
+    if (!fromCache) {
+      const cached = storage.setCachedWord(this.data.inputText.trim(), content);
+      log.info('[query] 已写入缓存', { word: this.data.inputText.trim() });
+    }
+
     this.setData({
       isLoading: false,
       showResult: true,
@@ -337,6 +362,7 @@ Page({
       resultHtml: html,
       parsedResult: parsed.meanings && parsed.meanings.length > 0 ? parsed : null,
       streamingText: content,
+      fromCache: !!fromCache,
       inputCollapsed: true,
       resultAnimation: animation.export(),
       // 查完后同步收藏状态（跨页取消收藏后回到本页也能正确显示）
@@ -450,5 +476,14 @@ Page({
 
   onUnload: function() {
     wsClient.close();
+  },
+
+  // 格式化缓存时长：「刚刚 / X 分钟前 / X 小时前 / X 天前」
+  _formatCacheAge: function(ms) {
+    if (!ms || ms < 0) return '';
+    if (ms < 60 * 1000) return '刚刚';
+    if (ms < 60 * 60 * 1000) return Math.floor(ms / 60000) + ' 分钟前';
+    if (ms < 24 * 60 * 60 * 1000) return Math.floor(ms / 3600000) + ' 小时前';
+    return Math.floor(ms / 86400000) + ' 天前';
   }
 });

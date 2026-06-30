@@ -26,7 +26,8 @@ ALLOWED_DATA_KEYS = {
     'collections', 'history', 'translations',
     'learned_words', 'learnedWords', 'review_records',
     'reviewStats', 'wordStates',
-    'learnOrder', 'preferences', 'theme'
+    'learnOrder', 'preferences', 'theme',
+    'wordCache'  # 查词结果缓存（避免重复调 AI）
 }
 
 # 线程局部连接缓存：每个线程维护一个长连接，避免反复开关 + 反复执行 PRAGMA
