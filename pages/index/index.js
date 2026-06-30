@@ -267,9 +267,12 @@ Page({
           }
           wx.hideLoading();
           const newText = that.data.streamingText + data.content;
+          // 流式中实时解析，让卡片跟着增长（done 后切换稳定结构）
+          const parsed = markdown.parseMarkdown(newText);
           that.setData({
             streamingText: newText,
             resultHtml: markdown.markdownToHtml(newText),
+            parsedResult: parsed && parsed.meanings && parsed.meanings.length > 0 ? parsed : null,
             showResult: true,
             isLoading: false
           });
