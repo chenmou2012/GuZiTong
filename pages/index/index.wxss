@@ -190,6 +190,25 @@
   border-left: 8rpx solid #B91C1C;
 }
 
+/* rich-text fallback 渲染（流式中）：给内嵌 h2/p/strong 加上视觉间距 */
+.result-card h2 {
+  font-size: 32rpx;
+  color: #B91C1C;
+  margin: 28rpx 0 12rpx;
+  font-weight: bold;
+}
+.result-card h2:first-child {
+  margin-top: 0;
+}
+.result-card h3 {
+  font-size: 28rpx;
+  color: #2C3E50;
+  margin: 20rpx 0 10rpx;
+}
+.result-card p {
+  margin: 8rpx 0;
+}
+
 .result-header {
   display: flex;
   justify-content: space-between;
