@@ -23,6 +23,7 @@ Page({
     resultHtml: '',
     parsedResult: null,     // 结构化解析结果：{ pinyin, meanings: [{pos, meaning, example, source}] }
     isCollected: false,
+    loadingTip: '正在查询...',  // loading 文案，10s 后切换为「AI 思考中...」
     hasHistory: false,
     inputCollapsed: false,
     resultAnimation: {},
@@ -191,8 +192,16 @@ Page({
       showResult: false,
       showError: false,
       inputCollapsed: true,
-      streamingText: ''
+      streamingText: '',
+      loadingTip: '正在查询...'
     });
+
+    // 5s 后切换 loading 文案（GLM-4.5-Air 慢，提示用户 AI 在思考）
+    setTimeout(() => {
+      if (this.data.isLoading) {
+        this.setData({ loadingTip: 'AI 思考中...' });
+      }
+    }, 5000);
 
     wx.showLoading({ title: '正在查询...', mask: true });
 
@@ -217,7 +226,7 @@ Page({
         that.setData({ isLoading: false });
         wx.hideLoading();
         errorUi.showRetryError('查询超时，请重试', () => that.searchWord());
-      }, 15000);
+      }, 45000);  // GLM-4.5-Air 推理慢，留更多时间
     }
 
     // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
@@ -236,7 +245,7 @@ Page({
         // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
         wsClient.send({ text: query, example: example, context: context });
         log.info('[query] 请求已发送');
-        // P0-6：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
+        // P0-6：兜底 connect-wait watchdog —— onOpen 后 N 秒内若没收到任何消息，
         // 视为后端握手后异常，强制收尾
         clearWatchdog();
         watchdog = setTimeout(() => {
@@ -246,7 +255,7 @@ Page({
           that.setData({ isLoading: false });
           wx.hideLoading();
           errorUi.showRetryError('查询无响应，请重试', () => that.searchWord());
-        }, 10000);
+        }, 30000);  // GLM-4.5-Air 首token 可能 10-20s，留 30s 余量
       },
       onMessage: function(data) {
         const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;

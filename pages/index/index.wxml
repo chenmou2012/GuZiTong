@@ -68,7 +68,7 @@
       <!-- 加载中提示（流式开始到第一条 content 之间） -->
       <view wx:if="{{isLoading && !streamingText}}" class="loading-inline">
         <view class="loading-spinner small"></view>
-        <text class="loading-text">正在查询...</text>
+        <text class="loading-text">{{loadingTip}}</text>
       </view>
 
       <!-- 结构化渲染：读音 + 义项卡片（优先）；fallback 到 markdownToHtml -->
