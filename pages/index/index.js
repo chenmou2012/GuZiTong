@@ -314,7 +314,9 @@ Page({
       resultHtml: html,
       streamingText: content,
       inputCollapsed: true,
-      resultAnimation: animation.export()
+      resultAnimation: animation.export(),
+      // 查完后同步收藏状态（跨页取消收藏后回到本页也能正确显示）
+      isCollected: storage.isCollected(this.data.inputText.trim())
     });
 
     storage.saveHistory(this.data.inputText, content);
@@ -344,10 +346,16 @@ Page({
       wx.showToast({ title: '查询完成后再收藏', icon: 'none' });
       return;
     }
-    const word = this.data.inputText;
-    const result = storage.toggleCollection(word, this.data.streamingText);
-    this.setData({ isCollected: result.collected });
-    wx.showToast({ title: result.collected ? '收藏成功' : '已取消收藏', icon: 'success' });
+    const word = this.data.inputText.trim();
+    const result = this.data.streamingText;
+    // 必须先查询（有结果）才能收藏
+    if (!word || !result) {
+      wx.showToast({ title: '请先查询后再收藏', icon: 'none' });
+      return;
+    }
+    const ret = storage.toggleCollection(word, result);
+    this.setData({ isCollected: ret.collected });
+    wx.showToast({ title: ret.collected ? '收藏成功' : '已取消收藏', icon: 'success' });
   },
 
   copyContent: function() {
