@@ -71,8 +71,31 @@
         <text class="loading-text">正在查询...</text>
       </view>
 
-      <!-- 使用 rich-text 渲染 Markdown -->
-      <rich-text nodes="{{resultHtml}}"></rich-text>
+      <!-- 结构化渲染：读音 + 义项卡片（优先）；fallback 到 markdownToHtml -->
+      <block wx:if="{{parsedResult && parsedResult.meanings.length > 0}}">
+        <view class="result-pinyin" wx:if="{{parsedResult.pinyin}}">
+          <text class="pinyin-text">{{parsedResult.pinyin}}</text>
+        </view>
+        <view class="definitions-list">
+          <view class="definition-item" wx:for="{{parsedResult.meanings}}" wx:key="index" wx:for-item="m">
+            <view class="definition-label-row">
+              <text class="definition-label">{{index + 1}}.</text>
+              <view class="definition-meaning">
+                <text wx:if="{{m.pos}}" class="definition-pos">[{{m.pos}}]</text>
+                <text>{{m.meaning}}</text>
+              </view>
+            </view>
+            <view wx:if="{{m.example}}" class="examples-section">
+              <view class="example-item">
+                <text class="example-sentence">{{m.example}}</text>
+                <text wx:if="{{m.source}}" class="example-source">（{{m.source}}）</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <!-- fallback：AI 输出不符合结构化模板时用 markdownToHtml -->
+      <rich-text wx:else nodes="{{resultHtml}}"></rich-text>
 
       <!-- 收藏按钮 -->
       <view class="result-actions" wx:if="{{showResult}}">

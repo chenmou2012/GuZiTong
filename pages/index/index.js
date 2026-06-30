@@ -21,6 +21,7 @@ Page({
     errorMessage: '',
     result: {},
     resultHtml: '',
+    parsedResult: null,     // 结构化解析结果：{ pinyin, meanings: [{pos, meaning, example, source}] }
     isCollected: false,
     hasHistory: false,
     inputCollapsed: false,
@@ -305,6 +306,8 @@ Page({
     });
     animation.opacity(1).translateY(0).step();
 
+    // 结构化解析：读音 + 义项列表
+    const parsed = markdown.parseMarkdown(content) || { pinyin: '', meanings: [], raw: content };
     const html = markdown.markdownToHtml(content);
 
     this.setData({
@@ -312,6 +315,7 @@ Page({
       showResult: true,
       result: { content },
       resultHtml: html,
+      parsedResult: parsed.meanings && parsed.meanings.length > 0 ? parsed : null,
       streamingText: content,
       inputCollapsed: true,
       resultAnimation: animation.export(),

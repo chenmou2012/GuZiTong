@@ -288,6 +288,19 @@
   flex: 1;
 }
 
+.definition-pos {
+  font-size: 22rpx;
+  color: #B91C1C;
+  font-weight: bold;
+  margin-right: 8rpx;
+}
+
+.example-source {
+  font-size: 22rpx;
+  color: #888;
+  margin-left: 8rpx;
+}
+
 /* 用法说明 */
 .usage-notes {
   background-color: #fff;
