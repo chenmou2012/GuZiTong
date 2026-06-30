@@ -19,7 +19,7 @@
     <textarea
       wx:if="{{!inputCollapsed}}"
       class="context-input {{inputCollapsed ? 'collapsed' : ''}}"
-      placeholder="上下文（可选）：短句当例句（如「学而时习之」），长文当出处"
+      placeholder="来源/出处（可选）"
       placeholder-class="placeholder"
       bindinput="onContextChange"
       value="{{contextText}}"
