@@ -188,12 +188,17 @@ Page({
     // 关闭之前的 WebSocket
     wsClient.close();
 
+    // 每次开始生成前清空上一轮的内容，避免义项卡片/缓存标记/计时残留
     this.setData({
       isLoading: true,
       showResult: false,
       showError: false,
       inputCollapsed: true,
       streamingText: '',
+      resultHtml: '',
+      parsedResult: null,        // 清空上次的义项卡片
+      elapsedTime: 0,           // 清空上次的耗时
+      fromCache: false,         // 清空上次的缓存标记
       loadingTip: '正在查询...'
     });
 
