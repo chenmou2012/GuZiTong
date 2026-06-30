@@ -132,30 +132,26 @@ function parseMarkdown(markdown) {
         continue;
       }
 
-      // 例句带出处：- 例句：xxx【出处】
-      const exampleWithSourceMatch = line.match(/^[-*]\s*例句\s*[：:]\s*(.+?)[【\[](.+?)[】\]]\s*$/);
-      if (exampleWithSourceMatch && inMeaning) {
-        currentExample = exampleWithSourceMatch[1].trim();
-        currentSource = exampleWithSourceMatch[2].trim();
+      // 例句带出处：容错多种括号格式
+      //   优先：【】半角方括号
+      //   其次：（）全角圆括号（AI 常用）
+      //   最后：（）半角圆括号
+      const exampleWithSource = line.match(/^[-*]?\s*例句\s*[：:]\s*(.+?)\s*[【\[（(](.+?)[】\]）)]\s*$/);
+      if (exampleWithSource && inMeaning) {
+        currentExample = exampleWithSource[1].trim();
+        currentSource = exampleWithSource[2].trim();
         continue;
       }
 
-      // 例句不带出处
-      const exampleMatch = line.match(/^[-*]\s*例句\s*[：:]\s*(.+)$/);
+      // 例句不带出处（兜底）
+      const exampleMatch = line.match(/^[-*]?\s*例句\s*[：:]\s*(.+)$/);
       if (exampleMatch && inMeaning) {
         currentExample = exampleMatch[1].trim();
         continue;
       }
 
-      // 避坑提示段（误用避坑），保留作为义项的备注
-      const cautionMatch = line.match(/^[⚠️❌]\s*易误为[：:]\s*(.+)$/);
-      if (cautionMatch && inMeaning) {
-        currentMeaning += ' [易误为: ' + cautionMatch[1].trim() + ']';
-        continue;
-      }
-
-      // 解释行：- 解释：xxx（追加到当前义项，用换行分隔）
-      const explanationMatch = line.match(/^[-*]\s*解释\s*[：:]\s*(.+)$/);
+      // 解释行：容错多种关键词（解释/释义/说明/详解/描述）+ 多种前缀（-、*、无）
+      const explanationMatch = line.match(/^[-*]?\s*(?:解释|释义|说明|详解|描述)\s*[：:]\s*(.+)$/);
       if (explanationMatch && inMeaning) {
         currentMeaning += (currentMeaning ? '\n' : '') + '解释：' + explanationMatch[1].trim();
         continue;
