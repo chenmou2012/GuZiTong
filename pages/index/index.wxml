@@ -19,7 +19,7 @@
     <textarea
       wx:if="{{!inputCollapsed}}"
       class="context-input {{inputCollapsed ? 'collapsed' : ''}}"
-      placeholder="来源/出处（可选）"
+      placeholder="字词的来源/出处（可选）"
       placeholder-class="placeholder"
       bindinput="onContextChange"
       value="{{contextText}}"
