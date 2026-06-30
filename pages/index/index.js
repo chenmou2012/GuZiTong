@@ -267,12 +267,11 @@ Page({
           }
           wx.hideLoading();
           const newText = that.data.streamingText + data.content;
-          // 流式中实时解析，让卡片跟着增长（done 后切换稳定结构）
-          const parsed = markdown.parseMarkdown(newText);
+          // 流式中只用 rich-text 实时渲染 markdown，保持稳定不闪烁
+          // 结构化卡片留给 done 时一次性切换（避免流式中频繁 fallback 抖动）
           that.setData({
             streamingText: newText,
             resultHtml: markdown.markdownToHtml(newText),
-            parsedResult: parsed && parsed.meanings && parsed.meanings.length > 0 ? parsed : null,
             showResult: true,
             isLoading: false
           });
