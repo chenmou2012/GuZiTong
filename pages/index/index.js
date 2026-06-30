@@ -276,11 +276,20 @@ Page({
           }
           wx.hideLoading();
           const newText = that.data.streamingText + data.content;
-          // 流式中只用 rich-text 实时渲染 markdown，保持稳定不闪烁
-          // 结构化卡片留给 done 时一次性切换（避免流式中频繁 fallback 抖动）
+          // 流式中累积式结构化解析：每解析出一个完整义项就立即多一张卡片
+          // 关键：永不回退（parsedResult 取 max(已有, 新)），避免 fallback 闪烁
+          const parsed = markdown.parseMarkdown(newText);
+          const existing = that.data.parsedResult || { pinyin: '', meanings: [], raw: '' };
+          let finalParsed = existing;
+          if (parsed && parsed.meanings.length >= existing.meanings.length) {
+            // 新解析的义项更多（或首次解析）→ 采用新的
+            finalParsed = parsed;
+          }
+          // 否则保留 existing（避免回退导致的卡片消失/闪烁）
           that.setData({
             streamingText: newText,
             resultHtml: markdown.markdownToHtml(newText),
+            parsedResult: finalParsed,
             showResult: true,
             isLoading: false
           });
