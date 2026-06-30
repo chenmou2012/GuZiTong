@@ -21,12 +21,30 @@ Page({
   },
 
   onLoad: function(options) {
-    const word = options.word || '';
+    const word = (options.word || '').trim();
     const collections = storage.getCollections();
-    const item = collections.find(c => c.word === word);
+    // 容错：trim + Unicode NFC 规范化后再匹配（避免前后空格/全半角差异导致匹配失败）
+    const normalize = (s) => (s || '').trim().normalize('NFC');
+    const item = collections.find(c => normalize(c.word) === normalize(word));
     if (!item) {
-      wx.showToast({ title: '收藏不存在', icon: 'none' });
-      setTimeout(() => wx.navigateBack(), 800);
+      console.warn('[collection-detail] 找不到收藏', {
+        urlWord: word,
+        urlWordLen: word.length,
+        collectionsCount: collections.length,
+        firstFewWords: collections.slice(0, 5).map(c => ({ word: c.word, len: c.word.length }))
+      });
+      // 详细 toast：告诉用户 URL word 和实际 storage 里的 word
+      const actualWords = collections.slice(0, 3).map(c => c.word).join('、');
+      const tip = collections.length === 0
+        ? '收藏列表为空'
+        : '找不到「' + word + '」（列表: ' + actualWords + '）';
+      wx.showModal({
+        title: '收藏不存在',
+        content: tip + '\n\n请回到查词页重新收藏',
+        showCancel: false,
+        confirmText: '返回',
+        success: () => wx.navigateBack()
+      });
       return;
     }
     this.setData({
