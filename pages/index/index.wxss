@@ -63,6 +63,27 @@
   font-size: 28rpx;
 }
 
+/* 例句 / 原句出处输入框（小一号） */
+.example-input,
+.context-input {
+  width: 100%;
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
+  background: #faf8f5;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #2C3E50;
+  line-height: 1.6;
+  text-align: left;
+  box-sizing: border-box;
+  min-height: 72rpx;
+}
+
+.example-input.collapsed,
+.context-input.collapsed {
+  display: none;
+}
+
 .placeholder {
   color: #aaa;
   font-size: 28rpx;

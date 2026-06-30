@@ -13,6 +13,7 @@ const { REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
 Page({
   data: {
     inputText: '',
+    exampleText: '',     // 例句（可选）：填了优先按例句释义
     contextText: '',     // 多音字消歧：原句/出处（可选）
     currentQuery: '',
     quickWords: ['之', '其', '而', '以', '何', '于'],
@@ -48,6 +49,7 @@ Page({
 
     this.setData({
       inputText: '',
+      exampleText: '',
       contextText: '',
       showResult: false,
       result: {},
@@ -75,6 +77,13 @@ Page({
     });
   },
 
+  // 例句输入：填了优先按例句释义
+  onExampleChange: function(e) {
+    this.setData({
+      exampleText: e.detail.value
+    });
+  },
+
   // 多音字消歧：原句/出处输入
   onContextChange: function(e) {
     this.setData({
@@ -85,6 +94,7 @@ Page({
   clearInput: function() {
     this.setData({
       inputText: '',
+      exampleText: '',
       contextText: '',
       showQuickWords: true,
       inputCollapsed: false,
@@ -132,9 +142,11 @@ Page({
 
   searchWord: function() {
     let query = this.data.inputText.trim();
+    // 例句（可选，maxlength 100）：填了优先按例句释义
+    const example = (this.data.exampleText || '').trim().slice(0, 100);
     // 多音字消歧：原句/出处（可选，长度上限 200 字防止滥用）
     const context = (this.data.contextText || '').trim().slice(0, 200);
-    log.debug('query:', query, 'context:', context);
+    log.debug('query:', query, 'example:', example, 'context:', context);
 
     if (!query) {
       wx.showToast({
@@ -213,7 +225,7 @@ Page({
         wsStartTime = Date.now();
         log.info('[query] WS 已连接 t=0');
         // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
-        wsClient.send({ text: query, context: context });
+        wsClient.send({ text: query, example: example, context: context });
         log.info('[query] 请求已发送');
         // P0-6：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
         // 视为后端握手后异常，强制收尾
