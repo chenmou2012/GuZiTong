@@ -154,6 +154,13 @@ function parseMarkdown(markdown) {
         continue;
       }
 
+      // 解释行：- 解释：xxx（追加到当前义项，用换行分隔）
+      const explanationMatch = line.match(/^[-*]\s*解释\s*[：:]\s*(.+)$/);
+      if (explanationMatch && inMeaning) {
+        currentMeaning += (currentMeaning ? '\n' : '') + '解释：' + explanationMatch[1].trim();
+        continue;
+      }
+
       // 义项内非空、非标题、非列表行 → 追加到当前义项解释
       if (inMeaning && !/^#{1,2}\s/.test(line) && !/^[-*]\s/.test(line) && !/^\d+\.\s/.test(line)) {
         currentMeaning += (currentMeaning ? ' ' : '') + line;

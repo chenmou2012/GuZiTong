@@ -305,6 +305,7 @@
   color: #2C3E50;
   line-height: 1.6;
   flex: 1;
+  white-space: pre-wrap;  /* 保留换行，让"释义"和"解释"分段显示 */
 }
 
 .definition-pos {
