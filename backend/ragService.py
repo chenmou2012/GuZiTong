@@ -109,10 +109,10 @@ class ChineseRAG:
         items = self.misuses[word]
         lines = [f"### 「{word}」常见误用避坑"]
         for i, item in enumerate(items, 1):
-            lines.append(f"{i}. ❌ 误用：{item.get('wrong', '')}")
-            lines.append(f"   ✅ 正确：{item.get('correct', '')}")
+            lines.append(f"{i}. 误用：{item.get('wrong', '')}")
+            lines.append(f"   正确：{item.get('correct', '')}")
             if item.get("note"):
-                lines.append(f"   💡 备注：{item['note']}")
+                lines.append(f"   备注：{item['note']}")
         return "\n".join(lines)
 
     def query(self, word: str, limit: int = None) -> str:
