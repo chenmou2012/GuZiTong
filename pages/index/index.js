@@ -166,6 +166,26 @@ Page({
       return;
     }
 
+    // 上下文一致性检查：用户填了来源/出处但查的字不在里面，提示一下
+    // _forceSearch 是用户点「继续查询」的标记，避免递归弹 modal
+    if (rawContext && query && !rawContext.includes(query) && !this._forceSearch) {
+      const that = this;
+      wx.showModal({
+        title: '提示',
+        content: '您查询的字「' + query + '」不在输入的来源/出处中，是否仍要查询？',
+        confirmText: '继续查询',
+        cancelText: '重新输入',
+        success: (res) => {
+          if (res.confirm) {
+            that._forceSearch = true;
+            that.searchWord();
+          }
+        }
+      });
+      return;
+    }
+    this._forceSearch = false;  // 走完正常流程后重置标志
+
     // 关闭之前的 WebSocket
     wsClient.close();
 
