@@ -38,29 +38,13 @@
     <text class="search-btn-text">{{inputCollapsed ? '查 词' : '查 词'}}</text>
   </view>
 
-  <!-- 快捷字词提示 -->
-  <view class="quick-words" wx:if="{{showQuickWords && !inputCollapsed}}">
-    <text class="section-title">中考高频虚词</text>
-    <view class="word-tags">
-      <view
-        class="word-tag"
-        wx:for="{{quickWords}}"
-        wx:key="index"
-        bindtap="onQuickWordTap"
-        data-word="{{item}}"
-      >
-        <text class="word-tag-text">{{item}}</text>
-      </view>
-    </view>
-  </view>
-
   <!-- 中考实词 -->
-  <view class="real-words-section" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
+  <view class="real-words-section" wx:if="{{!inputCollapsed && showRealWordsSection}}">
     <view class="real-words-header">
       <text class="section-title">中考高频实词</text>
       <text class="view-all-btn" bindtap="goToRealWords">查看全部</text>
     </view>
-    <view class="word-tags" wx:if="{{showQuickWords && !inputCollapsed && showRealWordsSection}}">
+    <view class="word-tags">
       <view
         class="word-tag"
         wx:for="{{highFreqRealWords}}"

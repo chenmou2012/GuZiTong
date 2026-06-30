@@ -15,7 +15,6 @@ Page({
     inputText: '',
     contextText: '',     // 上下文（可选）：短文本当例句、长文本当原句/出处
     currentQuery: '',
-    quickWords: ['之', '其', '而', '以', '何', '于'],
     showResult: false,
     isLoading: false,
     showError: false,
@@ -24,7 +23,6 @@ Page({
     resultHtml: '',
     isCollected: false,
     hasHistory: false,
-    showQuickWords: true,
     inputCollapsed: false,
     resultAnimation: {},
     realWords: REAL_WORDS,
@@ -53,7 +51,6 @@ Page({
       result: {},
       resultHtml: '',
       streamingText: '',
-      showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
       showRealWordsPicker: false,
@@ -86,7 +83,6 @@ Page({
     this.setData({
       inputText: '',
       contextText: '',
-      showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
       showRealWordsPicker: false,
@@ -194,7 +190,6 @@ Page({
       showResult: false,
       showError: false,
       inputCollapsed: true,
-      showQuickWords: false,
       streamingText: ''
     });
 
@@ -319,7 +314,6 @@ Page({
       resultHtml: html,
       streamingText: content,
       inputCollapsed: true,
-      showQuickWords: false,
       resultAnimation: animation.export()
     });
 
@@ -336,7 +330,7 @@ Page({
       showError: true,
       errorMessage: message,
       inputCollapsed: false,
-      showQuickWords: true
+
     });
     wsClient.close();
     setTimeout(() => {
@@ -387,7 +381,7 @@ Page({
         showResult: false,
         streamingText: '',
         inputCollapsed: false,
-        showQuickWords: true
+
       });
       wx.showToast({ title: '已停止', icon: 'none' });
     } else {
@@ -400,7 +394,6 @@ Page({
         result: {},
         resultHtml: '',
         streamingText: '',
-        showQuickWords: true,
         inputCollapsed: false,
         isCollected: false
       });
@@ -415,7 +408,6 @@ Page({
       result: {},
       resultHtml: '',
       streamingText: '',
-      showQuickWords: true,
       inputCollapsed: false,
       showRealWordsSection: true,
       showRealWordsPicker: false,

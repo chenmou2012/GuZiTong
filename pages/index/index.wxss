@@ -2,7 +2,7 @@
 .container {
   min-height: 100vh;
   background-color: #FDFBF7;
-  padding: 20rpx 30rpx 120rpx;
+  padding: 8rpx 30rpx 120rpx;
   box-sizing: border-box;
 }
 
@@ -11,12 +11,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40rpx 0 30rpx;
+  padding: 20rpx 0 24rpx;
   transition: padding 0.3s ease;
 }
 
 .header.collapsed {
-  padding: 20rpx 0 10rpx;
+  padding: 12rpx 0 10rpx;
 }
 
 .title {
@@ -142,11 +142,7 @@
   letter-spacing: 8rpx;
 }
 
-/* 快捷字词 */
-.quick-words {
-  margin-bottom: 40rpx;
-}
-
+/* 快捷字词（虚词栏已删除，保留 .section-title 共用） */
 .section-title {
   font-size: 28rpx;
   color: #666;
