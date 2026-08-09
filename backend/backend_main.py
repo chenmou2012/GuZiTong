@@ -3,7 +3,10 @@ import time
 import asyncio
 import os
 import random
-from fastapi import FastAPI, WebSocket, Header
+import threading
+from datetime import datetime, timedelta
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, WebSocket, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Any
@@ -17,11 +20,11 @@ from ragService import rag
 from auth import (
     code2session, create_token, verify_token,
     create_ws_ticket, consume_ws_ticket,
-    revoke_user_token,
+    revoke_user_token, WS_TICKET_EXPIRE_SECONDS,
 )
 from database import (
     create_user, get_user_by_openid, update_user_token, update_user_info,
-    save_user_data, get_user_data,
+    save_user_data, get_user_data, cleanup_revoked_tokens,
 )
 
 # ==================== 加载配置 ====================
@@ -37,9 +40,92 @@ PORT = _config["server"]["port"]
 MAX_WORKERS = _config["service"]["max_workers"]
 MAX_TOKENS = _config["service"]["max_tokens"]
 MAX_QUERY_LENGTH = _config["service"]["max_query_length"]
+MAX_TRANSLATE_LENGTH = _config["service"].get("translate_max_length", 1000)
+MAX_QUERY_CONTEXT_LENGTH = _config["service"].get("query_context_max_length", 200)
+WS_RATE_LIMIT_PER_MINUTE = _config["service"].get("ws_rate_limit_per_minute", 30)
+LOGIN_RATE_LIMIT_PER_MINUTE = _config["service"].get("login_rate_limit_per_minute", 60)
+WS_RECEIVE_TIMEOUT = _config["service"].get("ws_receive_timeout_seconds", 60)
+AI_STREAM_TOTAL_TIMEOUT = _config["service"].get("ai_stream_timeout_seconds", 180)
+CLEANUP_INTERVAL_SECONDS = _config["service"].get("cleanup_interval_seconds", 3600)
+CLEANUP_REVOKED_AFTER_DAYS = _config["service"].get("cleanup_revoked_after_days", 40)
+
+# 内存滑动窗口限流（重启即清零，够用于防滥用；正式多实例部署应换 Redis）
+class RateLimiter:
+    def __init__(self, limit: int, window_seconds: float = 60.0):
+        self.limit = limit
+        self.window = window_seconds
+        self._hits = {}
+        self._lock = threading.Lock()
+
+    def allow(self, key: str) -> bool:
+        now = time.time()
+        with self._lock:
+            hits = self._hits.setdefault(key, [])
+            while hits and hits[0] < now - self.window:
+                hits.pop(0)
+            if len(hits) >= self.limit:
+                return False
+            hits.append(now)
+            return True
+
+    def prune(self, max_idle_seconds: float = 3600.0):
+        """清理长时间不活跃的 key，防止内存膨胀"""
+        now = time.time()
+        with self._lock:
+            stale = [k for k, v in self._hits.items() if not v or v[-1] < now - max_idle_seconds]
+            for k in stale:
+                del self._hits[k]
+
+
+ws_rate_limiter = RateLimiter(WS_RATE_LIMIT_PER_MINUTE)
+login_rate_limiter = RateLimiter(LOGIN_RATE_LIMIT_PER_MINUTE)
+
+def _client_ip(request: Request) -> str:
+    """取客户端 IP（用于限流）。
+
+    优先用 Nginx 反代覆盖的 X-Real-IP（README 部署配置里由 Nginx 强制写入，
+    客户端无法伪造）；兜底取 TCP 对端地址。
+    不信任 X-Forwarded-For：其最左侧值可由客户端伪造，会让登录限流形同虚设。
+    """
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+    return request.client.host if request.client else "unknown"
+
+
+async def _background_cleanup():
+    """后台定时任务：清理过期的撤销 token 和限流器内存"""
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+        try:
+            cutoff = (datetime.now() - timedelta(days=CLEANUP_REVOKED_AFTER_DAYS)).isoformat()
+            removed = cleanup_revoked_tokens(cutoff)
+            if removed:
+                log_info(f"[cleanup] 清理撤销记录 {removed} 条")
+        except Exception as e:
+            log_error(f"[cleanup] 清理撤销记录失败: {e}")
+        try:
+            ws_rate_limiter.prune()
+            login_rate_limiter.prune()
+        except Exception as e:
+            log_error(f"[cleanup] 限流器清理失败: {e}")
+
 
 # 初始化 FastAPI
-app = FastAPI(title="古字通 API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(_background_cleanup())
+    log_info("[startup] 后台清理任务已启动")
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+app = FastAPI(title="古字通 API", lifespan=lifespan)
 
 # 添加 CORS 中间件
 # 微信小程序的固定 origin 是 https://servicewechat.com，关闭 allow_credentials 避免
@@ -61,10 +147,21 @@ executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 # --- 辅助函数 ---
 # P1-6: 删除未使用的 sync_create_chat_stream 函数（已被 call_ai_stream_async 替代）
 
-async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temperature: float = None):
-    """异步流式调用 AI：在后台线程拉 chunks，主 event loop 边收边发（不阻塞）"""
+async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temperature: float = None, stop_event: asyncio.Event = None, total_timeout: float = None):
+    """异步流式调用 AI：在后台线程拉 chunks，主 event loop 边收边发（不阻塞）。
+
+    stop_event 置位时（客户端断开/超时）producer 停止拉取，避免白烧 API 费用；
+    生成器退出时兜底置位并回收 executor future。
+
+    total_timeout：整个流式调用的硬性总时限（秒）。openai 请求自身也带该超时，
+    保证网络卡死的 producer 线程最终能自行退出，不会永久占用 executor 槽位
+    （此前无总超时时，20 个并发卡死连接就能耗尽线程池，服务整体不可用）。
+    """
     loop = asyncio.get_event_loop()
     queue = asyncio.Queue()
+    if total_timeout is None:
+        total_timeout = AI_STREAM_TOTAL_TIMEOUT
+    deadline = time.monotonic() + total_timeout
 
     def _producer():
         """后台线程：从智谱拉取每个 chunk 并 put 到 queue"""
@@ -74,11 +171,14 @@ async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temp
                 "messages": messages,
                 "max_tokens": max_tokens,
                 "stream": True,
+                "timeout": total_timeout,  # 请求级超时：卡死的线程最终自行退出
             }
             if temperature is not None:
                 kwargs["temperature"] = temperature
             stream = client.chat.completions.create(**kwargs)
             for c in stream:
+                if stop_event is not None and stop_event.is_set():
+                    break  # 客户端已断开：停止拉取，节省费用
                 if c.choices and c.choices[0].delta.content:
                     # 跨线程安全地把内容放进 asyncio.Queue
                     loop.call_soon_threadsafe(queue.put_nowait, c.choices[0].delta.content)
@@ -87,16 +187,36 @@ async def call_ai_stream_async(model: str, messages: list, max_tokens: int, temp
             loop.call_soon_threadsafe(queue.put_nowait, e)
 
     # 在 executor 中启动 producer（不 await！让 producer 在后台跑）
-    loop.run_in_executor(executor, _producer)
+    future = loop.run_in_executor(executor, _producer)
 
-    # 主 event loop 异步消费 queue
-    while True:
-        item = await queue.get()
-        if item is None:
-            return  # 收集完毕
-        if isinstance(item, Exception):
-            raise item
-        yield item
+    try:
+        # 主 event loop 异步消费 queue（带总时限，防止 AI 端卡死时永久等待）
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                if stop_event is not None:
+                    stop_event.set()
+                raise asyncio.TimeoutError(f"AI 流式调用超过总时限 {total_timeout:.0f}s")
+            item = await asyncio.wait_for(queue.get(), timeout=remaining)
+            if item is None:
+                return  # 收集完毕
+            if isinstance(item, Exception):
+                raise item
+            if stop_event is not None and stop_event.is_set():
+                return  # 主动终止：丢弃尚未发出的内容
+            yield item
+    finally:
+        if stop_event is not None:
+            stop_event.set()
+        # 回收 executor future，避免线程泄漏；producer 卡在网络时最多等 2s，
+        # 超时后强制 cancel 释放引用（线程本身受 openai 请求超时约束，最终会退出）
+        try:
+            await asyncio.wait_for(asyncio.wrap_future(future), timeout=2)
+        except asyncio.CancelledError:
+            future.cancel()
+            raise
+        except Exception:
+            future.cancel()
 
 
 # --- 数据模型 ---
@@ -226,15 +346,13 @@ TRANSLATE_SYSTEM_PROMPT = """你是一位专业的文言文翻译专家，专门
 # --- 接口 ---
 @app.get("/health")
 def health():
-    return {"status": "ok", "model": MODEL, "server": "active"}
+    # 只回状态，不暴露模型/技术栈信息，避免被侦察
+    return {"status": "ok"}
 
 
 async def send_streaming(ws: WebSocket, content: str):
     """流式发送一个 chunk（不再逐字符拆分，避免包数暴增和 UI 卡顿）"""
-    try:
-        await manager.send({'type': 'content', 'content': content}, ws)
-    except Exception as e:
-        log_debug(f"[WS] send 失败: {e}")
+    await manager.send({'type': 'content', 'content': content}, ws)
 
 
 @app.websocket("/ws/query")
@@ -260,11 +378,28 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
         await ws.close(code=1008, reason="缺少 ticket")
         log_error(f"[WS /ws/query] 缺少 ticket/token")
         return
+    if not ws_rate_limiter.allow(openid):
+        await ws.close(code=1008, reason="请求过于频繁，请稍后再试")
+        log_error(f"[WS /ws/query] 限流: {openid}")
+        return
     await manager.connect(ws)
+    stop_event = asyncio.Event()
     try:
-        data = await ws.receive_text()
-        request = json.loads(data)
-        word = request.get('text', request.get('word', ''))
+        try:
+            data = await asyncio.wait_for(ws.receive_text(), timeout=WS_RECEIVE_TIMEOUT)
+        except asyncio.TimeoutError:
+            log_error(f"[WS /ws/query] 空闲超时: {openid}")
+            await ws.close(code=1008, reason="空闲超时")
+            return
+        try:
+            request = json.loads(data)
+        except json.JSONDecodeError:
+            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            return
+        if not isinstance(request, dict):
+            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            return
+        word = str(request.get('text', request.get('word', ''))).strip()
 
         if not word:
             await manager.send({'error': '请输入字词'}, ws)
@@ -278,9 +413,9 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
 
         # 可选上下文（多音字消歧、出处定位）
         # 前端可在 user 选择某字时附带原句/篇目名，AI 据此优先判定读音和义项
-        context = (request.get('context') or '').strip()
+        context = (request.get('context') or '').strip()[:MAX_QUERY_CONTEXT_LENGTH]
         # 可选例句：用户输入的例句，AI 据此优先释义
-        example = (request.get('example') or '').strip()
+        example = (request.get('example') or '').strip()[:MAX_QUERY_CONTEXT_LENGTH]
         if example:
             log_info(f"[query] word='{word}', example='{example[:60]}'")
         elif context:
@@ -324,20 +459,43 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
         await manager.send({'type': 'start', 'word': word, 'context': context}, ws)
         first_token = True
         try:
-            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS, temperature=0.1):
+            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS, temperature=0.1, stop_event=stop_event):
                 if first_token:
                     log_info(f"[查词] 首token: {(time.time()-start_time)*1000:.0f}ms")
                     first_token = False
-                await send_streaming(ws, content)
+                if stop_event.is_set():
+                    break
+                try:
+                    await send_streaming(ws, content)
+                except Exception as e:
+                    # 客户端已断开：停止消费 AI 流，避免白烧费用
+                    log_debug(f"[WS /ws/query] send 失败，停止流: {e}")
+                    stop_event.set()
+                    break
         except Exception as e:
-            log_error(f"[查词] {e}")
+            log_error(f"[查词] AI 流式调用失败: {e}")
+            # 明确告知客户端失败，避免"显示完成但内容为空"的假象
+            try:
+                await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
+            except Exception:
+                pass
+            stop_event.set()
+            return
 
         log_success(f"[查词] 完成")
         try:
             await manager.send({'type': 'done'}, ws)
         except Exception as e:
             log_debug(f"[WS] send 失败: {e}")
+    except Exception as e:
+        # 兜底：非法消息等未预期异常不能静默断连，告知客户端后正常收尾
+        log_error(f"[WS /ws/query] 未处理异常: {e}")
+        try:
+            await manager.send({'type': 'error', 'message': '查询失败，请重试'}, ws)
+        except Exception:
+            pass
     finally:
+        stop_event.set()
         manager.disconnect(ws)
 
 
@@ -362,13 +520,35 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
         await ws.close(code=1008, reason="缺少 ticket")
         log_error(f"[WS /ws/translate] 缺少 ticket/token")
         return
+    if not ws_rate_limiter.allow(openid):
+        await ws.close(code=1008, reason="请求过于频繁，请稍后再试")
+        log_error(f"[WS /ws/translate] 限流: {openid}")
+        return
     await manager.connect(ws)
+    stop_event = asyncio.Event()
     try:
-        data = await ws.receive_text()
-        text = json.loads(data).get('text', '')
+        try:
+            data = await asyncio.wait_for(ws.receive_text(), timeout=WS_RECEIVE_TIMEOUT)
+        except asyncio.TimeoutError:
+            log_error(f"[WS /ws/translate] 空闲超时: {openid}")
+            await ws.close(code=1008, reason="空闲超时")
+            return
+        try:
+            req = json.loads(data)
+        except json.JSONDecodeError:
+            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            return
+        if not isinstance(req, dict):
+            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            return
+        text = str(req.get('text', '')).strip()
 
         if not text:
             await manager.send({'error': '请输入内容'}, ws)
+            return
+
+        if len(text) > MAX_TRANSLATE_LENGTH:
+            await manager.send({'error': f'单次最多翻译 {MAX_TRANSLATE_LENGTH} 字'}, ws)
             return
 
         start_time = time.time()
@@ -381,13 +561,26 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
         # 关键：async for 边收边发，producer 在后台线程跑，不阻塞主 event loop
         first_token = True
         try:
-            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS):
+            async for content in call_ai_stream_async(MODEL, messages, MAX_TOKENS, stop_event=stop_event):
                 if first_token:
                     log_info(f"[翻译] 首token: {(time.time()-start_time)*1000:.0f}ms")
                     first_token = False
-                await send_streaming(ws, content)
+                if stop_event.is_set():
+                    break
+                try:
+                    await send_streaming(ws, content)
+                except Exception as e:
+                    log_debug(f"[WS /ws/translate] send 失败，停止流: {e}")
+                    stop_event.set()
+                    break
         except Exception as e:
-            log_error(f"[翻译] {e}")
+            log_error(f"[翻译] AI 流式调用失败: {e}")
+            try:
+                await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
+            except Exception:
+                pass
+            stop_event.set()
+            return
 
         log_success(f"[翻译] 完成")
         try:
@@ -397,6 +590,7 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
     except Exception as e:
         log_error(f"[翻译] {e}")
     finally:
+        stop_event.set()
         manager.disconnect(ws)
 
 
@@ -434,8 +628,11 @@ class SyncRequest(BaseModel):
 
 
 @app.post("/api/login")
-async def login(req: LoginRequest):
+async def login(req: LoginRequest, request: Request):
     """微信登录"""
+    if not login_rate_limiter.allow(_client_ip(request)):
+        log_warning(f"[login] 限流: {_client_ip(request)}")
+        return {"error": "请求过于频繁，请稍后再试"}
     # 用 code 换 openid
     result = await code2session(req.code)
     if not result["success"]:
@@ -453,7 +650,12 @@ async def login(req: LoginRequest):
     else:
         # 新用户，创建
         token_info = create_token(openid)
-        create_user(openid, token_info["token"], token_info["expire_time"])
+        created = create_user(openid, token_info["token"], token_info["expire_time"])
+        if not created:
+            # 并发首次登录时 INSERT 唯一冲突会返回 False：用户可能已被另一请求创建，
+            # 改走 update 路径，避免"登录成功但所有接口 401"
+            log_warning(f"[login] create_user 失败（可能并发注册），改走 update: {openid}")
+            update_user_token(openid, token_info["token"], token_info["expire_time"])
         # 新用户：生成背诵顺序
         init_learn_order(openid)
 
@@ -464,20 +666,32 @@ async def login(req: LoginRequest):
     }
 
 
+# realwords.json 由 utils/services/realWords.js 生成，放在 backend 目录内
+# （README 有说明；改动词库后用 `node scripts/gen_realwords_json.js` 重新生成）
+# 进程内只读盘解析一次，避免每个新用户登录都重复 IO + JSON 解析
+_realwords_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "realwords.json")
+_realwords_cache = None
+
+
+def _load_realwords():
+    """读取 150 词表（带进程内缓存）"""
+    global _realwords_cache
+    if _realwords_cache is None:
+        with open(_realwords_path, 'r', encoding='utf-8') as f:
+            _realwords_cache = json.load(f)
+    return _realwords_cache
+
+
 def init_learn_order(openid: str):
     """新用户首次登录时生成背诵顺序"""
-    # realwords.json 在项目根目录（backend 的父目录），不再硬编码 /root/backend/
-    realwords_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "realwords.json")
-
     try:
-        with open(realwords_path, 'r', encoding='utf-8') as f:
-            words_data = json.load(f)
+        words_data = _load_realwords()
 
         words = [w['word'] for w in words_data]
-        # P1-7: 用纳秒级时间戳作种子，确保每个新用户拿到不同的背诵顺序
-        # 否则 Python 默认固定种子 → 所有用户的第一组完全一样
-        random.seed(time.time_ns())
-        random.shuffle(words)
+        # P1-7: 用纳秒级时间戳作独立 RNG 种子，确保每个新用户拿到不同的背诵顺序
+        # 用独立 random.Random 实例，避免 random.seed 污染进程全局 RNG 状态
+        rng = random.Random(time.time_ns())
+        rng.shuffle(words)
 
         # 添加序号和初始复习时间
         order = []
@@ -626,7 +840,7 @@ async def create_ws_ticket_api(authorization: str = Header(None)):
         return {"error": "无效的 token"}
 
     ticket = create_ws_ticket(openid)
-    return {"ticket": ticket, "expire_seconds": 30}
+    return {"ticket": ticket, "expire_seconds": WS_TICKET_EXPIRE_SECONDS}
 
 
 # --- 启动 ---

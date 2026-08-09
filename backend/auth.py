@@ -13,8 +13,10 @@ _config_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(_config_path, "r", encoding="utf-8") as f:
     _config = json.load(f)
 
-WECHAT_APPID = _config["wechat"]["appid"]
-WECHAT_SECRET = _config["wechat"]["secret"]
+# 密钥优先从环境变量读取（部署时覆盖，避免明文躺在 config.json 里），
+# 兜底读 config.json（仅本地开发用）
+WECHAT_APPID = os.getenv("WECHAT_APPID", _config["wechat"]["appid"])
+WECHAT_SECRET = os.getenv("WECHAT_SECRET", _config["wechat"]["secret"])
 
 # Token 有效期（天）
 TOKEN_EXPIRE_DAYS = 30

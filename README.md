@@ -567,6 +567,8 @@ pm2 logs guzi
 proxy_http_version 1.1;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $connection_upgrade;
+# 透传真实客户端 IP 供后端限流（后端 _client_ip 只信任该头，不信任可伪造的 X-Forwarded-For）
+proxy_set_header X-Real-IP $remote_addr;
 proxy_buffering off;
 proxy_cache off;
 proxy_read_timeout 300s;
