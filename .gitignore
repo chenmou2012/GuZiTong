@@ -28,6 +28,8 @@ __pycache__/
 backend/config.json
 backend/*.db
 backend/*.log
+# IP 属地离线库（11MB，部署时 scp 上传，不入库）
+backend/data/
 
 # 日志
 *.log

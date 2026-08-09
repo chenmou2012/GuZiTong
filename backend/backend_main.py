@@ -3,6 +3,7 @@ import time
 import asyncio
 import os
 import random
+import secrets
 import threading
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
@@ -17,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from logger import log_info, log_success, log_warning, log_debug, log_error, DEBUG_ENABLED
 
 from ragService import rag
+from iploc import query_cn as ip_query_cn
 from auth import (
     code2session, create_token, verify_token,
     create_ws_ticket, consume_ws_ticket,
@@ -25,6 +27,11 @@ from auth import (
 from database import (
     create_user, get_user_by_openid, update_user_token, update_user_info,
     save_user_data, get_user_data, cleanup_revoked_tokens,
+    add_feedback, get_feedbacks, update_feedback_status,
+    get_user_list, get_word_states_rows, get_db_stats,
+    add_login_log, get_login_logs,
+    add_usage_log, cleanup_usage_logs, get_daily_counts, get_usage_daily_counts,
+    get_usage_hourly, get_usage_heatmap, get_usage_daily_uv, get_feedback_status_counts,
 )
 
 # ==================== 加载配置 ====================
@@ -80,6 +87,62 @@ class RateLimiter:
 ws_rate_limiter = RateLimiter(WS_RATE_LIMIT_PER_MINUTE)
 login_rate_limiter = RateLimiter(LOGIN_RATE_LIMIT_PER_MINUTE)
 
+
+# ==================== 管理后台 ====================
+# 运行统计（内存计数，重启清零；供管理后台"实时监控"）
+_runtime_stats = {
+    "start_time": time.time(),
+    "query_total": 0,
+    "translate_total": 0,
+    "ai_errors": 0,
+    "feedback_total": 0,
+}
+
+# admin token（内存，12h 有效；重启后需重新登录）
+_admin_tokens: dict = {}
+ADMIN_TOKEN_EXPIRE_SECONDS = 12 * 3600
+
+
+def _admin_password() -> str:
+    """管理员密码：优先环境变量，其次 config.json 的 admin.password"""
+    return os.getenv("ADMIN_PASSWORD", (_config.get("admin") or {}).get("password", ""))
+
+
+def _create_admin_token() -> str:
+    token = secrets.token_urlsafe(32)
+    _admin_tokens[token] = time.time() + ADMIN_TOKEN_EXPIRE_SECONDS
+    return token
+
+
+def _verify_admin(authorization: str = None) -> bool:
+    """校验 admin token"""
+    token = _extract_token(authorization)
+    if not token:
+        return False
+    expire = _admin_tokens.get(token)
+    if not expire:
+        return False
+    if time.time() > expire:
+        _admin_tokens.pop(token, None)
+        return False
+    return True
+
+
+def _self_proc_info() -> dict:
+    """当前进程基础信息（Linux /proc）"""
+    info = {"pid": os.getpid(), "memory_mb": None, "cmdline": ""}
+    try:
+        with open("/proc/self/status") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    info["memory_mb"] = round(int(line.split()[1]) / 1024, 1)
+                    break
+        with open("/proc/self/cmdline", "rb") as f:
+            info["cmdline"] = f.read().decode("utf-8", "ignore").replace("\x00", " ")
+    except Exception:
+        pass
+    return info
+
 def _client_ip(request: Request) -> str:
     """取客户端 IP（用于限流）。
 
@@ -109,6 +172,12 @@ async def _background_cleanup():
             login_rate_limiter.prune()
         except Exception as e:
             log_error(f"[cleanup] 限流器清理失败: {e}")
+        try:
+            removed_usage = cleanup_usage_logs(90)
+            if removed_usage:
+                log_info(f"[cleanup] 清理使用日志 {removed_usage} 条")
+        except Exception as e:
+            log_error(f"[cleanup] 清理使用日志失败: {e}")
 
 
 # 初始化 FastAPI
@@ -137,6 +206,24 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
     allow_credentials=False,
 )
+
+# 管理后台静态页面：独立于后端目录（项目根 admin/ 优先；后端目录内 admin 兜底，
+# 兼容服务器"后端文件直接铺在站点根"的部署形态）。可用环境变量 ADMIN_DIR 强制指定
+# （相对后端目录，如 ADMIN_DIR=../admin）。
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_admin_dir = os.getenv("ADMIN_DIR", "")
+if _admin_dir:
+    _admin_dir = os.path.join(_this_dir, _admin_dir)
+else:
+    _admin_candidates = [
+        os.path.join(os.path.dirname(_this_dir), "admin"),  # 项目根 admin/
+        os.path.join(_this_dir, "admin"),                    # 后端目录内 admin/（服务器 wyw/admin）
+    ]
+    _admin_dir = next((p for p in _admin_candidates if os.path.isdir(p)), None)
+if _admin_dir and os.path.isdir(_admin_dir):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/admin", StaticFiles(directory=_admin_dir, html=True), name="admin")
+    log_info(f"[startup] 管理后台静态目录: {_admin_dir}")
 
 # 初始化客户端 (智谱 GLM)
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
@@ -456,6 +543,11 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
 
         # 调用 AI（temperature=0.1 减少幻觉，提升查词精确度）
         # 关键：async for 边收边发，producer 在后台线程跑，不阻塞主 event loop
+        _runtime_stats["query_total"] += 1
+        try:
+            add_usage_log(openid, "query")
+        except Exception:
+            pass
         await manager.send({'type': 'start', 'word': word, 'context': context}, ws)
         first_token = True
         try:
@@ -474,6 +566,7 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
                     break
         except Exception as e:
             log_error(f"[查词] AI 流式调用失败: {e}")
+            _runtime_stats["ai_errors"] += 1
             # 明确告知客户端失败，避免"显示完成但内容为空"的假象
             try:
                 await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
@@ -558,6 +651,11 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
         ]
 
         await manager.send({'type': 'start', 'original': text}, ws)
+        _runtime_stats["translate_total"] += 1
+        try:
+            add_usage_log(openid, "translate")
+        except Exception:
+            pass
         # 关键：async for 边收边发，producer 在后台线程跑，不阻塞主 event loop
         first_token = True
         try:
@@ -575,6 +673,7 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
                     break
         except Exception as e:
             log_error(f"[翻译] AI 流式调用失败: {e}")
+            _runtime_stats["ai_errors"] += 1
             try:
                 await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
             except Exception:
@@ -658,6 +757,14 @@ async def login(req: LoginRequest, request: Request):
             update_user_token(openid, token_info["token"], token_info["expire_time"])
         # 新用户：生成背诵顺序
         init_learn_order(openid)
+
+    # 记录登录日志（管理后台：最近上线时间 + IP 属地）；失败不阻塞登录
+    try:
+        client_ip = _client_ip(request)
+        location = ip_query_cn(client_ip) if client_ip and client_ip != "unknown" else ""
+        add_login_log(openid, client_ip, location)
+    except Exception as e:
+        log_debug(f"[login] 记录登录日志失败: {e}")
 
     return {
         "openid": openid,
@@ -841,6 +948,272 @@ async def create_ws_ticket_api(authorization: str = Header(None)):
 
     ticket = create_ws_ticket(openid)
     return {"ticket": ticket, "expire_seconds": WS_TICKET_EXPIRE_SECONDS}
+
+
+# ==================== 用户反馈（小程序提交 → 管理后台查看） ====================
+
+class FeedbackRequest(BaseModel):
+    content: str
+    contact: str = ""
+
+
+@app.post("/api/feedback")
+async def submit_feedback(authorization: str = Header(None), req: FeedbackRequest = None):
+    """小程序提交用户反馈（用户 token 鉴权）"""
+    token = _extract_token(authorization)
+    openid, valid = verify_token(token) if token else (None, False)
+    if not valid:
+        return {"error": "无效的 token"}
+    if not req or not req.content or not req.content.strip():
+        return {"error": "反馈内容不能为空"}
+    user = get_user_by_openid(openid)
+    nickname = (user or {}).get("nickname") or ""
+    ok = add_feedback(openid, nickname, req.content.strip(), (req.contact or "").strip())
+    if not ok:
+        return {"success": False, "error": "提交失败，请稍后重试"}
+    _runtime_stats["feedback_total"] += 1
+    log_info(f"[feedback] 新反馈来自 {nickname or openid}")
+    return {"success": True}
+
+
+# ==================== 管理后台接口（admin token 鉴权） ====================
+
+class AdminLoginRequest(BaseModel):
+    password: str
+
+
+class FeedbackStatusRequest(BaseModel):
+    status: str
+
+
+@app.post("/api/admin/login")
+async def admin_login(req: AdminLoginRequest):
+    """管理员登录：密码换 admin token（12h 有效）"""
+    if not _admin_password():
+        return {"error": "管理员密码未配置（config.json admin.password 或环境变量 ADMIN_PASSWORD）"}
+    if req.password != _admin_password():
+        log_warning("[admin] 登录密码错误")
+        return {"error": "密码错误"}
+    return {"token": _create_admin_token(), "expire_seconds": ADMIN_TOKEN_EXPIRE_SECONDS}
+
+
+@app.get("/api/admin/status")
+async def admin_status(authorization: str = Header(None)):
+    """实时监控：服务 / 进程 / 数据库 / WS 连接 / 计数器"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    now = time.time()
+    return {
+        "status": "ok",
+        "model": MODEL,
+        "uptime_seconds": round(now - _runtime_stats["start_time"]),
+        "start_time": datetime.fromtimestamp(_runtime_stats["start_time"]).isoformat(),
+        "proc": _self_proc_info(),
+        "ws_active": len(manager.active),
+        "db": get_db_stats(),
+        "counters": dict(_runtime_stats),
+        "rate_limiter_keys": {
+            "ws": len(ws_rate_limiter._hits),
+            "login": len(login_rate_limiter._hits),
+        },
+        "active_hours_24": get_usage_hourly(1),
+    }
+
+
+@app.get("/api/admin/users")
+async def admin_users(authorization: str = Header(None), page: int = 1, page_size: int = 20):
+    """用户列表（管理）"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    return get_user_list(page, page_size)
+
+
+def _parse_json_field(value, default):
+    """user_data 字段可能是 JSON 字符串或已解析对象"""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except Exception:
+            return default
+    return value if value is not None else default
+
+
+@app.get("/api/admin/user-detail")
+async def admin_user_detail(authorization: str = Header(None), openid: str = None):
+    """用户详细信息：资料 / 最近上线 / 登录记录(IP属地) / 学习统计 / 查词记录 / 翻译记录"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    if not openid:
+        return {"error": "缺少 openid 参数"}
+    user = get_user_by_openid(openid)
+    if not user:
+        return {"error": "用户不存在"}
+    data = get_user_data(openid) or {}
+
+    learned = _parse_json_field(data.get("wordStates"), {}) or {}
+    review_stats = _parse_json_field(data.get("reviewStats"), {}) or {}
+    history = _parse_json_field(data.get("history"), []) or []
+    translations = _parse_json_field(data.get("translations"), []) or []
+    collections = _parse_json_field(data.get("collections"), []) or []
+    if not isinstance(learned, dict): learned = {}
+    if not isinstance(review_stats, dict): review_stats = {}
+    if not isinstance(history, list): history = []
+    if not isinstance(translations, list): translations = []
+    if not isinstance(collections, list): collections = []
+
+    # 学习统计聚合
+    phase_dist = {"learning": 0, "review": 0, "graduated": 0}
+    learned_words = 0
+    review_count = 0
+    for state in learned.values():
+        if not isinstance(state, dict):
+            continue
+        learned_words += 1
+        ph = state.get("phase")
+        if ph in phase_dist:
+            phase_dist[ph] += 1
+        try:
+            review_count += int(state.get("reviewCount") or state.get("review_count") or 0)
+        except (TypeError, ValueError):
+            pass
+
+    # 查词记录：最近 15 条，含完整 content（前端默认折叠，点击展开）
+    recent_queries = []
+    for i, it in enumerate(reversed(history[-15:])):
+        if not isinstance(it, dict):
+            continue
+        content = it.get("content") or ""
+        recent_queries.append({
+            "word": it.get("word") or "",
+            "time": it.get("time"),
+            "preview": content[:80],
+            "content": content,
+        })
+
+    login_logs = get_login_logs(openid, 10)
+    last_active = login_logs[0]["created_at"] if login_logs else (user.get("updated_at") or user.get("created_at"))
+
+    return {
+        "profile": {
+            "openid": user.get("openid"),
+            "nickname": user.get("nickname") or "",
+            "avatar": user.get("avatar") or "",
+            "created_at": user.get("created_at"),
+            "updated_at": user.get("updated_at"),
+            "last_active_at": last_active,
+        },
+        "login_logs": login_logs,
+        "learning": {
+            "learned_words": learned_words,
+            "phase_dist": phase_dist,
+            "review_count": review_count,
+            "streak_days": review_stats.get("streak_days", 0),
+        },
+        "counts": {
+            "collections": len(collections),
+            "translations": len(translations),
+            "history": len(history),
+        },
+        "recent_queries": recent_queries,
+        "recent_translations": [
+            {"original": (t.get("original") if isinstance(t, dict) else "") or "", "time": t.get("time") if isinstance(t, dict) else None}
+            for t in reversed(translations[-5:])
+        ],
+        "user_data_keys": sorted(data.keys()),
+    }
+
+
+@app.get("/api/admin/user-data")
+async def admin_user_data(authorization: str = Header(None), openid: str = None):
+    """查看单用户数据"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    if not openid:
+        return {"error": "缺少 openid 参数"}
+    return {"openid": openid, "data": get_user_data(openid)}
+
+
+@app.get("/api/admin/feedbacks")
+async def admin_feedbacks(authorization: str = Header(None), status: str = None, page: int = 1, page_size: int = 20):
+    """反馈列表（管理）"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    return get_feedbacks(status, page, page_size)
+
+
+@app.put("/api/admin/feedbacks/{feedback_id}")
+async def admin_feedback_status(feedback_id: int, authorization: str = Header(None), req: FeedbackStatusRequest = None):
+    """标记反馈处理状态"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    if not req or not req.status:
+        return {"error": "缺少 status"}
+    ok = update_feedback_status(feedback_id, req.status)
+    return {"success": ok}
+
+
+@app.get("/api/admin/stats")
+async def admin_stats(authorization: str = Header(None)):
+    """数据统计：学习进度分布等（遍历各用户 wordStates 聚合）"""
+    if not _verify_admin(authorization):
+        return {"error": "未授权"}
+    phase_dist = {"learning": 0, "review": 0, "graduated": 0}
+    total_states = 0
+    users_with_states = 0
+    for row in get_word_states_rows():
+        try:
+            states = json.loads(row["data_value"])
+        except Exception:
+            continue
+        if not isinstance(states, dict):
+            continue
+        users_with_states += 1
+        for state in states.values():
+            if not isinstance(state, dict):
+                continue
+            total_states += 1
+            ph = state.get("phase")
+            if ph in phase_dist:
+                phase_dist[ph] += 1
+    # 趋势数据（图表）：近 30 天注册 / 近 14 天活跃 / 近 14 天查词与翻译
+    def _fill_daily(days, data):
+        out = []
+        for i in range(days - 1, -1, -1):
+            d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            out.append({"date": d[5:], "value": data.get(d, 0)})
+        return out
+
+    reg = _fill_daily(30, get_daily_counts("users", 30))
+    act = _fill_daily(14, get_daily_counts("login_logs", 14))
+    usage_raw = get_usage_daily_counts(14)
+    usage = []
+    for i in range(13, -1, -1):
+        d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+        u = usage_raw.get(d, {})
+        usage.append({"date": d[5:], "query": u.get("query", 0), "translate": u.get("translate", 0)})
+
+    uv_raw = get_usage_daily_uv(14)
+    uv = _fill_daily(14, uv_raw)
+    active_hours = get_usage_hourly(14)
+    heatmap = get_usage_heatmap(7)
+    feedback_status = get_feedback_status_counts()
+
+    return {
+        "db": get_db_stats(),
+        "users_with_states": users_with_states,
+        "total_word_states": total_states,
+        "phase_dist": phase_dist,
+        "counters": dict(_runtime_stats),
+        "trends": {
+            "registration": reg,
+            "active": act,
+            "uv": uv,
+            "usage": usage,
+            "active_hours": active_hours,
+            "heatmap": heatmap,
+            "feedback_status": feedback_status,
+        },
+    }
 
 
 # --- 启动 ---
