@@ -5,6 +5,7 @@ const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
 const errorUi = require('../../utils/services/error.js');
 const logger = require('../../utils/services/logger.js');
+const { startStreamQuery } = require('../../utils/services/streamQuery.js');
 const log = logger.for('translate');
 
 Page({
@@ -17,33 +18,37 @@ Page({
     resultAnimation: {},
     streamingText: '',
     resultHtml: '',
+    isCollected: false,    // 当前翻译是否已收藏（与查词模块 isCollected 对齐）
+    fromCache: false,      // 当前结果是否来自缓存（与查词模块 fromCache 对齐）
     statusBarHeight: 20
   },
 
   onLoad: function() {
-    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+    try {
+      this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+    } catch (e) {
+      log.error('[translate.onLoad] failed:', e);
+    }
   },
 
   onShow: function() {
-    // 检查是否有待翻译的文本（从收藏/翻译历史跳转过来）
-    const pendingText = storage.getPendingTranslation();
-    if (pendingText) {
-      storage.clearPendingTranslation();
-      this.setData({ inputText: pendingText });
-      // 自动触发翻译
-      this.translateText();
-      return;
+    try {
+      // 检查是否有待翻译的文本（从收藏/翻译历史跳转过来）
+      const pendingText = storage.getPendingTranslation();
+      if (pendingText) {
+        storage.clearPendingTranslation();
+        this.setData({ inputText: pendingText });
+        // 自动触发翻译
+        this.translateText();
+        return;
+      }
+      // 保留当前结果（从翻译详情/历史返回时不清空）
+      if (this.data.showResult && this.data.inputText) {
+        this.setData({ isCollected: storage.isTranslationCollected(this.data.inputText.trim()) });
+      }
+    } catch (e) {
+      log.error('[translate.onShow] failed:', e);
     }
-
-    // 每次切换回来时重置到初始界面
-    wsClient.close();
-    this.setData({
-      inputText: '',
-      showResult: false,
-      result: {},
-      inputCollapsed: false,
-      streamingText: ''
-    });
   },
 
   onInputChange: function(e) {
@@ -60,6 +65,11 @@ Page({
   },
 
   translateText: function() {
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
+
     const text = this.data.inputText.trim();
 
     if (!text) {
@@ -93,8 +103,18 @@ Page({
       isLoading: true,
       showResult: false,
       inputCollapsed: true,
-      streamingText: ''
+      streamingText: '',
+      fromCache: false   // 清空上次的缓存标记
     });
+
+    // 查缓存：命中 → 直接展示（不调 AI，秒级响应）
+    // 缓存键：text（与查词模块的 wordCache 对齐）
+    const cached = storage.getCachedTranslation(text);
+    if (cached) {
+      log.info('[translate] 命中缓存，跳过 AI 生成', { textLen: text.length, cacheTime: cached.time });
+      this.handleTranslateResult(cached.result, { fromCache: true });
+      return;
+    }
 
     wx.showLoading({
       title: '正在翻译...',
@@ -102,114 +122,41 @@ Page({
     });
 
     const that = this;
-    let wsStartTime = null;
-    let wsFirstTokenAt = null;
-    // P0-7 兜底 watchdog：WS 异常断开（onError 后只派发 onClose 但不发 done）
-    // 会导致 isLoading 永远 true，loading 转圈不停。
-    let watchdog = null;
-    function clearWatchdog() {
-      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-    }
-    function armIdleWatchdog() {
-      clearWatchdog();
-      watchdog = setTimeout(() => {
-        log.warn('[translate] idle watchdog 触发，强制收尾');
-        if (!that.data.isLoading) return;
-        wsClient.close();
-        that.setData({ isLoading: false });
-        wx.hideLoading();
-        errorUi.showRetryError('翻译超时，请重试', () => that.translateText());
-      }, 15000);
-    }
 
-    // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
-    auth.fetchWsTicket().then((ticket) => {
-      if (!ticket) {
-        wx.hideLoading();
-        errorUi.showRetryError('网络错误，请稍后重试', () => that.translateText());
-        return;
-      }
-      const queryStr = '?ticket=' + encodeURIComponent(ticket);
-      wsClient.connect('/ws/translate' + queryStr, {
-      onOpen: function() {
-        // 计时起点：WebSocket 已建立，真正发出请求这一刻
-        wsStartTime = Date.now();
-        log.info('[translate] WS 已连接 t=0');
-        // 发送翻译请求
-        wsClient.send({ text: text });
-        log.info('[translate] 请求已发送');
-        // P0-7：兜底 connect-wait watchdog —— onOpen 后 10s 内若没收到任何消息，
-        // 视为后端握手后异常，强制收尾
-        clearWatchdog();
-        watchdog = setTimeout(() => {
-          log.warn('[translate] connect-wait watchdog 触发，强制收尾');
-          if (!that.data.isLoading) return;
-          wsClient.close();
-          that.setData({ isLoading: false });
-          wx.hideLoading();
-          errorUi.showRetryError('翻译无响应，请重试', () => that.translateText());
-        }, 10000);
+    // P0-3/P0-7: 统一流式查询封装（ticket 换取、双层 watchdog、节流、错误收尾）
+    that._streamQuery = startStreamQuery({
+      path: '/ws/translate',
+      tag: 'translate',
+      throttleMode: 'interval',
+      throttleInterval: 100,
+      idleTimeoutMs: 15000,
+      connectWaitTimeoutMs: 10000,
+      retryMessage: '翻译超时，请重试',
+      send: () => wsClient.send({ text: text }),
+      isActive: () => that.data.isLoading,
+      finish: () => that.setData({ isLoading: false }),
+      onDelta: (delta) => {
+        const newText = that.data.streamingText + delta;
+        that.setData({
+          streamingText: newText,
+          resultHtml: markdown.markdownToHtml(newText)
+        });
       },
-      onMessage: function(data) {
-        const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
-        log.info(`[translate] 收到 ${data.type} (${elapsed}ms)`);
-        if (data.error) {
-          wx.hideLoading();
-          clearWatchdog();
-          wsClient.close();
-          that.setData({ isLoading: false });
-          errorUi.showRetryError(data.error, () => that.translateText());
-          return;
-        }
-
-        if (data.type === 'start') {
-          that.setData({
-            streamingText: ''
-          });
-          return;
-        }
-
-        if (data.type === 'content') {
-          if (wsFirstTokenAt === null) {
-            wsFirstTokenAt = Date.now();
-            log.info(`首token: ${wsFirstTokenAt - wsStartTime}ms`);
-          }
-          // 实时更新流式文本并渲染 Markdown
-          const newText = that.data.streamingText + data.content;
-          const html = markdown.markdownToHtml(newText);
-          that.setData({
-            streamingText: newText,
-            resultHtml: html
-          });
-          // P0-7：收到 content，重置 idle watchdog
-          armIdleWatchdog();
-          return;
-        }
-
-        if (data.type === 'done') {
-          log.info(`完成: ${Date.now() - wsStartTime}ms`);
-          // 完成
-          wx.hideLoading();
-          clearWatchdog();
-          that.handleTranslateResult(that.data.streamingText);
-          return;
-        }
+      onDone: (tail) => {
+        // 完成：先取回未刷新的尾包，保证 streamingText 完整
+        if (tail) { that.data.streamingText += tail; }
+        log.info('[translate] 完成');
+        that.handleTranslateResult(that.data.streamingText);
       },
-      onError: function(res) {
-        log.error('连接错误:', res);
-        wx.hideLoading();
-        wsClient.close();
-        errorUi.showRetryError('网络错误，请稍后重试', () => that.translateText());
-      },
-      onClose: function(res) {
-        log.info('连接关闭:', res);
-        // 由 wsClient 处理重连
+      onRetry: () => that.translateText(),
+      onStartMsg: () => that.setData({ streamingText: '' }),
+      onFirstContent: (wsStartTime) => {
+        log.info(`[translate] 首token: ${Date.now() - wsStartTime}ms`);
       }
     });
-    });  // P0-3: 闭合 fetchWsTicket().then
   },
 
-  handleTranslateResult: function(content) {
+  handleTranslateResult: function(content, options) {
     const animation = wx.createAnimation({
       duration: 400,
       timingFunction: 'ease-out'
@@ -218,12 +165,30 @@ Page({
 
     const html = markdown.markdownToHtml(content);
 
+    // 写缓存（只有非缓存来源、AI 真实生成时才写；缓存命中时跳过）
+    const fromCache = options && options.fromCache;
+    if (!fromCache) {
+      storage.setCachedTranslation(this.data.inputText.trim(), content);
+      log.info('[translate] 已写入缓存', { textLen: this.data.inputText.length });
+    }
+
+    // 缓存命中时计算「N 分钟前查过」文案（WXML 不能调函数）
+    const cacheAge = fromCache
+      ? this._formatCacheAge(Date.now() - (storage.getCachedTranslation(this.data.inputText.trim()) || {}).time)
+      : '';
+
     this.setData({
       isLoading: false,
       showResult: true,
+      // 缓存命中时也必须写回 streamingText，否则"复制/收藏"读到的是空串
+      streamingText: content,
       result: { content: content },
       resultAnimation: animation.export(),
-      resultHtml: html
+      resultHtml: html,
+      fromCache: !!fromCache,
+      cacheAge: cacheAge,
+      // 翻译完成后同步收藏状态（与查词模块 handleQueryResult 对齐）
+      isCollected: storage.isTranslationCollected(this.data.inputText.trim())
     });
 
     // 关闭 WebSocket
@@ -231,20 +196,29 @@ Page({
   },
 
   collectTranslation: function() {
-    const content = this.data.streamingText;
-    if (!content) {
-      wx.showToast({
-        title: '无翻译结果',
-        icon: 'none'
-      });
+    // 与查词模块 toggleCollect 一致：流式过程中 streamingText 是残缺文本，禁止收藏
+    if (this.data.isLoading) {
+      wx.showToast({ title: '翻译完成后再收藏', icon: 'none' });
       return;
     }
+    const text = this.data.inputText.trim();
+    const result = this.data.streamingText;
+    if (!text || !result) {
+      wx.showToast({ title: '请先翻译后再收藏', icon: 'none' });
+      return;
+    }
+    const ret = storage.toggleTranslation(text, result);
+    this.setData({ isCollected: ret.collected });
+    wx.showToast({ title: ret.collected ? '收藏成功' : '已取消收藏', icon: 'success' });
+  },
 
-    storage.addTranslation(this.data.inputText, content);
-    wx.showToast({
-      title: '已收藏',
-      icon: 'success'
-    });
+  // 缓存时长格式化（「刚刚 / X 分钟前 / X 小时前 / X 天前」），与查词模块对齐
+  _formatCacheAge: function(ms) {
+    if (!ms || ms < 0) return '';
+    if (ms < 60 * 1000) return '刚刚';
+    if (ms < 60 * 60 * 1000) return Math.floor(ms / 60000) + ' 分钟前';
+    if (ms < 24 * 60 * 60 * 1000) return Math.floor(ms / 3600000) + ' 小时前';
+    return Math.floor(ms / 86400000) + ' 天前';
   },
 
   copyTranslation: function() {
@@ -258,6 +232,10 @@ Page({
 
   // 停止或清空
   stopOrClear: function() {
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
     if (this.data.isLoading) {
       // 停止输出
       wsClient.close();
@@ -284,21 +262,11 @@ Page({
     }
   },
 
-  onPullDownRefresh: function() {
-    // 关闭 WebSocket
-    wsClient.close();
-
-    this.setData({
-      inputText: '',
-      showResult: false,
-      result: {},
-      inputCollapsed: false,
-      streamingText: ''
-    });
-    wx.stopPullDownRefresh();
-  },
-
   onUnload: function() {
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
     // 页面卸载时关闭 WebSocket
     wsClient.close();
   }

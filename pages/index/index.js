@@ -6,6 +6,7 @@ const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
 const errorUi = require('../../utils/services/error.js');
 const logger = require('../../utils/services/logger.js');
+const { startStreamQuery } = require('../../utils/services/streamQuery.js');
 const log = logger.for('query');
 
 const { REAL_WORDS, HIGH_FREQ_REAL_WORDS } = constants;
@@ -38,35 +39,33 @@ Page({
   },
 
   onLoad: function(options) {
-    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
-    this.checkHistory();
+    try {
+      this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+      this.checkHistory();
+    } catch (e) {
+      log.error('[index.onLoad] failed:', e);
+    }
   },
 
   onShow: function() {
-    // 检查是否有待查询的字
-    var pendingQuery = storage.getPendingQuery();
-    storage.clearPendingQuery();
+    try {
+      // 保留当前结果（从收藏详情/历史页返回时不清空，避免已查内容消失）
+      const pendingQuery = storage.getPendingQuery();
+      storage.clearPendingQuery();
 
-    this.setData({
-      inputText: '',
-      contextText: '',
-      showResult: false,
-      result: {},
-      resultHtml: '',
-      streamingText: '',
-      inputCollapsed: false,
-      showRealWordsSection: true,
-      showRealWordsPicker: false,
-      pickerIndex: -1,
-      isCollected: false
-    });
-
-    // 如果有待查询，执行查询
-    if (pendingQuery) {
-      this.setData({ inputText: pendingQuery });
-      this.searchWord();
+      if (pendingQuery) {
+        this.setData({ inputText: pendingQuery });
+        this.searchWord();
+        return;
+      }
+      // 有结果时刷新收藏状态（跨页取消收藏后回到本页也能正确显示）
+      if (this.data.showResult && this.data.inputText) {
+        this.setData({ isCollected: storage.isCollected(this.data.inputText.trim()) });
+      }
+      this.checkHistory();
+    } catch (e) {
+      log.error('[index.onShow] failed:', e);
     }
-    this.checkHistory();
   },
 
   onInputChange: function(e) {
@@ -130,6 +129,16 @@ Page({
   },
 
   searchWord: function() {
+    // 上一轮未清掉的流式查询先复位，避免旧回调污染新一轮
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
+    // 清掉上一轮未触发的缓存展示 / loading 文案 timer：
+    // 用户快速连查时，旧 timer 触发会把上一轮的缓存结果写进 UI 甚至掐断新 WS 连接
+    if (this._cacheTimer) { clearTimeout(this._cacheTimer); this._cacheTimer = null; }
+    if (this._loadingTipTimer) { clearTimeout(this._loadingTipTimer); this._loadingTipTimer = null; }
+
     let query = this.data.inputText.trim();
     // 上下文（可选，maxlength 200）：自动按长度归类
     // - 短文本（≤ 50 字）：当例句，发 example 字段，AI 优先按此释义
@@ -189,6 +198,7 @@ Page({
     wsClient.close();
 
     // 每次开始生成前清空上一轮的内容，避免义项卡片/缓存标记/计时残留
+    this._isQueryActive = true;  // 流式进行中标志（watchdog 收尾判断用，isLoading 首包后会变 false）
     this.setData({
       isLoading: true,
       showResult: false,
@@ -203,7 +213,8 @@ Page({
     });
 
     // 5s 后切换 loading 文案（GLM-4.5-Air 慢，提示用户 AI 在思考）
-    setTimeout(() => {
+    this._loadingTipTimer = setTimeout(() => {
+      this._loadingTipTimer = null;
       if (this.data.isLoading) {
         this.setData({ loadingTip: 'AI 思考中...' });
       }
@@ -219,7 +230,8 @@ Page({
         loadingTip: '已缓存（' + ageStr + '前查过）'
       });
       // 短暂显示缓存提示，再展示结果
-      setTimeout(() => {
+      this._cacheTimer = setTimeout(() => {
+        this._cacheTimer = null;
         this.setData({ loadingTip: '已缓存 · ' + ageStr });
         this.handleQueryResult(cached.result, { fromCache: true });
       }, 400);
@@ -230,116 +242,55 @@ Page({
 
     const that = this;
     log.debug('发送数据: text=' + query);
-    let wsStartTime = null;
-    let wsFirstTokenAt = null;
-    // P0-6 兜底 watchdog：WS 异常断开（onError 后只派发 onClose 但不发 done）
-    // 会导致 isLoading 永远 true，loading 转圈不停。
-    // - 收到第一条 content 时启动（idle 15s 无新内容视为卡死）
-    // - 收到 done / error / 手动停止时清除
-    let watchdog = null;
-    function clearWatchdog() {
-      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-    }
-    function armIdleWatchdog() {
-      clearWatchdog();
-      watchdog = setTimeout(() => {
-        log.warn('[query] idle watchdog 触发，强制收尾');
-        if (!that.data.isLoading) return;
-        wsClient.close();
+
+    // P0-3/P0-6: 统一流式查询封装（ticket 换取、双层 watchdog、帧级节流、错误收尾）
+    that._streamQuery = startStreamQuery({
+      path: '/ws/query',
+      tag: 'query',
+      throttleMode: 'frame',          // 查词对流畅度敏感，用帧级节流
+      idleTimeoutMs: 45000,           // GLM-4.5-Air 推理慢，idle 留更多时间
+      connectWaitTimeoutMs: 30000,    // 首 token 可能 10-20s，留 30s 余量
+      retryMessage: '查询超时，请重试',
+      send: () => wsClient.send({ text: query, example: example, context: context }),
+      isActive: () => that._isQueryActive,
+      finish: () => {
+        that._isQueryActive = false;
         that.setData({ isLoading: false });
-        wx.hideLoading();
-        errorUi.showRetryError('查询超时，请重试', () => that.searchWord());
-      }, 45000);  // GLM-4.5-Air 推理慢，留更多时间
-    }
-
-    // P0-3: 先换一次性 ticket，避免 token 出现在 URL/Nginx 日志
-    auth.fetchWsTicket().then((ticket) => {
-      if (!ticket) {
-        wx.hideLoading();
-        errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
-        return;
-      }
-      const queryStr = '?ticket=' + encodeURIComponent(ticket);
-      wsClient.connect('/ws/query' + queryStr, {
-      onOpen: function() {
-        // 计时起点：WebSocket 已建立，真正发出请求这一刻
-        wsStartTime = Date.now();
-        log.info('[query] WS 已连接 t=0');
-        // 发送查询：text 必填，context 可选（多音字消歧 / 出处定位）
-        wsClient.send({ text: query, example: example, context: context });
-        log.info('[query] 请求已发送');
-        // P0-6：兜底 connect-wait watchdog —— onOpen 后 N 秒内若没收到任何消息，
-        // 视为后端握手后异常，强制收尾
-        clearWatchdog();
-        watchdog = setTimeout(() => {
-          log.warn('[query] connect-wait watchdog 触发，强制收尾');
-          if (!that.data.isLoading) return;
-          wsClient.close();
-          that.setData({ isLoading: false });
-          wx.hideLoading();
-          errorUi.showRetryError('查询无响应，请重试', () => that.searchWord());
-        }, 30000);  // GLM-4.5-Air 首token 可能 10-20s，留 30s 余量
       },
-      onMessage: function(data) {
-        const elapsed = wsStartTime ? Date.now() - wsStartTime : -1;
-        log.info(`[query] 收到 ${data.type} (${elapsed}ms)`);
-        if (data.error) {
-          wx.hideLoading();
-          clearWatchdog();
-          wsClient.close();
-          that.setData({ isLoading: false });
-          errorUi.showRetryError(data.error, () => that.searchWord());
-          return;
+      onStartMsg: () => that.setData({ streamingText: '', resultHtml: '', parsedResult: null }),  // 重连后清空旧内容，避免两轮拼接重复
+      onDelta: (delta) => {
+        const newText = that.data.streamingText + delta;
+        const parsed = markdown.parseMarkdown(newText);
+        const existing = that.data.parsedResult || { pinyin: '', meanings: [], raw: '' };
+        const finalParsed = (parsed && parsed.meanings.length >= existing.meanings.length)
+          ? parsed
+          : existing;
+        const hasCards = !!(finalParsed && finalParsed.meanings.length > 0);
+        const patch = {
+          streamingText: newText,
+          parsedResult: finalParsed,
+          showResult: true,
+          isLoading: false
+        };
+        // 结构化卡片已就绪时 fallback HTML 用不上，不再每块重算
+        if (!hasCards) {
+          patch.resultHtml = markdown.markdownToHtml(newText);
         }
-
-        if (data.type === 'content') {
-          if (wsFirstTokenAt === null) {
-            wsFirstTokenAt = Date.now();
-            log.info(`首token: ${wsFirstTokenAt - wsStartTime}ms`);
-          }
-          wx.hideLoading();
-          const newText = that.data.streamingText + data.content;
-          // 流式中累积式结构化解析：每解析出一个完整义项就立即多一张卡片
-          // 关键：永不回退（parsedResult 取 max(已有, 新)），避免 fallback 闪烁
-          const parsed = markdown.parseMarkdown(newText);
-          const existing = that.data.parsedResult || { pinyin: '', meanings: [], raw: '' };
-          let finalParsed = existing;
-          if (parsed && parsed.meanings.length >= existing.meanings.length) {
-            // 新解析的义项更多（或首次解析）→ 采用新的
-            finalParsed = parsed;
-          }
-          // 否则保留 existing（避免回退导致的卡片消失/闪烁）
-          that.setData({
-            streamingText: newText,
-            resultHtml: markdown.markdownToHtml(newText),
-            parsedResult: finalParsed,
-            showResult: true,
-            isLoading: false
-          });
-          // P0-6：收到 content，重置 idle watchdog
-          armIdleWatchdog();
-        }
-
-        if (data.type === 'done') {
-          log.info(`完成: ${Date.now() - wsStartTime}ms`);
-          clearWatchdog();
-          that.handleQueryResult(that.data.streamingText);
-        }
+        that.setData(patch);
       },
-      onError: function(res) {
-        log.error('连接错误:', res);
-        wx.hideLoading();
-        clearWatchdog();
-        wsClient.close();
-        that.setData({ isLoading: false });
-        errorUi.showRetryError('网络错误，请稍后重试', () => that.searchWord());
+      onDone: (tail) => {
+        // 先取回未刷新的尾包，保证 streamingText 完整
+        if (tail) {
+          that.data.streamingText += tail;
+        }
+        log.info('[query] 完成');
+        that.handleQueryResult(that.data.streamingText);
       },
-      onClose: function(res) {
-        log.info('连接关闭:', res);
-        // 由 wsClient 处理重连
+      onRetry: () => that.searchWord(),
+      onFirstContent: (wsStartTime) => {
+        log.info(`[query] 首token: ${Date.now() - wsStartTime}ms`);
       }
     });
-    });  // P0-3: 闭合 fetchWsTicket().then
   },
 
   handleQueryResult: function(content, options) {
@@ -435,6 +386,13 @@ Page({
 
   // 停止或清空
   stopOrClear: function() {
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
+    // 缓存命中 400ms 窗口内点「停止/清空」也要取消 timer，否则旧缓存结果仍会写回 UI
+    if (this._cacheTimer) { clearTimeout(this._cacheTimer); this._cacheTimer = null; }
+    if (this._loadingTipTimer) { clearTimeout(this._loadingTipTimer); this._loadingTipTimer = null; }
     if (this.data.isLoading) {
       // 停止输出
       wsClient.close();
@@ -463,23 +421,13 @@ Page({
     }
   },
 
-  onPullDownRefresh: function() {
-    wsClient.close();
-    this.setData({
-      inputText: '',
-      showResult: false,
-      result: {},
-      resultHtml: '',
-      streamingText: '',
-      inputCollapsed: false,
-      showRealWordsSection: true,
-      showRealWordsPicker: false,
-      pickerIndex: -1
-    });
-    wx.stopPullDownRefresh();
-  },
-
   onUnload: function() {
+    if (this._cacheTimer) { clearTimeout(this._cacheTimer); this._cacheTimer = null; }
+    if (this._loadingTipTimer) { clearTimeout(this._loadingTipTimer); this._loadingTipTimer = null; }
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
+    }
     wsClient.close();
   },
 

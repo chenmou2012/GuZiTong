@@ -7,7 +7,7 @@ const wsClient = require('../../utils/services/websocket.js');
 const auth = require('../../utils/services/auth.js');
 const errorUi = require('../../utils/services/error.js');
 const logger = require('../../utils/services/logger.js');
-const { createThrottle } = require('../../utils/services/streamThrottle.js');
+const { startStreamQuery } = require('../../utils/services/streamQuery.js');
 const log = logger.for('translation-detail');
 
 // 时间格式化（与 collection-detail 一致）
@@ -110,9 +110,9 @@ Page({
   },
 
   onUnload: function() {
-    if (this._streamThrottle) {
-      this._streamThrottle.reset();
-      this._streamThrottle = null;
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
     }
     wsClient.close();
   },
@@ -130,9 +130,9 @@ Page({
         if (res.confirm) {
           // 取消收藏时如果还在流式翻译，先关掉 WS 避免泄露
           if (that.data.isRegenerating) {
-            if (that._streamThrottle) {
-              that._streamThrottle.reset();
-              that._streamThrottle = null;
+            if (that._streamQuery) {
+              that._streamQuery.dispose();
+              that._streamQuery = null;
             }
             wsClient.close();
           }
@@ -160,9 +160,9 @@ Page({
 
   regenerate: function() {
     if (this.data.isRegenerating) return;
-    if (this._streamThrottle) {
-      this._streamThrottle.reset();
-      this._streamThrottle = null;
+    if (this._streamQuery) {
+      this._streamQuery.dispose();
+      this._streamQuery = null;
     }
 
     if (!auth.checkLogin()) {
@@ -187,121 +187,51 @@ Page({
     wx.showLoading({ title: '正在重新翻译...', mask: true });
 
     const that = this;
-    let wsStartTime = null;
 
-    // 双层 watchdog（同 translate.js）
-    let watchdog = null;
-    function clearWatchdog() {
-      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-    }
-    function armIdleWatchdog() {
-      clearWatchdog();
-      watchdog = setTimeout(() => {
-        log.warn('[translation-detail] idle watchdog 触发');
-        if (!that.data.isRegenerating) return;
-        throttle.reset();
-        wsClient.close();
-        that.setData({ isRegenerating: false, isShowingNew: false });
-        wx.hideLoading();
-        errorUi.showRetryError('翻译超时，请重试', () => that.regenerate());
-      }, 15000);
-    }
-
-    // 流式渲染节流：与翻译页一致
-    const throttle = createThrottle(100, function(delta) {
-      const newText = that.data.streamingText + delta;
-      that.setData({
-        streamingText: newText,
-        streamingHtml: markdown.markdownToHtml(newText),
-        isShowingNew: true
-      });
-      armIdleWatchdog();
-    });
-    that._streamThrottle = throttle;
-
-    auth.fetchWsTicket().then((ticket) => {
-      if (!ticket) {
-        wx.hideLoading();
-        that.setData({ isRegenerating: false });
-        errorUi.showRetryError('网络错误，请稍后重试', () => that.regenerate());
-        return;
-      }
-      wsClient.connect('/ws/translate?ticket=' + encodeURIComponent(ticket), {
-        firstContent: true,
-        onOpen: function() {
-          wsStartTime = Date.now();
-          wsClient.send({ text: that.data.original });
-          log.info('[translation-detail] 已发送 original=' + that.data.original.slice(0, 30));
-          // onOpen 后 10s 内若无任何消息视为握手后异常
-          clearWatchdog();
-          watchdog = setTimeout(() => {
-            log.warn('[translation-detail] connect-wait watchdog 触发');
-            if (!that.data.isRegenerating) return;
-            throttle.reset();
-            wsClient.close();
-            that.setData({ isRegenerating: false, isShowingNew: false });
-            wx.hideLoading();
-            errorUi.showRetryError('翻译无响应，请重试', () => that.regenerate());
-          }, 10000);
-        },
-        onMessage: function(data) {
-          if (data.error) {
-            throttle.reset();
-            wx.hideLoading();
-            clearWatchdog();
-            wsClient.close();
-            that.setData({ isRegenerating: false, isShowingNew: false });
-            errorUi.showRetryError(data.error, () => that.regenerate());
-            return;
-          }
-          if (data.type === 'content') {
-            if (this.firstContent) {
-              this.firstContent = false;
-              wx.hideLoading();
-            }
-            throttle.push(data.content);
-          }
-          if (data.type === 'done') {
-            wx.hideLoading();
-            clearWatchdog();
-            wsClient.close();
-            const tail = throttle.flushNow();
-            if (tail) {
-              that.data.streamingText += tail;
-            }
-            // 自动替换翻译的 translated 字段（保留原 time）
-            const updated = storage.updateTranslation(that.data.original, that.data.streamingText);
-            if (updated) {
-              // 同步写新缓存（下次命中）
-              storage.setCachedTranslation(that.data.original, that.data.streamingText);
-              that.setData({
-                isRegenerating: false,
-                originalTranslated: that.data.streamingText,
-                originalHtml: markdown.markdownToHtml(that.data.streamingText),
-                streamingText: '',
-                streamingHtml: '',
-                isShowingNew: false
-              });
-              wx.showToast({ title: '已更新翻译', icon: 'success' });
-            } else {
-              that.setData({ isRegenerating: false, isShowingNew: false });
-              wx.showToast({ title: '更新失败', icon: 'none' });
-            }
-          }
-        },
-        onError: function(res) {
-          log.error('连接错误:', res);
-          throttle.reset();
-          wx.hideLoading();
-          clearWatchdog();
-          wsClient.close();
+    // P0-3/P0-7: 统一流式查询封装（ticket 换取、双层 watchdog、节流、错误收尾）
+    that._streamQuery = startStreamQuery({
+      path: '/ws/translate',
+      tag: 'translation-detail',
+      throttleMode: 'interval',
+      throttleInterval: 100,
+      idleTimeoutMs: 15000,
+      connectWaitTimeoutMs: 10000,
+      retryMessage: '翻译超时，请重试',
+      send: () => wsClient.send({ text: that.data.original }),
+      isActive: () => that.data.isRegenerating,
+      finish: () => that.setData({ isRegenerating: false, isShowingNew: false }),
+      onStartMsg: () => that.setData({ streamingText: '' }),  // 重连后清空旧内容，避免两轮拼接重复
+      onDelta: (delta) => {
+        const newText = that.data.streamingText + delta;
+        that.setData({
+          streamingText: newText,
+          streamingHtml: markdown.markdownToHtml(newText),
+          isShowingNew: true
+        });
+      },
+      onDone: (tail) => {
+        wsClient.close();  // 与原文一致：完成后关闭连接
+        if (tail) { that.data.streamingText += tail; }
+        // 自动替换翻译的 translated 字段（保留原 time）
+        const updated = storage.updateTranslation(that.data.original, that.data.streamingText);
+        if (updated) {
+          // 同步写新缓存（下次命中）
+          storage.setCachedTranslation(that.data.original, that.data.streamingText);
+          that.setData({
+            isRegenerating: false,
+            originalTranslated: that.data.streamingText,
+            originalHtml: markdown.markdownToHtml(that.data.streamingText),
+            streamingText: '',
+            streamingHtml: '',
+            isShowingNew: false
+          });
+          wx.showToast({ title: '已更新翻译', icon: 'success' });
+        } else {
           that.setData({ isRegenerating: false, isShowingNew: false });
-          errorUi.showRetryError('网络错误，请稍后重试', () => that.regenerate());
-        },
-        onClose: function() {
-          // 由 wsClient 处理重连
+          wx.showToast({ title: '更新失败', icon: 'none' });
         }
-      });
+      },
+      onRetry: () => that.regenerate()
     });
   }
 });

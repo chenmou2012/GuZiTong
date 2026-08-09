@@ -1,4 +1,5 @@
 <!-- components/records-list/index.wxml -->
+<wxs src="./format.wxs" module="fmt" />
 <view class="records-list">
   <view wx:if="{{list.length === 0}}" class="empty-state">
     <text class="empty-text">{{emptyText}}</text>
@@ -13,7 +14,7 @@
     <view class="list-body">
       <view
         wx:for="{{list}}"
-        wx:key="index"
+        wx:key="*this"
         class="list-item"
         bindtap="onItemTap"
         data-index="{{index}}"
@@ -21,11 +22,15 @@
         <view class="item-main">
           <view class="item-title-row">
             <text class="item-title">{{item[titleField]}}</text>
-            <text wx:if="{{showTime && item.time}}" class="item-time">{{formatTime(item.time)}}</text>
+            <text wx:if="{{extraField && item[extraField]}}" class="item-extra">{{item[extraField]}}</text>
+            <text wx:if="{{showTime && item.time}}" class="item-time">{{fmt.formatTime(item.time)}}</text>
           </view>
           <text wx:if="{{subtitleField && item[subtitleField]}}" class="item-subtitle">
             {{item[subtitleField]}}
           </text>
+        </view>
+        <view wx:if="{{actionLabel}}" class="item-action" catchtap="onItemAction" data-index="{{index}}">
+          <text class="action-text">{{actionLabel}}</text>
         </view>
         <view class="item-delete" catchtap="onItemDelete" data-index="{{index}}">
           <text class="delete-icon">×</text>

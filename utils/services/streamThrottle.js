@@ -112,6 +112,9 @@ function createFrameThrottle(flushFn, maxLatencyMs) {
       clearTimeout(maxTimer);
       maxTimer = null;
     }
+    // 重置调度标志：flushNow 后若再有 push（如 done 后残留消息）能重新调度，
+    // 否则 pending 会滞留到旧 wx.nextTick 才顺带刷出
+    scheduled = false;
     if (!pending) return null;
     const delta = pending;
     pending = '';
