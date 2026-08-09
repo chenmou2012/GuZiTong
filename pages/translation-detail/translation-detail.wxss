@@ -1,0 +1,277 @@
+/* pages/translation-detail/translation-detail.wxss */
+/* 与 collection-detail 风格对齐：米色书页底 + 朱砂印章点缀 + 楷体大字 */
+
+page {
+  background: linear-gradient(180deg, #FDFBF7 0%, #F8F2E8 100%);
+  background-attachment: fixed;
+}
+
+.container {
+  min-height: 100vh;
+  padding: 20rpx 30rpx 220rpx;
+  box-sizing: border-box;
+}
+
+/* 返回按钮 */
+.back-btn {
+  position: fixed;
+  top: calc(20rpx + {{statusBarHeight}}px);
+  left: 20rpx;
+  z-index: 100;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8rpx);
+  border-radius: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.08);
+}
+
+.back-text {
+  font-size: 26rpx;
+  color: #B91C1C;
+  letter-spacing: 2rpx;
+}
+
+/* 顶部页头 */
+.page-header {
+  padding: 32rpx 0 36rpx;
+  text-align: center;
+  position: relative;
+}
+
+.page-header::before {
+  content: '';
+  display: block;
+  width: 60rpx;
+  height: 6rpx;
+  margin: 0 auto 24rpx;
+  background: linear-gradient(90deg, transparent, #B91C1C 50%, transparent);
+  border-radius: 3rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 56rpx;  /* 翻译的原文比单字长，字号比 collection-detail 小 */
+  color: #2C3E50;
+  font-weight: bold;
+  font-family: 'STKaiti', 'KaiTi', 'STSong', 'SimSun', serif;
+  letter-spacing: 6rpx;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.page-subtitle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 18rpx;
+  padding: 6rpx 22rpx;
+  background: rgba(185, 28, 28, 0.04);
+  border-radius: 24rpx;
+}
+
+.page-subtitle {
+  font-size: 22rpx;
+  color: #B91C1C;
+  letter-spacing: 6rpx;
+  font-weight: 500;
+}
+
+.subtitle-divider {
+  width: 1rpx;
+  height: 20rpx;
+  background: rgba(185, 28, 28, 0.25);
+}
+
+.collected-at {
+  font-size: 22rpx;
+  color: #888;
+  letter-spacing: 1rpx;
+  font-feature-settings: 'tnum';
+}
+
+/* 原文区 */
+.original-section {
+  background: #FFFEFB;
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
+  margin: 24rpx 0;
+  box-shadow:
+    0 2rpx 8rpx rgba(0, 0, 0, 0.04),
+    0 12rpx 32rpx rgba(120, 80, 40, 0.06);
+  position: relative;
+  border-left: 4rpx solid #B91C1C;
+}
+
+.original-label-row {
+  margin-bottom: 12rpx;
+}
+
+.original-label {
+  font-size: 22rpx;
+  color: #B91C1C;
+  letter-spacing: 6rpx;
+  font-weight: 500;
+}
+
+.original-text {
+  font-size: 30rpx;
+  color: #5D4037;
+  line-height: 1.8;
+  font-family: 'STKaiti', 'KaiTi', 'STSong', 'SimSun', serif;
+  white-space: pre-wrap;
+  word-break: break-all;
+  letter-spacing: 1rpx;
+}
+
+/* 译文区 */
+.result-area {
+  background: #FFFEFB;
+  border-radius: 20rpx;
+  padding: 36rpx 32rpx 40rpx;
+  margin: 24rpx 0;
+  box-shadow:
+    0 2rpx 8rpx rgba(0, 0, 0, 0.04),
+    0 12rpx 32rpx rgba(120, 80, 40, 0.06);
+  position: relative;
+  background-image:
+    linear-gradient(180deg, rgba(255, 254, 251, 0) 0%, rgba(248, 240, 226, 0.3) 100%);
+}
+
+/* 状态标签 */
+.result-label {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 22rpx;
+  color: #999;
+  letter-spacing: 4rpx;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx dashed rgba(185, 28, 28, 0.15);
+}
+
+.result-label.streaming {
+  color: #B91C1C;
+}
+
+.result-label-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
+}
+
+.result-label-dot.static {
+  background: rgba(185, 28, 28, 0.4);
+  box-shadow: 0 0 0 4rpx rgba(185, 28, 28, 0.08);
+}
+
+.result-label.streaming .result-label-dot {
+  background: #B91C1C;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.5); }
+  50% { box-shadow: 0 0 0 10rpx rgba(185, 28, 28, 0); }
+}
+
+/* rich-text 渲染 markdown 样式（与 translate 主页保持一致） */
+rich-text {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #2C3E50;
+}
+
+rich-text h2 {
+  font-size: 30rpx;
+  color: #B91C1C;
+  margin: 24rpx 0 12rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+rich-text h2:first-child {
+  margin-top: 0;
+}
+
+rich-text p {
+  margin: 8rpx 0;
+}
+
+rich-text strong {
+  color: #B91C1C;
+  font-weight: bold;
+}
+
+/* 底部按钮组（固定） */
+.action-btns {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: rgba(253, 251, 247, 0.95);
+  backdrop-filter: blur(12rpx);
+  z-index: 100;
+  box-sizing: border-box;
+  border-top: 1rpx solid rgba(185, 28, 28, 0.08);
+  box-shadow: 0 -4rpx 16rpx rgba(120, 80, 40, 0.04);
+}
+
+.btn-secondary,
+.btn-tertiary,
+.btn-primary {
+  flex: 1;
+  margin: 0;
+  padding: 22rpx 0;
+  font-size: 28rpx;
+  border-radius: 16rpx;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary {
+  background: #FFFEFB;
+  color: #666;
+  border: 1rpx solid #ddd;
+}
+
+.btn-secondary[disabled] {
+  background: #f5f5f5;
+  color: #ccc;
+  border-color: #e8e8e8;
+}
+
+.btn-tertiary {
+  background: #FFFEFB;
+  color: #B91C1C;
+  border: 1rpx solid #B91C1C;
+}
+
+.btn-tertiary:active {
+  background: rgba(185, 28, 28, 0.06);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #B91C1C 0%, #8B1414 100%);
+  color: #FFFEFB;
+  border: none;
+  box-shadow: 0 4rpx 12rpx rgba(185, 28, 28, 0.25);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.3);
+}
+
+.btn-primary[disabled] {
+  background: #d4a5a5;
+  color: #FFFEFB;
+  box-shadow: none;
+}

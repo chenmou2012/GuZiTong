@@ -1,0 +1,48 @@
+<!-- pages/translation-detail/translation-detail.wxml -->
+<view class="container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <text class="back-text">‹ 返回</text>
+  </view>
+
+  <!-- 标题：原文短摘 + 收藏时间 -->
+  <view class="page-header">
+    <text class="page-title">{{originalShort}}</text>
+    <view class="page-subtitle-row">
+      <text class="page-subtitle">翻译内容</text>
+      <view class="subtitle-divider"></view>
+      <text wx:if="{{collectedAtShort}}" class="collected-at">{{collectedAtShort}}</text>
+    </view>
+  </view>
+
+  <!-- 原文区（完整原文） -->
+  <view class="original-section">
+    <view class="original-label-row">
+      <text class="original-label">原文</text>
+    </view>
+    <text class="original-text">{{original}}</text>
+  </view>
+
+  <!-- 译文区 -->
+  <view class="result-area">
+    <!-- 状态标签：流式 / 静态 -->
+    <view wx:if="{{isShowingNew}}" class="result-label streaming">
+      <text class="result-label-dot"></text>
+      <text>正在重新翻译…</text>
+    </view>
+    <view wx:else class="result-label">
+      <text class="result-label-dot static"></text>
+      <text>{{isRegenerating ? '翻译中…' : '已收藏的译文'}}</text>
+    </view>
+
+    <!-- rich-text 渲染 markdown -->
+    <rich-text nodes="{{isShowingNew ? streamingHtml : originalHtml}}"></rich-text>
+  </view>
+
+  <!-- 底部按钮组（固定） -->
+  <view class="action-btns">
+    <button class="btn-secondary" bindtap="copyContent" disabled="{{!originalTranslated && !streamingText}}">复制</button>
+    <button class="btn-tertiary" bindtap="removeCollect">取消收藏</button>
+    <button class="btn-primary" bindtap="regenerate" disabled="{{isRegenerating}}">{{isRegenerating ? '翻译中...' : '重新翻译'}}</button>
+  </view>
+</view>

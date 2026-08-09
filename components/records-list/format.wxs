@@ -1,0 +1,13 @@
+// components/records-list/format.wxs
+// WXS 时间格式化：模板里直接调 JS 方法会在每次渲染时重复执行，
+// 用 WXS 在渲染层完成，零额外开销。
+function formatTime(ts) {
+  if (!ts) return '';
+  var d = getDate(ts);
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+module.exports = {
+  formatTime: formatTime
+};
