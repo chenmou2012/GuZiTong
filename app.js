@@ -53,13 +53,24 @@ App({
   },
 
   // 静默登录：拉起 wx.login() 拿到 code → 换 openid/token → 拉取用户资料
-  // - 已有 token：仅刷新 userInfo（防止后端昵称变更后前端不一致）
+  // - 已有 token：刷新 userInfo；若 token 过期则清除并重新登录
   // - 无 token：完整登录流程
   // - 失败：仅 console.warn，不弹 toast、不阻塞 UI
   // 返回 Promise，便于 _autoSync 串行等待登录完成
   _silentLogin: function() {
     if (auth.checkLogin()) {
-      return auth.fetchUserInfo().catch((e) => log.warn('[auto login] refresh failed:', e.message));
+      return auth.fetchUserInfo()
+        .then((info) => {
+          if (info) return info;
+          // fetchUserInfo 遇到 401/旧版错误响应时会清除本地登录态。
+          return auth.login().then(() => auth.fetchUserInfo());
+        })
+        .then((info) => {
+          if (!info) throw new Error('重新登录后获取用户资料失败');
+          log.info('[auto login] refreshed, openid=' + auth.getOpenid());
+          return info;
+        })
+        .catch((e) => log.warn('[auto login] refresh failed:', e.message));
     }
     return auth.login()
       .then((res) => auth.fetchUserInfo())

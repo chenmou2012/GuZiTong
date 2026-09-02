@@ -8,6 +8,7 @@ import threading
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, Header, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Any
@@ -706,6 +707,11 @@ def _extract_token(authorization: str = None) -> str | None:
     return authorization
 
 
+def _auth_error(message: str = "无效的 token"):
+    """统一返回认证失败状态，避免客户端把错误 JSON 当成成功响应。"""
+    return JSONResponse(status_code=401, content={"error": message})
+
+
 class LoginRequest(BaseModel):
     code: str
 
@@ -828,7 +834,7 @@ async def get_user_info(authorization: str = Header(None)):
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         log_warning('[user] 无效 token')
-        return {"error": "无效的 token"}
+        return _auth_error()
 
     user = get_user_by_openid(openid)
     if not user:
@@ -854,7 +860,7 @@ async def update_user(
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         log_warning('[user] 无效 token')
-        return {"error": "无效的 token"}
+        return _auth_error()
 
     nickname = req.nickname if req else None
     avatar = req.avatar if req else None
@@ -869,7 +875,7 @@ async def get_user_data_api(authorization: str = Header(None), data_type: str = 
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         log_warning('[user] 无效 token')
-        return {"error": "无效的 token"}
+        return _auth_error()
 
     data = get_user_data(openid, data_type)
     return {"data": data}
@@ -893,7 +899,7 @@ async def save_user_data_api(
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         log_warning('[save_user_data] 无效 token')
-        return {"error": "无效的 token"}
+        return _auth_error()
 
     dt = req.data_type
     dk = req.data_key
@@ -944,7 +950,7 @@ async def create_ws_ticket_api(authorization: str = Header(None)):
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
         log_warning('[ws-ticket] 无效 token')
-        return {"error": "无效的 token"}
+        return _auth_error()
 
     ticket = create_ws_ticket(openid)
     return {"ticket": ticket, "expire_seconds": WS_TICKET_EXPIRE_SECONDS}
@@ -963,7 +969,7 @@ async def submit_feedback(authorization: str = Header(None), req: FeedbackReques
     token = _extract_token(authorization)
     openid, valid = verify_token(token) if token else (None, False)
     if not valid:
-        return {"error": "无效的 token"}
+        return _auth_error()
     if not req or not req.content or not req.content.strip():
         return {"error": "反馈内容不能为空"}
     user = get_user_by_openid(openid)

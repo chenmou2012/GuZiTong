@@ -99,7 +99,13 @@ def verify_token(token: str) -> tuple:
         if isinstance(expire_val, (int, float)):
             expire_time = datetime.fromtimestamp(expire_val)
         else:
-            expire_time = datetime.fromisoformat(str(expire_val))
+            # SQLite 的 TEXT 列会把旧数据中的 Unix 时间戳读成字符串，
+            # 例如 "1783999118.34697"。先按 ISO 解析，失败后兼容数字字符串。
+            expire_text = str(expire_val).strip()
+            try:
+                expire_time = datetime.fromisoformat(expire_text)
+            except ValueError:
+                expire_time = datetime.fromtimestamp(float(expire_text))
     except (ValueError, TypeError, OverflowError) as e:
         log_warning(f"[auth.verify_token] expire_time 解析失败: {e}")
         return None, False

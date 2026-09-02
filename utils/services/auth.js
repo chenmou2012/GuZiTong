@@ -68,6 +68,21 @@ function getToken() {
   return wx.getStorageSync(STORAGE_KEYS.TOKEN);
 }
 
+/** 清除本地登录态，不调用服务端（适用于 token 已失效的场景） */
+function clearLoginState() {
+  wx.removeStorageSync(STORAGE_KEYS.TOKEN);
+  wx.removeStorageSync(STORAGE_KEYS.OPENID);
+  wx.removeStorageSync(STORAGE_KEYS.USER_INFO);
+}
+
+function isAuthError(value) {
+  return !!value && (
+    value.statusCode === 401 ||
+    value.error === '无效的 token' ||
+    value.error === '未授权'
+  );
+}
+
 /**
  * 保存 token
  */
@@ -116,11 +131,16 @@ async function fetchUserInfo() {
       header: { 'Authorization': 'Bearer ' + token }
     });
 
-    if (response.error) return null;
+    if (response.error) {
+      if (isAuthError(response)) clearLoginState();
+      return null;
+    }
 
     setUserInfo(response);
     return response;
   } catch (e) {
+    if (isAuthError(e)) clearLoginState();
+    else throw e;
     return null;
   }
 }
@@ -224,21 +244,39 @@ async function saveUserData(dataType, dataKey, dataValue) {
  * @returns {Promise<string|null>} ticket 或 null（失败/未登录）
  */
 async function fetchWsTicket() {
-  const token = getToken();
+  let token = getToken();
   if (!token) return null;
 
-  try {
-    const response = await request('/api/ws-ticket', {
-      method: 'POST',
-      header: { 'Authorization': 'Bearer ' + token }
-    });
-    if (response && response.ticket) return response.ticket;
-    log.warn('fetchWsTicket: 响应无 ticket', response);
-    return null;
-  } catch (e) {
-    log.warn('fetchWsTicket failed:', e.message);
-    return null;
+  // 最多重登一次：覆盖用户在小程序长时间运行期间 token 过期的情况。
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await request('/api/ws-ticket', {
+        method: 'POST',
+        header: { 'Authorization': 'Bearer ' + token }
+      });
+      if (response && response.ticket) return response.ticket;
+      if (!isAuthError(response) || attempt > 0) {
+        log.warn('fetchWsTicket: 响应无 ticket', response);
+        return null;
+      }
+    } catch (e) {
+      if (!isAuthError(e) || attempt > 0) {
+        log.warn('fetchWsTicket failed:', e.message);
+        return null;
+      }
+    }
+
+    clearLoginState();
+    try {
+      await login();
+      token = getToken();
+      if (!token) return null;
+    } catch (e) {
+      log.warn('fetchWsTicket: 重新登录失败:', e.message);
+      return null;
+    }
   }
+  return null;
 }
 
 /**
@@ -309,7 +347,10 @@ function request(url, options = {}) {
         if (res.statusCode === 200) {
           resolve(res.data);
         } else {
-          reject(new Error('请求失败: ' + res.statusCode));
+          const error = new Error('请求失败: ' + res.statusCode);
+          error.statusCode = res.statusCode;
+          error.data = res.data;
+          reject(error);
         }
       },
       fail: (err) => {
@@ -323,6 +364,7 @@ module.exports = {
   login,
   checkLogin,
   getToken,
+  clearLoginState,
   setToken,
   getOpenid,
   setOpenid,
