@@ -247,7 +247,10 @@ Page({
     that._streamQuery = startStreamQuery({
       path: '/ws/query',
       tag: 'query',
-      throttleMode: 'frame',          // 查词对流畅度敏感，用帧级节流
+      // wx.nextTick 不是屏幕帧回调，高频 WebSocket 消息下仍会逐包 setData。
+      // 50ms 合并一次，给 Markdown 解析和 WXML 更新留出主线程余量。
+      throttleMode: 'interval',
+      throttleInterval: 50,
       idleTimeoutMs: 45000,           // GLM-4.5-Air 推理慢，idle 留更多时间
       connectWaitTimeoutMs: 30000,    // 首 token 可能 10-20s，留 30s 余量
       retryMessage: '查询超时，请重试',
