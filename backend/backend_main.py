@@ -482,10 +482,10 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
         try:
             request = json.loads(data)
         except json.JSONDecodeError:
-            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            await manager.send({'type': 'error', 'error': '消息格式错误'}, ws)
             return
         if not isinstance(request, dict):
-            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            await manager.send({'type': 'error', 'error': '消息格式错误'}, ws)
             return
         word = str(request.get('text', request.get('word', ''))).strip()
 
@@ -570,7 +570,7 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
             _runtime_stats["ai_errors"] += 1
             # 明确告知客户端失败，避免"显示完成但内容为空"的假象
             try:
-                await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
+                await manager.send({'type': 'error', 'error': 'AI 服务暂不可用，请重试'}, ws)
             except Exception:
                 pass
             stop_event.set()
@@ -585,7 +585,7 @@ async def ws_query(ws: WebSocket, ticket: str = None, token: str = None):
         # 兜底：非法消息等未预期异常不能静默断连，告知客户端后正常收尾
         log_error(f"[WS /ws/query] 未处理异常: {e}")
         try:
-            await manager.send({'type': 'error', 'message': '查询失败，请重试'}, ws)
+            await manager.send({'type': 'error', 'error': '查询失败，请重试'}, ws)
         except Exception:
             pass
     finally:
@@ -630,10 +630,10 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
         try:
             req = json.loads(data)
         except json.JSONDecodeError:
-            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            await manager.send({'type': 'error', 'error': '消息格式错误'}, ws)
             return
         if not isinstance(req, dict):
-            await manager.send({'type': 'error', 'message': '消息格式错误'}, ws)
+            await manager.send({'type': 'error', 'error': '消息格式错误'}, ws)
             return
         text = str(req.get('text', '')).strip()
 
@@ -676,7 +676,7 @@ async def ws_translate(ws: WebSocket, ticket: str = None, token: str = None):
             log_error(f"[翻译] AI 流式调用失败: {e}")
             _runtime_stats["ai_errors"] += 1
             try:
-                await manager.send({'type': 'error', 'message': 'AI 服务暂不可用，请重试'}, ws)
+                await manager.send({'type': 'error', 'error': 'AI 服务暂不可用，请重试'}, ws)
             except Exception:
                 pass
             stop_event.set()

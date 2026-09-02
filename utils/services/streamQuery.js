@@ -110,12 +110,14 @@ function startStreamQuery(opts) {
       }, connectWaitTimeoutMs);
     },
     onMessage: function(data) {
-      if (data.error) {
+      // 兼容旧后端的 message 字段；新协议统一使用 error。
+      const errorMessage = data.error || (data.type === 'error' && data.message);
+      if (errorMessage) {
         cleanup();
         wsClient.close();
         wx.hideLoading();
         finish();
-        errorUi.showRetryError(data.error, onRetry);
+        errorUi.showRetryError(errorMessage, onRetry);
         return;
       }
       if (data.type === 'start') {
