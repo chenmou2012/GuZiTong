@@ -5,8 +5,8 @@
     <text class="subtitle">已掌握 {{learnedCount}} 个词</text>
 
     <view class="stats-card">
-      <text class="stats-label">当前组别</text>
-      <text class="stats-value">第 {{groupIndex}} 组</text>
+      <text class="stats-label">已学完第 {{groupIndex}} 组</text>
+      <text class="stats-value">（共 {{totalGroups}} 组）</text>
     </view>
 
     <view class="btns">

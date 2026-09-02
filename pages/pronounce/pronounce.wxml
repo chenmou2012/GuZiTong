@@ -51,7 +51,7 @@
         <view class="item-main">
           <view class="item-line">
             <text class="item-py">{{item.pinyin}}</text>
-            <text class="item-sentence"><text wx:for="{{item.parts}}" wx:key="index" wx:for-item="p" class="{{p.bold ? 'b' : ''}}">{{p.text}}</text></text>
+            <text class="item-sentence"><text wx:for="{{item.parts}}" wx:key="key" wx:for-item="p" class="{{p.bold ? 'b' : ''}}">{{p.text}}</text></text>
           </view>
           <view class="item-meta">
             <text class="item-meaning">{{item.meaning}}</text>

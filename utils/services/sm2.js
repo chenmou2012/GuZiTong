@@ -71,10 +71,13 @@ function syncStatsToServer(stats) {
 // ==================== 串行写队列 (P1-9) ====================
 //
 // 并发问题：用户在 learn 页快速答题时，recordReview 会被连续调用。
-// setStates 是同步的（最后赢），但 syncWordStatesToServer 是 async fire-and-forget。
-// 网络往返时间不可控 → 后发请求可能先到服务端 → 服务端 last-write-wins 误判。
+// 本地落盘（wx.setStorageSync）本身是同步的、最后赢，因此每个调用立即写本地；
+// 网络同步是 async fire-and-forget，往返时间不可控 → 后发请求可能先到服务端
+// → 服务端 last-write-wins 误判。
 //
-// 解决方案：所有"写本地 + 同步服务端"打包成任务，串行执行。
+// 修复（2026-07）：队列只负责"网络同步"的顺序，不再包裹本地落盘。
+// 之前的实现把"读快照 + 落盘 + 同步"整体入队，同一 tick 内多次调用会各自读到
+// 旧快照，后面的写把前面的覆盖 → 批量 markWordLearned 只剩最后一个字。
 // 同时 syncWordStatesToServer 和 syncStatsToServer 之间也需保证顺序：
 // states 必须先于 stats（否则 stats 引用了尚未写盘的 states）。
 
@@ -100,11 +103,28 @@ function todayStr() {
   return new Date().toLocaleDateString('zh-CN');
 }
 
+function createNewState(word, now) {
+  return {
+    word: word,
+    ef: CONFIG.INITIAL_EF,
+    interval: 0,
+    repetition: 0,
+    phase: PHASE.LEARNING,
+    nextReviewAt: now,
+    learnedAt: now,
+    lastReviewedAt: 0,
+    totalReviews: 0,
+    correctCount: 0,
+    wrongCount: 0
+  };
+}
+
 function rollDailyStats(stats) {
   const today = todayStr();
   if (stats.lastReviewDate !== today) {
     stats.todayReview = 0;
     stats.todayDone = 0;
+    stats.todayLearn = 0;  // 跨天重置「今日学习」，避免越积越多
     if (stats.lastReviewDate) {
       const yesterday = new Date(Date.now() - DAY_MS).toLocaleDateString('zh-CN');
       stats.streakDays = (stats.lastReviewDate === yesterday) ? (stats.streakDays || 0) + 1 : 1;
@@ -126,62 +146,38 @@ function clampEf(ef) {
  * 已存在则返回现有状态；不存在则按"刚学完"初始化（rep=0, interval=0,
  * nextReviewAt=now，意味着立即可复习）。
  *
- * P1-9: 改用串行写队列，避免连续调用时 sync 乱序。
+ * 本地同步落盘：同 tick 内后续调用（含 recordReview）能立即读到新状态。
  */
 function getOrCreateState(word, now = Date.now()) {
   const states = getStates();
   if (states[word]) return states[word];
-
-  const state = {
-    word: word,
-    ef: CONFIG.INITIAL_EF,
-    interval: 0,
-    repetition: 0,
-    phase: PHASE.LEARNING,
-    nextReviewAt: now,
-    learnedAt: now,
-    lastReviewedAt: 0,
-    totalReviews: 0,
-    correctCount: 0,
-    wrongCount: 0
-  };
-  states[word] = state;
-  _enqueue(() => _writeWordStates(states));
-  return state;
+  states[word] = createNewState(word, now);
+  setStates(states);
+  return states[word];
 }
 
 /**
  * 标记字为已学（初始化 SM-2 状态）。幂等。
  *
- * P1-9: states 和 stats 必须严格按顺序串行写入，否则服务端可能先收到 stats
- * （它读本地 stats 快照）后收到 states，破坏数据一致性。
+ * 本地立即同步落盘（批量调用不会互相覆盖）；队列只负责把最终快照按顺序推到
+ * 服务端（states 先于 stats，避免服务端读到 stats 引用了未写盘的 states）。
  */
 function markWordLearned(word, now = Date.now()) {
   const states = getStates();
   if (states[word]) return states[word];
 
-  const state = {
-    word: word,
-    ef: CONFIG.INITIAL_EF,
-    interval: 0,
-    repetition: 0,
-    phase: PHASE.LEARNING,
-    nextReviewAt: now,         // 立即可复习
-    learnedAt: now,
-    lastReviewedAt: 0,
-    totalReviews: 0,
-    correctCount: 0,
-    wrongCount: 0
-  };
-  states[word] = state;
+  states[word] = createNewState(word, now);
+  setStates(states); // 同步落盘：同一 tick 多次调用各自读到最新值
 
   const stats = rollDailyStats(getStats());
   stats.todayLearn = (stats.todayLearn || 0) + 1;
   stats.lastReviewDate = todayStr();
+  setStats(stats);
 
-  _enqueue(() => _writeWordStates(states).then(() => _writeStats(stats)));
+  // 本地已同步落盘，队列任务只做网络同步（避免执行时用旧快照回退本地）
+  _enqueue(() => syncWordStatesToServer(states).then(() => syncStatsToServer(stats)));
 
-  return state;
+  return states[word];
 }
 
 /**
@@ -228,6 +224,7 @@ function recordReview(word, quality, now = Date.now()) {
   state.totalReviews += 1;
 
   states[word] = state;
+  setStates(states); // 同步落盘
 
   // 同步复习统计
   const stats = rollDailyStats(getStats());
@@ -239,11 +236,59 @@ function recordReview(word, quality, now = Date.now()) {
     stats.todayDone += 1;
     stats.totalCorrect += 1;
   }
+  setStats(stats);
 
-  // P1-9: states 先于 stats 串行写入（即便服务端读到中间态也不会数据错位）
-  _enqueue(() => _writeWordStates(states).then(() => _writeStats(stats)));
+  // 队列只负责网络同步：states 先于 stats 串行推送
+  _enqueue(() => syncWordStatesToServer(states).then(() => syncStatsToServer(stats)));
 
   return state;
+}
+
+/**
+ * 按字合并本地/云端 wordStates：同字取 lastReviewedAt（兜底 learnedAt）更新的一方，
+ * 单边存在的字直接保留。用于同步时避免"旧云端覆盖新本地"或"空本地覆盖云端"。
+ */
+function mergeWordStates(local, cloud) {
+  const merged = {};
+  const words = new Set([...Object.keys(local || {}), ...Object.keys(cloud || {})]);
+  for (const word of words) {
+    const l = local[word];
+    const c = cloud[word];
+    if (!l) { merged[word] = c; continue; }
+    if (!c) { merged[word] = l; continue; }
+    const lTime = l.lastReviewedAt || l.learnedAt || 0;
+    const cTime = c.lastReviewedAt || c.learnedAt || 0;
+    merged[word] = lTime >= cTime ? l : c;
+  }
+  return merged;
+}
+
+/**
+ * 合并本地/云端 reviewStats：统计为聚合值，无法精确回溯，取两边较大值，
+ * 保证任何一边的进度都不会被静默抹掉。
+ */
+function mergeReviewStats(local, cloud) {
+  const l = local || {};
+  const c = cloud || {};
+  const total = (s) => (s.totalCorrect || 0) + (s.totalWrong || 0);
+  const base = total(c) > total(l) ? c : l;
+  return {
+    todayReview: Math.max(l.todayReview || 0, c.todayReview || 0),
+    todayDone: Math.max(l.todayDone || 0, c.todayDone || 0),
+    todayLearn: Math.max(l.todayLearn || 0, c.todayLearn || 0),
+    streakDays: Math.max(l.streakDays || 0, c.streakDays || 0),
+    lastReviewDate: base.lastReviewDate || l.lastReviewDate || c.lastReviewDate || null,
+    totalCorrect: Math.max(l.totalCorrect || 0, c.totalCorrect || 0),
+    totalWrong: Math.max(l.totalWrong || 0, c.totalWrong || 0)
+  };
+}
+
+/**
+ * 把本地最新的 wordStates + reviewStats 推到服务端（先 states 后 stats）。
+ * fullSync 在"拉取合并"完成后调用，保证云端与本地一致。
+ */
+function pushToServer() {
+  return _enqueue(() => _writeWordStates(getStates()).then(() => _writeStats(getStats())));
 }
 
 /**
@@ -301,10 +346,11 @@ async function restoreFromServer() {
     const data = await auth.getUserData('learn');
     if (!data) return null;
 
+    // 合并而非覆盖：同一字取 lastReviewedAt 更新的一方，防止旧云端覆盖新本地
     if (data.wordStates) {
       const states = typeof data.wordStates === 'string' ? JSON.parse(data.wordStates) : data.wordStates;
       if (states && typeof states === 'object') {
-        wx.setStorageSync('wordStates', states);
+        wx.setStorageSync('wordStates', mergeWordStates(getStates(), states));
       }
     }
 
@@ -313,7 +359,7 @@ async function restoreFromServer() {
       if (stats && typeof stats === 'object') {
         // 兼容老数据：剥离 ebbinghausStage
         delete stats.ebbinghausStage;
-        wx.setStorageSync('reviewStats', stats);
+        wx.setStorageSync('reviewStats', mergeReviewStats(getStats(), stats));
       }
     }
 
@@ -419,6 +465,9 @@ module.exports = {
   // 同步与迁移
   restoreFromServer,
   migrateLegacyData,
+  pushToServer,
+  mergeWordStates,
+  mergeReviewStats,
   // 统计
   getEbbinghausStats
 };

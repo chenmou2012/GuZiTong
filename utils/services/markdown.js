@@ -84,6 +84,10 @@ function parseMarkdown(markdown) {
     const flushMeaning = () => {
       if (currentMeaning.trim()) {
         result.meanings.push({
+          // 稳定 id：以 push 顺序生成。流式全量重解析时同一义项保持同一 id，
+          // 让 WXML 的 wx:key 复用节点（内容原地更新），避免 key 随释义内容变化
+          // 导致节点反复重建、进入动画重放（卡片闪烁看不清）。
+          id: 'm' + result.meanings.length,
           pos: currentPos,
           meaning: currentMeaning.trim(),
           example: currentExample.trim(),

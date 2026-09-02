@@ -20,7 +20,13 @@ Page({
   },
 
   refresh: function() {
-    this.setData({ collections: storage.getCollections() });
+    const list = storage.getCollections().map(item => ({
+      ...item,
+      _key: item.word,
+      // 列表只渲染预览，完整结果在收藏详情页从 storage 读取
+      result: storage.previewText(item.result)
+    }));
+    this.setData({ collections: list });
   },
 
   onItemTap(e) {
@@ -43,9 +49,7 @@ Page({
       content: '确定清空所有收藏？',
       success: (res) => {
         if (res.confirm) {
-          // 逐条删除（storage 无 clearCollections，循环调用 removeCollection）
-          const list = storage.getCollections();
-          list.forEach(item => storage.removeCollection(item.word));
+          storage.clearCollections();
           this.refresh();
           wx.showToast({ title: '已清空', icon: 'success' });
         }

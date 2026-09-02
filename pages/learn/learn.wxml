@@ -78,7 +78,7 @@
       <view class="intro-word-item" wx:if="{{groupWords[introIndex]}}">
         <text class="intro-word">{{groupWords[introIndex].word}}</text>
         <view class="intro-meanings-list">
-          <block wx:for="{{groupWords[introIndex].meanings}}" wx:for-item="m" wx:key="index">
+          <block wx:for="{{groupWords[introIndex].meanings}}" wx:for-item="m" wx:key="meaning">
             <view class="intro-meaning-item">
               <text class="meaning-number">{{index + 1}}.</text>
               <text class="meaning-text">{{m.meaning}}</text>
@@ -90,13 +90,11 @@
 
     <!-- 展示环节底部固定导航栏 -->
     <view wx:if="{{phase === 'intro'}}" class="intro-nav-bar">
-      <view class="intro-nav-inner">
-        <button class="intro-nav-btn btn-prev" bindtap="prevIntro" wx:if="{{introIndex > 0}}">上一个</button>
-        <button class="intro-nav-btn btn-next" bindtap="nextIntro" wx:if="{{introIndex < groupSize - 1}}">下一个</button>
-        <button class="intro-nav-btn action-btn start-btn" bindtap="startPractice" wx:if="{{introIndex === groupSize - 1}}">
-          <text class="action-btn-text">开始练习</text>
-        </button>
-      </view>
+      <button class="intro-nav-btn btn-prev" bindtap="prevIntro" wx:if="{{introIndex > 0}}">上一个</button>
+      <button class="intro-nav-btn btn-next" bindtap="nextIntro" wx:if="{{introIndex < groupSize - 1}}">下一个</button>
+      <button class="intro-nav-btn action-btn start-btn" bindtap="startPractice" wx:if="{{introIndex === groupSize - 1}}">
+        <text class="action-btn-text">开始练习</text>
+      </button>
     </view>
 
     <!-- 练习环节 -->
@@ -117,7 +115,7 @@
         <!-- 题目 -->
         <view class="main-card">
           <view wx:if="{{quizType === 'sentence_meaning' && sentenceParts}}" class="quote-text">
-            <text wx:for="{{sentenceParts}}" wx:key="index" wx:for-item="part" class="{{part.isBold ? 'bold-word' : ''}}">{{part.text}}</text>
+            <text wx:for="{{sentenceParts}}" wx:key="key" wx:for-item="part" class="{{part.isBold ? 'bold-word' : ''}}">{{part.text}}</text>
           </view>
           <view wx:elif="{{quizType === 'sentence_meaning'}}" class="quote-text">{{quiz.sentence}}</view>
           <view wx:else class="quote-text">{{quiz.word}}</view>

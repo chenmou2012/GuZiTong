@@ -41,9 +41,14 @@ Page({
   },
 
   onLoad: function() {
-    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
-    this.checkLogin();
-    this.loadSettings();
+    try {
+      this.setData({ statusBarHeight: getApp().globalData.statusBarHeight });
+      this.checkLogin();
+      this.loadSettings();
+    } catch (e) {
+      // 静默兜底：loadStats 等可能因 storage 数据异常失败
+      console.error('[profile.onLoad] failed:', e);
+    }
   },
 
   loadSettings: function() {
@@ -71,17 +76,27 @@ Page({
   },
 
   onShow: function() {
-    this.checkLogin();
-    this.loadSettings();
-    this.loadStats();
-    // 防并发：连续 tab 切换可能产生多个并发的 restoreFromServer，
-    // 用序号拒绝陈旧回调，避免后发请求覆盖前者造成"旧数据刷新 UI"。
-    if (this._onShowSeq === undefined) this._onShowSeq = 0;
-    const seq = ++this._onShowSeq;
-    storage.restoreFromServer().then(() => {
-      if (seq !== this._onShowSeq) return;
+    try {
+      this.checkLogin();
+      this.loadSettings();
       this.loadStats();
-    });
+      // 防并发：连续 tab 切换可能产生多个并发的 restoreFromServer，
+      // 用序号拒绝陈旧回调，避免后发请求覆盖前者造成"旧数据刷新 UI"。
+      if (this._onShowSeq === undefined) this._onShowSeq = 0;
+      const seq = ++this._onShowSeq;
+      storage.restoreFromServer().then(() => {
+        if (seq !== this._onShowSeq) return;
+        try {
+          this.loadStats();
+        } catch (e) {
+          console.error('[profile.onShow.loadStats] failed:', e);
+        }
+      }).catch((e) => {
+        console.error('[profile.onShow.restoreFromServer] failed:', e);
+      });
+    } catch (e) {
+      console.error('[profile.onShow] failed:', e);
+    }
   },
 
   checkLogin: function() {
@@ -265,6 +280,10 @@ Page({
 
   goTranslations: function() {
     wx.navigateTo({ url: '/pages/translations/translations' });
+  },
+
+  goFeedback: function() {
+    wx.navigateTo({ url: '/pages/feedback/feedback' });
   },
 
   viewAbout: function() {

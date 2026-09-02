@@ -3,6 +3,7 @@ Page({
   data: {
     statusBarHeight: 20,
     groupIndex: 0,
+    totalGroups: 0,
     learnedCount: 0
   },
 
@@ -10,12 +11,20 @@ Page({
     this.setData({
       statusBarHeight: getApp().globalData.statusBarHeight,
       groupIndex: parseInt(options.groupIndex || 0) + 1,
+      totalGroups: parseInt(options.totalGroups || 0),
       learnedCount: parseInt(options.count || 0)
     });
   },
 
-  // 继续下一组
+  // 继续下一组：告诉 learn "直接开始下一组"，然后 navigateBack
   continueNext: function() {
+    const app = getApp();
+    app.globalData = app.globalData || {};
+    // groupdone 的 groupIndex 是 1-based（已完成那一组），learn 内部要 0-based
+    app.globalData.pendingContinue = {
+      action: 'next',
+      groupIndex: this.data.groupIndex - 1
+    };
     wx.navigateBack();
   },
 

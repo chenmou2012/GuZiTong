@@ -16,8 +16,8 @@
   <view class="word-grid">
     <view
       class="word-item"
-      wx:for="{{filteredWords}}"
-      wx:key="index"
+      wx:for="{{visibleWords}}"
+      wx:key="*this"
       bindtap="onWordTap"
       data-word="{{item}}"
     >

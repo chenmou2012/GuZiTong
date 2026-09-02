@@ -14,8 +14,12 @@
     list="{{history}}"
     title-field="word"
     subtitle-field="content"
+    extra-field="fromCache"
+    action-label="重查"
+    action-event="action"
     empty-text="还没有查过词，快去试试吧"
     bind:itemtap="onItemTap"
+    bind:action="onItemAction"
     bind:itemdelete="onItemDelete"
     bind:clearall="onClearAll"
   />

@@ -28,18 +28,19 @@ function buildSrc(item, voiceKey) {
 
 // 把例句中的目标字加粗
 function boldWord(sentence, word) {
-  if (!sentence || !word) return [{ text: sentence || '', bold: false }];
+  if (!sentence || !word) return [{ text: sentence || '', bold: false, key: 0 }];
   const parts = [];
   let last = 0;
   let idx = sentence.indexOf(word, last);
+  let key = 0;
   while (idx !== -1) {
-    if (idx > last) parts.push({ text: sentence.slice(last, idx), bold: false });
-    parts.push({ text: word, bold: true });
+    if (idx > last) parts.push({ text: sentence.slice(last, idx), bold: false, key: key++ });
+    parts.push({ text: word, bold: true, key: key++ });
     last = idx + word.length;
     idx = sentence.indexOf(word, last);
   }
-  if (last < sentence.length) parts.push({ text: sentence.slice(last), bold: false });
-  return parts.length ? parts : [{ text: sentence, bold: false }];
+  if (last < sentence.length) parts.push({ text: sentence.slice(last), bold: false, key: key++ });
+  return parts.length ? parts : [{ text: sentence, bold: false, key: 0 }];
 }
 
 Page({
@@ -131,6 +132,12 @@ Page({
   },
 
   initAudio: function () {
+    // 静音键模式下仍播放跟读音（学习场景需要）
+    try {
+      wx.setInnerAudioOption({ obeyMuteSwitch: false });
+    } catch (e) {
+      log.warn('setInnerAudioOption failed:', e);
+    }
     this.audio = wx.createInnerAudioContext();
     this.audio.onEnded(() => this.setData({ playingKey: '' }));
     this.audio.onStop(() => this.setData({ playingKey: '' }));

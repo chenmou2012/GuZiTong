@@ -7234,44 +7234,6 @@ module.exports = [
     ]
   },
   {
-    "word": "为",
-    "type": "select_meanings",
-    "options": [
-      {
-        "text": "观赏",
-        "correct": false
-      },
-      {
-        "text": "是",
-        "correct": true
-      },
-      {
-        "text": "作为，当作",
-        "correct": true
-      },
-      {
-        "text": "变成，成为",
-        "correct": true
-      },
-      {
-        "text": "做，干",
-        "correct": true
-      },
-      {
-        "text": "牵，拉",
-        "correct": false
-      },
-      {
-        "text": "雕刻，制作，制造",
-        "correct": true
-      },
-      {
-        "text": "为了",
-        "correct": true
-      }
-    ]
-  },
-  {
     "word": "委",
     "type": "sentence_meaning",
     "sentence": "委而去之，是地利不如人和",

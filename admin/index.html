@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>古字通 · 管理后台</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ========== 登录视图 ========== -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">古</div>
+    <h1 class="login-title">古字通管理后台</h1>
+    <p class="login-sub">实时监控 · 用户管理 · 反馈处理 · 数据统计</p>
+    <input id="adminPwd" type="password" class="login-input" placeholder="请输入管理员密码" autocomplete="current-password">
+    <button id="loginBtn" class="btn btn-primary btn-block">登 录</button>
+    <div id="loginErr" class="login-err"></div>
+  </div>
+</div>
+
+<!-- ========== 主视图 ========== -->
+<div id="appView" class="app hidden">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">古</span>
+      <span class="topbar-title">古字通管理后台</span>
+      <span id="serverDot" class="server-dot"></span>
+      <span id="serverStatus" class="server-status">检测中</span>
+    </div>
+    <div class="topbar-right">
+      <span id="lastRefresh" class="last-refresh"></span>
+      <button id="logoutBtn" class="btn btn-ghost">退出</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="monitor">实时监控</button>
+    <button class="tab" data-tab="users">用户管理</button>
+    <button class="tab" data-tab="feedbacks">用户反馈<span id="feedbackBadge" class="badge hidden"></span></button>
+    <button class="tab" data-tab="stats">数据统计</button>
+  </nav>
+
+  <main class="content">
+
+    <!-- ===== 监控 ===== -->
+    <section id="tab-monitor" class="tab-panel active">
+      <div class="panel-head">
+        <h2>实时监控</h2>
+        <div class="panel-actions">
+          <label class="switch"><input type="checkbox" id="autoRefresh" checked><span>自动刷新（10s）</span></label>
+          <button id="refreshMonitor" class="btn btn-ghost btn-sm">立即刷新</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>服务状态</h3>
+          <div id="monService" class="kv">
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w60"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w40"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>数据库</h3>
+          <div id="monDb" class="kv">
+            <div class="skeleton-line w60"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w60"></div>
+            <div class="skeleton-line w80"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>运行活动</h3>
+          <div id="monActivity" class="kv">
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w40"></div>
+            <div class="skeleton-line w60"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>请求计数（自启动）</h3>
+          <div id="monCounters" class="kv">
+            <div class="skeleton-line w60"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w40"></div>
+            <div class="skeleton-line w60"></div>
+          </div>
+        </div>
+        <div class="card card-chart">
+          <h3>近 24 小时请求分布</h3>
+          <div id="chart24h" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 用户 ===== -->
+    <section id="tab-users" class="tab-panel">
+      <div class="panel-head">
+        <h2>用户管理</h2>
+        <button id="refreshUsers" class="btn btn-ghost btn-sm">刷新</button>
+      </div>
+      <div class="card card-flat">
+        <table class="table">
+          <thead>
+            <tr><th>昵称</th><th>openid</th><th>注册时间</th><th>操作</th></tr>
+          </thead>
+          <tbody id="userTbody">
+            <tr><td><div class="skeleton-line w40"></div></td><td><div class="skeleton-line w100"></div></td><td><div class="skeleton-line w60"></div></td><td><div class="skeleton-line w40"></div></td></tr>
+            <tr><td><div class="skeleton-line w40"></div></td><td><div class="skeleton-line w100"></div></td><td><div class="skeleton-line w60"></div></td><td><div class="skeleton-line w40"></div></td></tr>
+            <tr><td><div class="skeleton-line w40"></div></td><td><div class="skeleton-line w100"></div></td><td><div class="skeleton-line w60"></div></td><td><div class="skeleton-line w40"></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <button id="userPrev" class="btn btn-ghost btn-sm">上一页</button>
+          <span id="userPageInfo" class="pager-info"></span>
+          <button id="userNext" class="btn btn-ghost btn-sm">下一页</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 反馈 ===== -->
+    <section id="tab-feedbacks" class="tab-panel">
+      <div class="panel-head">
+        <h2>用户反馈</h2>
+        <div class="panel-actions">
+          <div id="fbFilters" class="filter-group">
+            <button class="filter active" data-status="">全部</button>
+            <button class="filter" data-status="new">新反馈</button>
+            <button class="filter" data-status="processing">处理中</button>
+            <button class="filter" data-status="done">已完成</button>
+          </div>
+          <span class="muted">自动刷新 15s</span>
+        </div>
+      </div>
+      <div id="fbList" class="fb-list">
+        <div class="skeleton-card"><div class="skeleton-line w40"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></div>
+        <div class="skeleton-card"><div class="skeleton-line w40"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></div>
+      </div>
+      <div class="pager">
+        <button id="fbPrev" class="btn btn-ghost btn-sm">上一页</button>
+        <span id="fbPageInfo" class="pager-info"></span>
+        <button id="fbNext" class="btn btn-ghost btn-sm">下一页</button>
+      </div>
+    </section>
+
+    <!-- ===== 统计 ===== -->
+    <section id="tab-stats" class="tab-panel">
+      <div class="panel-head">
+        <h2>数据统计</h2>
+        <button id="refreshStats" class="btn btn-ghost btn-sm">刷新</button>
+      </div>
+      <div class="grid">
+        <div class="card"><h3>用户</h3><div id="stUsers" class="big-num">-</div></div>
+        <div class="card"><h3>有学习记录的用户</h3><div id="stLearners" class="big-num">-</div></div>
+        <div class="card"><h3>已学词条总数</h3><div id="stWords" class="big-num">-</div></div>
+        <div class="card"><h3>查词次数</h3><div id="stQueries" class="big-num">-</div></div>
+        <div class="card"><h3>翻译次数</h3><div id="stTranslations" class="big-num">-</div></div>
+        <div class="card"><h3>反馈总数</h3><div id="stFeedbacks" class="big-num">-</div></div>
+      </div>
+
+      <div class="grid chart-grid">
+        <div class="card card-chart">
+          <h3>近 30 天注册趋势</h3>
+          <div id="chartReg" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>近 14 天活跃趋势（登录）</h3>
+          <div id="chartActive" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>查词 / 翻译趋势（近 14 天）</h3>
+          <div id="chartUsage" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>学习进度分布（按词条）</h3>
+          <div id="chartPhase" class="chart chart-donut"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>24 小时活跃分布（近 14 天）</h3>
+          <div id="chartHours" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>活跃热力图（近 7 天 × 24 小时）</h3>
+          <div id="chartHeatmap" class="chart"><div class="skeleton-line w80"></div></div>
+        </div>
+        <div class="card card-chart">
+          <h3>反馈状态分布</h3>
+          <div id="chartFbStatus" class="chart chart-donut"><div class="skeleton-line w80"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== 用户详情弹层 ===== -->
+<div id="userDetailModal" class="modal hidden">
+  <div class="modal-mask" data-close="udmodal"></div>
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <div>
+        <h3 id="udTitle">用户详情</h3>
+        <div id="udOpenid" class="ud-openid"></div>
+      </div>
+      <div class="modal-head-actions">
+        <button id="udRawBtn" class="btn btn-ghost btn-sm">原始数据</button>
+        <button class="modal-close" data-close="udmodal">×</button>
+      </div>
+    </div>
+    <div id="udBody" class="modal-body ud-body">
+      <div class="skeleton-line w80"></div>
+      <div class="skeleton-line w60"></div>
+      <div class="skeleton-line w100"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 用户数据弹层 ===== -->
+<div id="userDataModal" class="modal hidden">
+  <div class="modal-mask" data-close="modal"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>用户数据</h3>
+      <button class="modal-close" data-close="modal">×</button>
+    </div>
+    <pre id="userDataBody" class="modal-body"></pre>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

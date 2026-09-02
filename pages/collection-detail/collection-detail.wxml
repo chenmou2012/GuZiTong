@@ -5,25 +5,56 @@
     <text class="back-text">‹ 返回</text>
   </view>
 
-  <!-- 标题：被收藏的字 -->
+  <!-- 标题：被收藏的字 + 收藏时间戳 -->
   <view class="page-header">
     <text class="page-title">{{word}}</text>
-    <text class="page-subtitle">收藏内容</text>
-  </view>
-
-  <!-- 结果区：流式中显示新结果，否则显示原收藏 -->
-  <view class="result-area">
-    <view wx:if="{{isShowingNew}}" class="result-label">正在生成新结果...</view>
-    <view wx:else class="result-label">{{isRegenerating ? '查询中...' : '已收藏的释义'}}</view>
-
-    <view class="result-content">
-      <rich-text nodes="{{isShowingNew ? streamingHtml : originalHtml}}"></rich-text>
+    <view class="page-subtitle-row">
+      <text class="page-subtitle">收藏内容</text>
+      <view class="subtitle-divider"></view>
+      <text wx:if="{{collectedAtShort}}" class="collected-at">{{collectedAtShort}}</text>
     </view>
   </view>
 
-  <!-- 加载指示 -->
-  <view wx:if="{{isRegenerating}}" class="loading-indicator">
-    <text class="loading-text">{{isShowingNew ? '正在解读...' : '等待响应...'}}</text>
+  <!-- 结果区 -->
+  <view class="result-area">
+    <!-- 状态标签：流式中 -->
+    <view wx:if="{{isShowingNew}}" class="result-label streaming">
+      <text class="result-label-dot"></text>
+      <text>正在生成新结果…</text>
+    </view>
+    <view wx:else class="result-label">
+      <text class="result-label-dot static"></text>
+      <text>{{isRegenerating ? '查询中…' : '已收藏的释义'}}</text>
+    </view>
+
+    <!-- 结构化渲染：读音 + 义项卡片（与查词页一致） -->
+    <block wx:if="{{displayParsed && displayParsed.meanings.length > 0}}">
+      <view wx:if="{{displayParsed.pinyin}}" class="result-pinyin">
+        <text class="pinyin-text">{{displayParsed.pinyin}}</text>
+      </view>
+      <view class="definitions-list">
+        <view class="definition-item" wx:for="{{displayParsed.meanings}}" wx:key="id" wx:for-item="m">
+          <view class="definition-label-row">
+            <text class="definition-label">{{index + 1}}.</text>
+            <view class="definition-meaning">
+              <text wx:if="{{m.pos}}" class="definition-pos">[{{m.pos}}]</text>
+              <text>{{m.meaning}}</text>
+            </view>
+          </view>
+          <view wx:if="{{m.example}}" class="examples-section">
+            <view class="example-item">
+              <text class="example-sentence">{{m.example}}</text>
+              <text wx:if="{{m.source}}" class="example-source">（{{m.source}}）</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- fallback：AI 输出不符合结构化模板时用 markdownToHtml -->
+    <block wx:else>
+      <rich-text nodes="{{isShowingNew ? streamingHtml : originalHtml}}"></rich-text>
+    </block>
   </view>
 
   <!-- 底部按钮组 -->

@@ -360,6 +360,59 @@ button::after {
   border-color: #bc262e;
 }
 
+/* 展示环节底部固定导航栏：与练习环节 result-btns 位置/风格统一 */
+.intro-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 30rpx;
+  background: #FDFBF7;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.intro-nav-btn {
+  flex: 1;
+  padding: 24rpx 0;
+  background: #fff;
+  color: #2C3E50;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: 2rpx solid #e0e0e0;
+  line-height: 1.4;
+}
+
+.intro-nav-btn:active {
+  background: #fafafa;
+  transform: scale(0.98);
+}
+
+/* "开始练习"按钮样式与练习环节 next-btn 对齐 */
+.intro-nav-btn.action-btn.start-btn {
+  background: #bc262e;
+  color: #fff;
+  border-color: #bc262e;
+}
+
+.intro-nav-btn.action-btn.start-btn:active {
+  background: #991b1b;
+}
+
+/* "下一个"为主推进按钮，红色高亮（与练习环节 next-btn 一致） */
+.intro-nav-btn.btn-next {
+  background: #bc262e;
+  color: #fff;
+  border-color: #bc262e;
+}
+
+.intro-nav-btn.btn-next:active {
+  background: #991b1b;
+}
+
 /* ============ 学习态：练习环节（practice） ============ */
 
 .practice-phase {

@@ -1,79 +1,306 @@
 /* pages/collection-detail/collection-detail.wxss */
+/* 设计方向：「古籍善本」—— 沉稳的米色书页、朱砂印章点缀、楷体大字与分明的义项卡片 */
+
+page {
+  /* 米色书页底，带极淡竖向渐变模拟纸张纹理 */
+  background: linear-gradient(180deg, #FDFBF7 0%, #F8F2E8 100%);
+  background-attachment: fixed;
+}
 
 .container {
   min-height: 100vh;
-  background-color: #FDFBF7;
-  padding: 20rpx 30rpx 200rpx;
+  padding: 20rpx 30rpx 220rpx;
   box-sizing: border-box;
 }
 
+/* 返回按钮 */
 .back-btn {
   position: fixed;
   top: calc(20rpx + {{statusBarHeight}}px);
   left: 20rpx;
   z-index: 100;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8rpx);
+  border-radius: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.08);
 }
 
 .back-text {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: #B91C1C;
+  letter-spacing: 2rpx;
 }
 
+/* 顶部页头 */
 .page-header {
-  padding: 24rpx 0 30rpx;
+  padding: 32rpx 0 36rpx;
   text-align: center;
+  position: relative;
+}
+
+/* 顶部朱砂分隔线 —— 模拟古籍版心的「鱼尾」装饰 */
+.page-header::before {
+  content: '';
+  display: block;
+  width: 60rpx;
+  height: 6rpx;
+  margin: 0 auto 24rpx;
+  background: linear-gradient(90deg, transparent, #B91C1C 50%, transparent);
+  border-radius: 3rpx;
 }
 
 .page-title {
-  font-size: 56rpx;
+  display: block;
+  font-size: 88rpx;
   color: #2C3E50;
   font-weight: bold;
-  font-family: 'STKaiti', 'KaiTi', serif;
-  letter-spacing: 8rpx;
+  font-family: 'STKaiti', 'KaiTi', 'STSong', 'SimSun', serif;
+  letter-spacing: 12rpx;
+  line-height: 1.1;
+  text-indent: 12rpx; /* 抵消 letter-spacing 造成的视觉偏移 */
+}
+
+/* 副标题行：左侧「收藏内容」+ 竖线 + 右侧时间 */
+.page-subtitle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 18rpx;
+  padding: 6rpx 22rpx;
+  background: rgba(185, 28, 28, 0.04);
+  border-radius: 24rpx;
 }
 
 .page-subtitle {
-  display: block;
-  font-size: 22rpx;
-  color: #999;
-  margin-top: 8rpx;
-  letter-spacing: 4rpx;
-}
-
-.result-area {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 32rpx 28rpx;
-  margin: 24rpx 0;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
-  min-height: 400rpx;
-}
-
-.result-label {
   font-size: 22rpx;
   color: #B91C1C;
-  letter-spacing: 2rpx;
-  margin-bottom: 20rpx;
-  padding-bottom: 12rpx;
-  border-bottom: 1rpx solid #f0e8df;
+  letter-spacing: 6rpx;
+  font-weight: 500;
 }
 
-.result-content {
+.subtitle-divider {
+  width: 1rpx;
+  height: 20rpx;
+  background: rgba(185, 28, 28, 0.25);
+}
+
+.collected-at {
+  font-size: 22rpx;
+  color: #888;
+  letter-spacing: 1rpx;
+  font-feature-settings: 'tnum'; /* 等宽数字 */
+}
+
+/* 结果卡片容器 */
+.result-area {
+  background: #FFFEFB;
+  border-radius: 20rpx;
+  padding: 36rpx 32rpx 40rpx;
+  margin: 24rpx 0;
+  box-shadow:
+    0 2rpx 8rpx rgba(0, 0, 0, 0.04),
+    0 12rpx 32rpx rgba(120, 80, 40, 0.06);
+  position: relative;
+  /* 极淡的竖向纹理模拟宣纸 */
+  background-image:
+    linear-gradient(180deg, rgba(255, 254, 251, 0) 0%, rgba(248, 240, 226, 0.3) 100%);
+}
+
+/* 状态标签：流式 / 静态 */
+.result-label {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 22rpx;
+  color: #999;
+  letter-spacing: 4rpx;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx dashed rgba(185, 28, 28, 0.15);
+}
+
+.result-label.streaming {
+  color: #B91C1C;
+}
+
+.result-label-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
+}
+
+.result-label-dot.static {
+  background: rgba(185, 28, 28, 0.4);
+  box-shadow: 0 0 0 4rpx rgba(185, 28, 28, 0.08);
+}
+
+/* 流式中：朱砂红点 + 脉冲动画 */
+.result-label.streaming .result-label-dot {
+  background: #B91C1C;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10rpx rgba(185, 28, 28, 0);
+  }
+}
+
+/* 读音 */
+.result-pinyin {
+  margin-bottom: 24rpx;
+  padding: 16rpx 22rpx;
+  background: linear-gradient(90deg, rgba(185, 28, 28, 0.05), rgba(185, 28, 28, 0.02));
+  border-left: 4rpx solid #B91C1C;
+  border-radius: 0 8rpx 8rpx 0;
+}
+
+.pinyin-text {
+  font-size: 30rpx;
+  color: #5D4037;
+  letter-spacing: 6rpx;
+  font-weight: 500;
+}
+
+/* 义项列表 */
+.definitions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.definition-item {
+  position: relative;
+  padding: 24rpx 24rpx 24rpx 28rpx;
+  background: #FCF9F2;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(185, 28, 28, 0.08);
+  transition: transform 0.2s ease;
+}
+
+/* 左侧朱砂竖条 —— 模拟古籍「朱丝栏」 */
+.definition-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16rpx;
+  bottom: 16rpx;
+  width: 4rpx;
+  background: linear-gradient(180deg, #B91C1C 0%, rgba(185, 28, 28, 0.3) 100%);
+  border-radius: 0 2rpx 2rpx 0;
+}
+
+.definition-label-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+/* 序号：仿印章（朱底白字，方块） */
+.definition-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 8rpx;
+  font-size: 22rpx;
+  color: #FFFEFB;
+  background: #B91C1C;
+  border-radius: 6rpx;
+  font-weight: bold;
+  font-feature-settings: 'tnum';
+  margin-top: 2rpx;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+
+.definition-meaning {
+  flex: 1;
+  font-size: 30rpx;
+  color: #2C3E50;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  letter-spacing: 1rpx;
+}
+
+.definition-pos {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #B91C1C;
+  font-weight: 600;
+  margin-right: 10rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(185, 28, 28, 0.08);
+  border-radius: 6rpx;
+}
+
+/* 例句 */
+.examples-section {
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8rpx;
+  border-left: 2rpx solid rgba(185, 28, 28, 0.2);
+}
+
+.example-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.example-sentence {
+  font-size: 26rpx;
+  color: #5D4037;
+  font-style: italic;
+  line-height: 1.6;
+  font-family: 'STKaiti', 'KaiTi', serif;
+}
+
+.example-source {
+  font-size: 22rpx;
+  color: #999;
+  letter-spacing: 1rpx;
+}
+
+/* rich-text fallback 样式 */
+rich-text {
   font-size: 28rpx;
   line-height: 1.8;
   color: #2C3E50;
 }
 
-.loading-indicator {
-  text-align: center;
-  padding: 20rpx 0;
-}
-
-.loading-text {
-  font-size: 24rpx;
+rich-text h2 {
+  font-size: 30rpx;
   color: #B91C1C;
+  margin: 24rpx 0 12rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
 }
 
+rich-text h2:first-child {
+  margin-top: 0;
+}
+
+rich-text p {
+  margin: 8rpx 0;
+}
+
+rich-text strong {
+  color: #B91C1C;
+  font-weight: bold;
+}
+
+/* 底部按钮组（固定） */
 .action-btns {
   position: fixed;
   bottom: 0;
@@ -82,10 +309,12 @@
   display: flex;
   gap: 16rpx;
   padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
-  background: #FDFBF7;
+  background: rgba(253, 251, 247, 0.95);
+  backdrop-filter: blur(12rpx);
   z-index: 100;
   box-sizing: border-box;
-  border-top: 1rpx solid #f0e8df;
+  border-top: 1rpx solid rgba(185, 28, 28, 0.08);
+  box-shadow: 0 -4rpx 16rpx rgba(120, 80, 40, 0.04);
 }
 
 .btn-secondary,
@@ -93,14 +322,17 @@
 .btn-primary {
   flex: 1;
   margin: 0;
-  padding: 20rpx 0;
+  padding: 22rpx 0;
   font-size: 28rpx;
   border-radius: 16rpx;
   line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary {
-  background: #fff;
+  background: #FFFEFB;
   color: #666;
   border: 1rpx solid #ddd;
 }
@@ -108,21 +340,33 @@
 .btn-secondary[disabled] {
   background: #f5f5f5;
   color: #ccc;
+  border-color: #e8e8e8;
 }
 
 .btn-tertiary {
-  background: #fff;
+  background: #FFFEFB;
   color: #B91C1C;
   border: 1rpx solid #B91C1C;
 }
 
+.btn-tertiary:active {
+  background: rgba(185, 28, 28, 0.06);
+}
+
 .btn-primary {
-  background: #B91C1C;
-  color: #fff;
+  background: linear-gradient(135deg, #B91C1C 0%, #8B1414 100%);
+  color: #FFFEFB;
   border: none;
+  box-shadow: 0 4rpx 12rpx rgba(185, 28, 28, 0.25);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.3);
 }
 
 .btn-primary[disabled] {
   background: #d4a5a5;
-  color: #fff;
+  color: #FFFEFB;
+  box-shadow: none;
 }

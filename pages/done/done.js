@@ -16,7 +16,11 @@ Page({
     wx.switchTab({ url: '/pages/index/index' });
   },
 
+  // 继续学习：全部学完后再来一轮（重新洗牌所有 150 字）
   continueLearn: function() {
+    const app = getApp();
+    app.globalData = app.globalData || {};
+    app.globalData.pendingContinue = { action: 'restart' };
     wx.navigateBack();
   }
 });

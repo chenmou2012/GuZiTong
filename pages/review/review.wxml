@@ -1,28 +1,88 @@
 <!-- pages/review/review.wxml -->
+<!-- UI 全面对齐 pages/learn/learn.wxml 的多选题布局（颜色、字号、间距、按钮组） -->
 <view class="container">
-  <!-- 顶部退出按钮（学习中） -->
-  <view wx:if="{{currentWord}}" class="exit-btn" bindtap="exitReview">
+  <!-- 顶部退出按钮（复习中） -->
+  <view wx:if="{{currentWord && mode !== 'done'}}" class="exit-btn" bindtap="exitReview">
     <text class="exit-btn-text">✕ 退出</text>
   </view>
 
-  <!-- 复习中 -->
-  <view wx:if="{{currentWord}}" class="review-content">
+  <!-- 复习中：多选题模式 -->
+  <view wx:if="{{currentWord && mode === 'multi'}}" class="review-content">
     <!-- 进度 -->
     <view class="progress-bar">
       <view class="progress-fill" style="width:{{progressPercent}}%"></view>
     </view>
     <view class="progress-text">{{currentIndex + 1}} / {{totalCount}}</view>
 
-    <!-- 题目卡片 -->
+    <!-- 题目卡片（字） -->
     <view class="quiz-area">
       <view class="main-card">
         <text class="word">{{currentWord.word}}</text>
       </view>
 
-      <!-- 释义 -->
+      <!-- 问题提示 -->
+      <view class="question-text">
+        <text>选出"{{currentWord.word}}"所有的意思</text>
+      </view>
+
+      <!-- 多选提示：正确选项个数（始终显示） -->
+      <view class="multi-hint">
+        <text>本题有 {{multiQuiz.correctCount}} 个正确选项（已选 {{selectedIndexes.length}}）</text>
+      </view>
+
+      <!-- 选项列表（与 learn.wxml:143-147 同构） -->
+      <view class="options-area">
+        <view wx:for="{{multiQuiz.optionDisplays}}" wx:key="idx" wx:for-item="opt" wx:for-index="idx"
+              class="option-btn {{showResult ? (opt.correct ? 'correct' : (opt.selected ? 'wrong' : '')) : (opt.selected ? 'selected' : '')}}"
+              bindtap="onSelectOption" data-index="{{idx}}">
+          <text>{{opt.text}}{{showResult ? (opt.correct ? '  ✓' : (opt.selected ? '  ✗' : '')) : ''}}</text>
+        </view>
+      </view>
+
+      <!-- 结果 -->
+      <view wx:if="{{showResult}}" class="result-area">
+        <text wx:if="{{multiQuiz.isCorrect}}" class="result-correct">✓ 回答正确！</text>
+        <text wx:else class="result-wrong">✗ 回答错误</text>
+        <!-- 答错时显示正确答案 -->
+        <view wx:if="{{!multiQuiz.isCorrect}}" class="correct-answers">
+          <text>正确答案：{{multiQuiz.correctAnswersText}}</text>
+        </view>
+      </view>
+
+      <!-- 底部按钮组（与 learn.wxml:181-189 同构，文案三态切换） -->
+      <!-- 未提交 + 未选择：看答案可点，提交灰色 -->
+      <view wx:if="{{!showResult && selectedIndexes.length === 0}}" class="result-btns">
+        <button class="answer-btn" bindtap="giveUp">看答案</button>
+        <button class="next-btn disabled">提交</button>
+      </view>
+      <!-- 未提交 + 已选择：看答案 disabled，提交可点 -->
+      <view wx:if="{{!showResult && selectedIndexes.length > 0}}" class="result-btns">
+        <button class="answer-btn disabled">看答案</button>
+        <button class="next-btn" bindtap="nextQuestion">提交</button>
+      </view>
+      <!-- 已提交：看答案 disabled，下一词可点 -->
+      <view wx:if="{{showResult}}" class="result-btns">
+        <button class="answer-btn disabled">看答案</button>
+        <button class="next-btn" bindtap="nextQuestion">下一词</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 复习中：self 自评模式（防御性，理论不触发） -->
+  <view wx:if="{{currentWord && mode === 'self'}}" class="review-content">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width:{{progressPercent}}%"></view>
+    </view>
+    <view class="progress-text">{{currentIndex + 1}} / {{totalCount}}</view>
+
+    <view class="quiz-area">
+      <view class="main-card">
+        <text class="word">{{currentWord.word}}</text>
+      </view>
+
       <view wx:if="{{showMeaning}}" class="meaning-area">
         <view class="meaning-list">
-          <block wx:for="{{currentWord.meanings}}" wx:key="*this" wx:for-item="m">
+          <block wx:for="{{currentWord.meanings}}" wx:key="meaning" wx:for-item="m">
             <view class="meaning-item">
               <text class="meaning-number">{{index + 1}}.</text>
               <text class="meaning-text">{{m.meaning}}</text>
@@ -32,9 +92,7 @@
       </view>
     </view>
 
-    <!-- 底部按钮：三档评分 -->
     <view class="btns">
-      <!-- 已显示意思（点过不认识）后只剩"下一词/模糊/认识" -->
       <block wx:if="{{showMeaning}}">
         <button class="btn-hard-confirm" bindtap="markHard">下一词</button>
         <button class="btn-good" bindtap="markGood">模糊</button>
@@ -49,9 +107,10 @@
   </view>
 
   <!-- 复习完成 -->
-  <view wx:if="{{!currentWord}}" class="done-content">
+  <view wx:if="{{mode === 'done'}}" class="done-content">
     <text class="done-title">复习完成</text>
     <text class="done-subtitle">今日复习 {{totalCount}} 个词</text>
+    <text wx:if="{{redoCount > 0}}" class="redo-info">答错重做 {{redoCount}} 个</text>
 
     <button class="btn-home" bindtap="goHome">返回主页</button>
   </view>

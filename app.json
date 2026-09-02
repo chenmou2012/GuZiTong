@@ -12,7 +12,9 @@
     "pages/history/history",
     "pages/collections/collections",
     "pages/collection-detail/collection-detail",
-    "pages/translations/translations"
+    "pages/translations/translations",
+    "pages/translation-detail/translation-detail",
+    "pages/feedback/feedback"
   ],
   "usingComponents": {},
   "__usePrivacyCheck__": true,

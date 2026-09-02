@@ -14,8 +14,12 @@
     list="{{translations}}"
     title-field="original"
     subtitle-field="translated"
+    extra-field="fromCache"
+    action-label="重译"
+    action-event="action"
     empty-text="还没有翻译过文言文"
     bind:itemtap="onItemTap"
+    bind:action="onItemAction"
     bind:itemdelete="onItemDelete"
     bind:clearall="onClearAll"
   />

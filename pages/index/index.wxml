@@ -48,7 +48,7 @@
       <view
         class="word-tag"
         wx:for="{{highFreqRealWords}}"
-        wx:key="index"
+        wx:key="*this"
         bindtap="onQuickWordTap"
         data-word="{{item}}"
       >
@@ -77,7 +77,7 @@
           <text class="pinyin-text">{{parsedResult.pinyin}}</text>
         </view>
         <view class="definitions-list">
-          <view class="definition-item" wx:for="{{parsedResult.meanings}}" wx:key="index" wx:for-item="m">
+          <view class="definition-item" wx:for="{{parsedResult.meanings}}" wx:key="id" wx:for-item="m">
             <view class="definition-label-row">
               <text class="definition-label">{{index + 1}}.</text>
               <view class="definition-meaning">

@@ -1,5 +1,4 @@
 // 登录认证服务
-const app = getApp();
 const logger = require('./logger.js');
 const log = logger.for('auth');
 const API_BASE_URL = 'https://share.sng-oj.cn';
@@ -243,6 +242,28 @@ async function fetchWsTicket() {
 }
 
 /**
+ * 提交用户反馈（小程序 → 管理后台查看处理）
+ * @param {string} content 反馈内容
+ * @param {string} contact 联系方式（选填）
+ * @returns {Promise<boolean>}
+ */
+async function submitFeedback(content, contact) {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const response = await request('/api/feedback', {
+      method: 'POST',
+      data: { content: content, contact: contact || '' },
+      header: { 'Authorization': 'Bearer ' + token }
+    });
+    return response.success === true;
+  } catch (e) {
+    log.error('submitFeedback failed:', e);
+    return false;
+  }
+}
+
+/**
  * 登出（服务端撤销 token + 本地清缓存）
  */
 async function logout() {
@@ -313,5 +334,6 @@ module.exports = {
   getUserData,
   saveUserData,
   fetchWsTicket,
+  submitFeedback,
   logout
 };

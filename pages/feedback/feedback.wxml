@@ -1,0 +1,50 @@
+<!-- pages/feedback/feedback.wxml -->
+<view class="fb-container" style="padding-top: calc(20rpx + {{statusBarHeight}}px)">
+  <!-- 自定义导航 -->
+  <view class="fb-nav">
+    <view class="fb-nav-back" bindtap="goBack">
+      <text class="fb-nav-arrow">‹</text>
+    </view>
+    <text class="fb-nav-title">意见反馈</text>
+    <view class="fb-nav-back"></view>
+  </view>
+
+  <view class="fb-body">
+    <view class="fb-tip">
+      你的每一条建议都会帮助我们做得更好。遇到问题请描述得尽量具体（如操作步骤、出错的字词等），方便我们复现与修复。
+    </view>
+
+    <view class="fb-card">
+      <view class="fb-label-row">
+        <text class="fb-label">反馈内容 <text class="fb-required">*</text></text>
+        <text class="fb-count">{{contentCount}}/{{maxLength}}</text>
+      </view>
+      <textarea
+        class="fb-textarea"
+        value="{{content}}"
+        placeholder="请描述你的建议或遇到的问题…"
+        maxlength="{{maxLength}}"
+        bindinput="onContentInput"
+        auto-height
+      />
+    </view>
+
+    <view class="fb-card">
+      <view class="fb-label-row">
+        <text class="fb-label">联系方式 <text class="fb-optional">（选填）</text></text>
+      </view>
+      <input
+        class="fb-input"
+        value="{{contact}}"
+        placeholder="微信号 / QQ，便于我们答复你"
+        maxlength="60"
+        bindinput="onContactInput"
+      />
+    </view>
+
+    <button class="fb-submit" disabled="{{submitting}}" bindtap="submit">
+      {{submitting ? '提交中…' : '提交反馈'}}
+    </button>
+    <text class="fb-privacy">提交即表示你同意我们仅将反馈用于产品改进</text>
+  </view>
+</view>

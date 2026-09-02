@@ -91,16 +91,20 @@ Page({
   },
 
   onLoad: function() {
-    const groupSize = storage.getGroupSize() || 5;
-    GROUP_SIZE = groupSize;
-    this.setData({
-      statusBarHeight: getApp().globalData.statusBarHeight,
-      groupSize: groupSize
-    });
-    // 保存到全局
-    getApp().globalData.groupSize = groupSize;
-    quiz.loadFont();
-    this.loadData();
+    try {
+      const groupSize = storage.getGroupSize() || 5;
+      GROUP_SIZE = groupSize;
+      this.setData({
+        statusBarHeight: getApp().globalData.statusBarHeight,
+        groupSize: groupSize
+      });
+      // 保存到全局
+      getApp().globalData.groupSize = groupSize;
+      this.loadData();
+    } catch (e) {
+      // 静默兜底：loadData 内 readWords / buildQuizQueue 等可能因 storage 异常失败
+      console.error('[learn.onLoad] failed:', e);
+    }
   },
 
   // 切后台时兜底落盘进度（onUnload 不一定触发：强杀、微信被系统回收等）
@@ -111,46 +115,88 @@ Page({
   },
 
   onShow: function() {
-    // 检查全局状态，如果被重置则同步
-    const app = getApp();
-    if (app.globalData && app.globalData.learning === false) {
-      this.setData({ learning: false });
-      app.globalData.learning = null; // 重置
-    }
+    try {
+      // 检查全局状态，如果被重置则同步
+      const app = getApp();
+      if (app.globalData && app.globalData.learning === false) {
+        this.setData({ learning: false });
+        app.globalData.learning = null; // 重置
+      }
 
-    // 每次显示时检查 groupSize 是否变化
-    const currentGroupSize = getApp().globalData.groupSize || storage.getGroupSize() || 5;
-    if (currentGroupSize !== this.data.groupSize) {
-      GROUP_SIZE = currentGroupSize;
-      this.setData({ groupSize: GROUP_SIZE });
-    }
-
-    const progress = wx.getStorageSync(STORAGE_KEY);
-
-    // 有保存进度才恢复，否则显示主界面
-    if (this.data.learning && progress && progress.learning) {
-      // 非学习状态但有保存的进度，加载数据后再恢复
-      this.loadData();
-      setTimeout(() => {
-        if (this.restoreProgress()) {
-          wx.showModal({
-            title: '继续学习',
-            content: '检测到上次学习进度，是否继续？',
-            success: (res) => {
-              if (res.confirm) {
-                this.setData({ learning: true });
-                this.startPractice();
-                wx.removeStorageSync(STORAGE_KEY);
-              }
-              // 取消时保留进度，下次进入仍可恢复
-            }
+      // 优先消费"继续学习"标记：done / groupdone 跳转前设置的
+      // - action: 'next'   → 直接开始下一组（groupdone 回传的是"已完成组"的 0-based index）
+      // - action: 'restart'→ 全部学完后重新洗牌所有 150 字再来一轮
+      if (app.globalData && app.globalData.pendingContinue) {
+        const info = app.globalData.pendingContinue;
+        app.globalData.pendingContinue = null;  // 立即清掉，避免重复消费
+        if (info.action === 'next') {
+          // 清掉进度后从"下一组"开始（已完成组 index + 1），再 startLearn
+          try { wx.removeStorageSync(STORAGE_KEY); } catch (_) {}
+          this.setData({
+            groupIndex: info.groupIndex + 1,
+            learning: false,
+            allWords: REAL_WORDS_DATA || []
           });
+          this.startLearn();
+          return;
+        } else if (info.action === 'restart') {
+          // 重新洗牌所有 150 字（包括已学过的），从第 0 组开始
+          try { wx.removeStorageSync(STORAGE_KEY); } catch (_) {}
+          this.setData({
+            groupIndex: 0,
+            learning: false,
+            allWords: REAL_WORDS_DATA || []
+          });
+          this.startLearn();
+          return;
         }
-      }, 500);
-    } else {
-      // 正常显示主界面
-      this.data.learning = false;
-      this.loadData();
+      }
+
+      // 每次显示时检查 groupSize 是否变化
+      const currentGroupSize = getApp().globalData.groupSize || storage.getGroupSize() || 5;
+      if (currentGroupSize !== this.data.groupSize) {
+        GROUP_SIZE = currentGroupSize;
+        this.setData({ groupSize: GROUP_SIZE });
+      }
+
+      // 单独 try/catch：STORAGE_KEY 里的数据若损坏（schema 变更、JSON parse 失败等），
+      // 直接走"显示主界面"分支，绝不能阻塞页面渲染
+      let progress = null;
+      try {
+        progress = wx.getStorageSync(STORAGE_KEY);
+      } catch (e) {
+        console.warn('[learn.onShow] STORAGE_KEY read failed, resetting progress:', e);
+        try { wx.removeStorageSync(STORAGE_KEY); } catch (_) {}
+        progress = null;
+      }
+
+      // 有保存进度才恢复，否则显示主界面
+      if (this.data.learning && progress && progress.learning) {
+        // 非学习状态但有保存的进度，加载数据后再恢复
+        this.loadData();
+        setTimeout(() => {
+          if (this.restoreProgress()) {
+            wx.showModal({
+              title: '继续学习',
+              content: '检测到上次学习进度，是否继续？',
+              success: (res) => {
+                if (res.confirm) {
+                  this.setData({ learning: true });
+                  this.startPractice();
+                  wx.removeStorageSync(STORAGE_KEY);
+                }
+                // 取消时保留进度，下次进入仍可恢复
+              }
+            });
+          }
+        }, 500);
+      } else {
+        // 正常显示主界面
+        this.data.learning = false;
+        this.loadData();
+      }
+    } catch (e) {
+      console.error('[learn.onShow] failed:', e);
     }
   },
 
@@ -219,7 +265,8 @@ Page({
    *    - 单意思词语也能保证有 1 道多选题
    */
   buildQuizQueue: function(word) {
-    const singles = QUIZ_DATA.filter(q => q.word === word && q.type === 'sentence_meaning');
+    const wordQuestions = quiz.getQuestionsByWord(word, QUIZ_DATA);
+    const singles = wordQuestions.filter(q => q.type === 'sentence_meaning');
     const shuffled = quiz.shuffleArray([...singles]);
 
     const wordData = REAL_WORDS_DATA.find(w => w.word === word);
@@ -238,30 +285,9 @@ Page({
    * 现在每个词都保证至少 1 道多选题，所以总数 ≥ sentence_meaning 题数 + 1
    */
   queueLengthFor: function(word) {
-    const singles = QUIZ_DATA.filter(q => q.word === word && q.type === 'sentence_meaning').length;
+    const singles = quiz.getQuestionsByWord(word, QUIZ_DATA)
+      .filter(q => q.type === 'sentence_meaning').length;
     return singles + 1;
-  },
-
-  // 从全局词库获取额外选项（解决选项不足问题）
-  getExtraOptions: function(correctAnswer, type) {
-    const allWords = this.data.allWords;
-    if (!allWords || allWords.length === 4) return [];
-
-    let pool = [];
-    if (type === 'context') {
-      // 语境选意思：从所有词的意思中获取
-      pool = allWords.flatMap(w => (w.meanings || []).map(m => m.meaning));
-    } else {
-      // 根据意思选句子：从所有词的例句中获取
-      pool = allWords.flatMap(w => (w.meanings || []).map(m => m.example).filter(e => e));
-    }
-
-    // 过滤掉正确答案和已选选项
-    const currentOptions = this.data.quizOptions || [];
-    pool = pool.filter(o => o !== correctAnswer && !currentOptions.includes(o));
-
-    quiz.shuffleArray(pool);
-    return pool.slice(0, 4 - currentOptions.length);
   },
 
   // 保存学习进度
@@ -305,26 +331,27 @@ Page({
 
   // 解析句子并返回加粗HTML
   boldWordInSentence: function(sentence, word) {
-    if (!sentence || !word) return [{ text: sentence, isBold: false }];
+    if (!sentence || !word) return [{ text: sentence, isBold: false, key: 0 }];
 
     const parts = [];
     const regex = new RegExp(word, 'g');
     let lastIndex = 0;
     let match;
+    let key = 0;
 
     while ((match = regex.exec(sentence)) !== null) {
       // 添加匹配前的普通文本
       if (match.index > lastIndex) {
-        parts.push({ text: sentence.slice(lastIndex, match.index), isBold: false });
+        parts.push({ text: sentence.slice(lastIndex, match.index), isBold: false, key: key++ });
       }
       // 添加匹配的加粗文本
-      parts.push({ text: word, isBold: true });
+      parts.push({ text: word, isBold: true, key: key++ });
       lastIndex = regex.lastIndex;
     }
 
     // 添加剩余文本
     if (lastIndex < sentence.length) {
-      parts.push({ text: sentence.slice(lastIndex), isBold: false });
+      parts.push({ text: sentence.slice(lastIndex), isBold: false, key: key++ });
     }
 
     return parts;
@@ -615,6 +642,11 @@ Page({
 
     // 多选题：第一次点击提交显示结果，第二次点击跳转
     if (quizType === 'select_meanings') {
+      // 多选零选项直接跳过会沿用上一题的 isCorrect，且等于白嫖一题 —— 拦截
+      if (selectedIndexes.length === 0 && !showResult) {
+        wx.showToast({ title: '请先选择答案', icon: 'none' });
+        return;
+      }
       if (selectedIndexes.length > 0 && !showResult) {
         // 第一次点击，提交并标记，显示结果
         this.autoSubmitMultiSelect(selectedIndexes);
@@ -674,24 +706,37 @@ Page({
         sm2.markWordLearned(w.word);
       });
 
+      // 实时重算已学数（markWordLearned 后 wordStates 变了，this.data.learnedCount 是旧值）
+      // 用真实值覆盖：避免"已学 N/150"始终是开始学习时的数字
+      const realLearnedCount = Object.keys(sm2.getAllWordStates()).length;
+      const realLearnProgress = Math.round((realLearnedCount / this.data.totalCount) * 100) || 0;
+
       // 检查是否还有下一组
       const nextGroupIndex = groupIndex + 1;
       if (nextGroupIndex >= totalGroups) {
         // 没有更多组了，跳转到完成页面
         // 先重置 learning 状态，否则 done 页 navigateBack 回 learn 时
         // data.learning 仍为 true，会阻止 loadData 刷新数据
-        this.setData({ learning: false });
+        this.setData({
+          learning: false,
+          learnedCount: realLearnedCount,
+          learnProgress: realLearnProgress
+        });
         wx.navigateTo({
-          url: '/pages/done/done?count=' + this.data.learnedCount
+          url: '/pages/done/done?count=' + realLearnedCount
         });
         return;
       }
 
       // 跳转到本组完成页面
-      const learnedCount = groupWords.length;
-      this.setData({ groupIndex: nextGroupIndex, learning: false });
+      this.setData({
+        groupIndex: nextGroupIndex,
+        learning: false,
+        learnedCount: realLearnedCount,
+        learnProgress: realLearnProgress
+      });
       wx.navigateTo({
-        url: '/pages/groupdone/groupdone?groupIndex=' + groupIndex + '&count=' + learnedCount
+        url: '/pages/groupdone/groupdone?groupIndex=' + groupIndex + '&count=' + realLearnedCount + '&totalGroups=' + totalGroups
       });
       return;
     }

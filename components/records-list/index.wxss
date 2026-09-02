@@ -86,6 +86,42 @@
   color: #bbb;
 }
 
+/* 标题旁的额外徽章（仅当传入 extraField 时显示） */
+.item-extra {
+  font-size: 20rpx;
+  color: #B91C1C;
+  background: #fef5f5;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+/* 右侧操作按钮（仅当传入 actionLabel 时显示，如翻译历史的「重译」） */
+.item-action {
+  padding: 8rpx 20rpx;
+  margin-left: 12rpx;
+  background: #fff;
+  border: 2rpx solid #bc262e;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+  height: 48rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #bc262e;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.item-action:active {
+  background: #fef5f5;
+}
+
 .item-subtitle {
   font-size: 26rpx;
   color: #666;

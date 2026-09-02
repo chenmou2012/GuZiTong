@@ -20,6 +20,22 @@ Component({
     emptyText: {
       type: String,
       value: '暂无记录'
+    },
+    // 新增可选属性（不传则不显示，对 history/collections 零侵入）：
+    // extraField: 项里要显示的额外标记字段名（如 'fromCache'），值为字符串才渲染
+    extraField: {
+      type: String,
+      value: ''
+    },
+    // actionLabel: 右侧操作按钮文案（如 '重译'），空则不显示
+    actionLabel: {
+      type: String,
+      value: ''
+    },
+    // actionEvent: 操作按钮触发的事件名，默认 'action'
+    actionEvent: {
+      type: String,
+      value: 'action'
     }
   },
 
@@ -38,15 +54,14 @@ Component({
       this.triggerEvent('itemdelete', { item, index });
     },
 
-    onClearAll() {
-      this.triggerEvent('clearall');
+    onItemAction(e) {
+      const index = e.currentTarget.dataset.index;
+      const item = this.data.list[index];
+      this.triggerEvent(this.data.actionEvent || 'action', { item, index });
     },
 
-    formatTime(ts) {
-      if (!ts) return '';
-      const d = new Date(ts);
-      const pad = (n) => (n < 10 ? '0' + n : '' + n);
-      return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    onClearAll() {
+      this.triggerEvent('clearall');
     }
   }
 });

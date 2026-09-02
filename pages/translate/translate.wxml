@@ -54,9 +54,14 @@
           <text class="action-text">复制</text>
         </view>
         <view class="collect-btn" bindtap="collectTranslation">
-          <text class="collect-icon">🤍</text>
-          <text class="collect-text">收藏</text>
+          <text class="collect-icon">{{isCollected ? '❤️' : '🤍'}}</text>
+          <text class="collect-text">{{isCollected ? '已收藏' : '收藏'}}</text>
         </view>
+      </view>
+
+      <!-- 缓存标记：与查词模块 fromCache 标记对齐 -->
+      <view wx:if="{{showResult && fromCache}}" class="cache-badge">
+        <text>已缓存 · {{cacheAge}}前查过</text>
       </view>
 
       <!-- 停止/清空按钮 -->
